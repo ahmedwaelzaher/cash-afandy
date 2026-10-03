@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\Gender;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -33,6 +36,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'first_name',
         'last_name',
         'email',
+        'phone',
+        'birthdate',
+        'gender',
+        'country_id',
+        'state_id',
         'password',
         'last_login_at',
     ];
@@ -56,6 +64,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'last_login_at' => 'datetime',
+        'birthdate' => 'date',
+        'gender' => Gender::class,
     ];
 
     /**
@@ -151,5 +161,45 @@ class User extends Authenticatable implements MustVerifyEmail
     public function financeCategories(): HasMany
     {
         return $this->hasMany(FinanceCategory::class);
+    }
+
+    /**
+     * Get the validation rules for the user's personal details.
+     *
+     * Shared by registration, profile completion and profile update.
+     */
+    public static function personalDetailsRules(mixed $countryId): array
+    {
+        return [
+            'phone' => ['nullable', 'string', 'max:20'],
+            'birthdate' => ['required', 'date', 'before:today'],
+            'gender' => ['required', Rule::enum(Gender::class)],
+            'country_id' => ['required', 'exists:countries,id'],
+            'state_id' => ['required', Rule::exists('states', 'id')->where('country_id', $countryId)],
+        ];
+    }
+
+    /**
+     * Determine whether the user has filled in all the required personal details.
+     */
+    public function hasCompletedProfile(): bool
+    {
+        return $this->birthdate && $this->gender && $this->country_id && $this->state_id;
+    }
+
+    /**
+     * Get the user's country of residence.
+     */
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    /**
+     * Get the user's state (governorate) of residence.
+     */
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
     }
 }

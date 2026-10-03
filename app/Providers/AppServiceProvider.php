@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Http\Request;
@@ -51,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . $context->model],
             'password' => ['required', 'confirmed', Password::defaults()],
+            ...User::personalDetailsRules(request('country_id')),
             ...setting('cloudflare_turnstile_site_key') ? ['captcha' => ['required', 'captcha']] : [],
         ]);
 
@@ -60,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => $request->password,
+            ...$request->only('phone', 'birthdate', 'gender', 'country_id', 'state_id'),
         ]));
 
         // Set redirect path for authentication middleware

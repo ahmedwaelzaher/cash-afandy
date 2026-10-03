@@ -30,6 +30,8 @@
                     placeholder="your@email.com" validation="required|email" />
             </div>
 
+            @include('website.profile.partials.personal-details')
+
             <div class="mb-3">
                 <x-input type="password" name="password" :title="__('Password')" type="password"
                     placeholder="{{ __('Leave blank if you don\'t want to change it') }}"

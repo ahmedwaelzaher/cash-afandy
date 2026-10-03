@@ -21,16 +21,9 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12 col-md-6 mb-3">
-                    <x-input type="email" name="email" :title="__('Email address')" value="{{ old('email') }}"
-                        placeholder="your@email.com" validation="required|email" />
-                </div>
-
-                <div class="col-12 col-md-6 mb-3">
-                    <x-input type="tel" name="phone" :title="__('Phone Number')" value="{{ old('phone') }}"
-                        :placeholder="__('Phone Number')" />
-                </div>
+            <div class="mb-3">
+                <x-input type="email" name="email" :title="__('Email address')" value="{{ old('email') }}"
+                    placeholder="your@email.com" validation="required|email" />
             </div>
 
             <div class="row">
@@ -44,24 +37,7 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12 col-md-6 mb-3">
-                    <x-label :title="__('Birthdate')" for="birthdate" />
-
-                    <div class="input-icon">
-                        <input type="date" id="birthdate" name="birthdate" value="{{ old('birthdate') }}"
-                            class="form-control" />
-                        <span class="input-icon-addon">
-                            <i class="fas fa-calendar"></i>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6 mb-3">
-                    <x-radios name="gender" :title="__('Gender')" :options="['male' => __('Male'), 'female' => __('Female')]"
-                        value="male" inline />
-                </div>
-            </div>
+            @include('website.profile.partials.personal-details')
 
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3">

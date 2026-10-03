@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Enums\Gender;
+use App\Models\Country;
+use App\Models\State;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,11 +70,23 @@ class SocialiteController extends Controller
             $user->forceFill(['email_verified_at' => now()]);
         }
 
+        $details = $this->personalDetails($socialUser);
+
+        // Only fill what the user hasn't set already, the rest is confirmed on the completion page.
+        $user->birthdate ??= $this->fullBirthdate($details);
+        $user->gender ??= Gender::tryFrom($details['gender'] ?? '');
+
         $user->last_login_at = now();
         $user->save();
 
         Auth::guard('users')->login($user, true);
         $request->session()->regenerate();
+
+        if (! $user->hasCompletedProfile()) {
+            $request->session()->put('profile_completion', $details);
+
+            return redirect()->route('website.profile.complete');
+        }
 
         return redirect()->intended(route('website.index'));
     }
@@ -119,6 +135,59 @@ class SocialiteController extends Controller
             'redirect' => route('website.socialite.callback', ['provider' => $provider]),
         ]]);
 
-        return Socialite::driver($provider);
+        $driver = Socialite::driver($provider);
+
+        if ($provider === 'facebook') {
+            $driver->scopes(['user_birthday', 'user_gender', 'user_location'])
+                ->fields(['name', 'email', 'birthday', 'gender', 'location']);
+        }
+
+        return $driver;
+    }
+
+    /**
+     * Extract the personal details the provider shared, used to prefill the completion page.
+     */
+    protected function personalDetails(SocialiteUser $socialUser): array
+    {
+        $raw = $socialUser->getRaw();
+
+        // Facebook sends MM/DD/YYYY, or only MM/DD or YYYY depending on the user's privacy settings.
+        $parts = array_map('intval', explode('/', $raw['birthday'] ?? ''));
+
+        [$month, $day, $year] = match (count($parts)) {
+            3 => $parts,
+            2 => [...$parts, null],
+            default => [null, null, $parts[0] ?: null],
+        };
+
+        // Facebook location is a free-text place name, e.g. "Cairo, Egypt", so match each part by name.
+        $segments = array_filter(array_map('trim', explode(',', $raw['location']['name'] ?? '')));
+
+        $country = Country::query()->whereIn('name', $segments)->orWhereIn('native', $segments)->first() ?? website_country();
+
+        $state = State::query()
+            ->where('country_id', $country?->id)
+            ->where(fn ($query) => $query->whereIn('name', $segments)->orWhereIn('native', $segments))
+            ->first();
+
+        return [
+            'birth_day' => $day,
+            'birth_month' => $month,
+            'birth_year' => $year,
+            'gender' => $raw['gender'] ?? null,
+            'country_id' => $country?->id,
+            'state_id' => $state?->id,
+        ];
+    }
+
+    /**
+     * Get the birthdate from the personal details, when the provider shared all of its parts.
+     */
+    protected function fullBirthdate(array $details): ?Carbon
+    {
+        ['birth_day' => $day, 'birth_month' => $month, 'birth_year' => $year] = $details;
+
+        return $day && $month && $year && checkdate($month, $day, $year) ? Carbon::create($year, $month, $day) : null;
     }
 }
