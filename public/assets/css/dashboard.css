@@ -134,12 +134,12 @@
 
 .dashboard-sidebar .navbar-brand-image img {
     width: auto;
-    height: 2.5rem;
+    height: 3rem;
 }
 
 @media screen and (min-width: 992px) {
     .dashboard-sidebar .navbar-brand-image img {
-        height: 5rem;
+        height: 7rem;
         max-width: 100%;
     }
 }

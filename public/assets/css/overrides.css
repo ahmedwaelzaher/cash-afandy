@@ -708,10 +708,10 @@ select.is-invalid ~ .ts-wrapper {
 
 .container-tight .navbar-brand img {
     width: auto;
-    height: 5rem;
+    height: 8rem;
 }
 
 .page-loader img {
     width: auto;
-    height: 6rem;
+    height: 8rem;
 }
