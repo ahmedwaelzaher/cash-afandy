@@ -300,17 +300,63 @@ Testimonials
 /* ============================================================
 Our Partners
 ============================================================ */
-.site-partners-swiper {
-    width: 100%;
+.site-marquee {
+    --marquee-gap: 1.5rem;
+    container-type: inline-size;
+    overflow: hidden;
     padding-block: 0.75rem;
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
 }
 
-.site-partners-swiper .swiper-wrapper {
-    transition-timing-function: linear !important;
+.site-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: site-marquee-scroll var(--marquee-duration, 40s) linear infinite;
 }
 
-.site-partners-swiper .swiper-slide {
-    width: auto;
+.site-marquee:hover .site-marquee-track {
+    animation-play-state: paused;
+}
+
+.site-marquee-reverse .site-marquee-track {
+    animation-direction: reverse;
+}
+
+.site-marquee-group {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-around;
+    gap: var(--marquee-gap);
+    min-width: 100cqw;
+    padding-inline-end: var(--marquee-gap);
+}
+
+[dir='rtl'] .site-marquee-track {
+    animation-name: site-marquee-scroll-rtl;
+}
+
+@keyframes site-marquee-scroll {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes site-marquee-scroll-rtl {
+    to {
+        transform: translateX(50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-marquee {
+        overflow-x: auto;
+        mask-image: none;
+    }
+
+    .site-marquee-track {
+        animation: none;
+    }
 }
 
 .site-partners-logo {

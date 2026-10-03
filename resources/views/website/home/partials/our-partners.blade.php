@@ -8,54 +8,16 @@
         </div>
     </div>
 
-    <div id="partners-row-1" class="container swiper site-partners-swiper mb-3">
-        <div class="swiper-wrapper align-items-center">
-            @foreach ($clients->shuffle() as $client)
-                <div class="swiper-slide">
+    @foreach ([false, true] as $reverse)
+        <div class="container @unless ($loop->last) mb-3 @endunless">
+            <x-marquee :reverse="$reverse" :duration="max(20, $clients->count() * 3)">
+                @foreach ($clients->shuffle() as $client)
                     <a class="site-partners-logo" href="{{ route('website.clients.show', $client) }}"
                         title="{{ $client->title }}">
-                        <img src="{{ $client->logo }}" alt="{{ $client->title }}" loading="lazy">
+                        <img src="{{ $client->logo }}" alt="{{ $client->title }}" loading="eager">
                     </a>
-                </div>
-            @endforeach
+                @endforeach
+            </x-marquee>
         </div>
-    </div>
-
-    <div id="partners-row-2" class="container swiper site-partners-swiper">
-        <div class="swiper-wrapper align-items-center">
-            @foreach ($clients->shuffle() as $client)
-                <div class="swiper-slide">
-                    <a class="site-partners-logo" href="{{ route('website.clients.show', $client) }}"
-                        title="{{ $client->title }}">
-                        <img src="{{ $client->logo }}" alt="{{ $client->title }}" loading="lazy">
-                    </a>
-                </div>
-            @endforeach
-        </div>
-    </div>
+    @endforeach
 </section>
-
-@push('scripts')
-    <script>
-        $(document).ready(() => {
-            let partnersMarqueeOptions = {
-                slidesPerView: 'auto',
-                spaceBetween: 24,
-                loop: true,
-                speed: 3000,
-                allowTouchMove: false,
-                autoplay: {
-                    delay: 1,
-                    disableOnInteraction: true,
-                    pauseOnMouseEnter: false,
-                },
-            };
-
-            new Swiper('#partners-row-1', partnersMarqueeOptions);
-            new Swiper('#partners-row-2', {
-                ...partnersMarqueeOptions,
-                autoplay: { ...partnersMarqueeOptions.autoplay, reverseDirection: true },
-            });
-        });
-    </script>
-@endpush
