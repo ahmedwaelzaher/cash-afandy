@@ -150,7 +150,7 @@ State any meaningful assumption.
 - Every view must be responsive and support both RTL (Arabic) and LTR (English). Use logical CSS properties.
 - After adding `__()` tokens, run `php artisan lang:extract` then `php artisan lang:publish`. Don't hand-edit `lang/*.json`.
 - Don't start a dev server or take screenshots to verify UI. Run non-visual checks and tell the user what changed.
-- Porting from the old Waffrlly repo, or working from the Figma design? Read `docs/project-context.md` first.
+- Porting from the old Waffrlly repo, or working from the Figma design? Read `./project-context.md` first.
 
 ---
 
