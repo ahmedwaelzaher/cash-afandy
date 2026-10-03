@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Website\CouponController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\ProfileController;
@@ -23,6 +24,9 @@ Route::get('up', HealthCheckController::class)->name('health-check');
 Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
 Route::get('static-pages/{staticPage}', [StaticPageController::class, 'show'])->name('static-pages.show');
 Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
+
+Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
+Route::get('coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
 
 Route::middleware('auth:users')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
