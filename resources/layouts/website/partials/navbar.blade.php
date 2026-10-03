@@ -144,6 +144,10 @@
                                     <span class="dropdown-item-title">{{ __('Profile') }}</span>
                                 </a>
 
+                                <a href="{{ route('website.finance.categories.index') }}" class="dropdown-item">
+                                    <span class="dropdown-item-title">{{ __('Finance Categories') }}</span>
+                                </a>
+
                                 <a href="#" class="dropdown-item"
                                     onclick="event.preventDefault(); $('#logout').submit()">
                                     <span class="dropdown-item-title">{{ __('Logout') }}</span>

@@ -46,4 +46,17 @@
             </div>
         </div>
     </x-form>
+
+    <x-form class="card card-md mt-3" :action="route('website.profile.preferences.update')" method="PUT">
+        <div class="card-body">
+            <div class="mb-3">
+                <x-select name="currency" :title="__('Currency')" :options="$currencies"
+                    :value="$user->preferences?->currency" :hint="__('Used for all your income and expenses.')" />
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">{{ __('Save Preferences') }}</button>
+            </div>
+        </div>
+    </x-form>
 </x-layouts::website.auth>

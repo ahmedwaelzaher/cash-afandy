@@ -10,6 +10,7 @@ use App\Http\Controllers\Dashboard\ClientController;
 use App\Http\Controllers\Dashboard\CouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\ExtractLanguageTokensController;
+use App\Http\Controllers\Dashboard\FinanceCategoryController;
 use App\Http\Controllers\Dashboard\LanguageController;
 use App\Http\Controllers\Dashboard\LanguageTokenController;
 use App\Http\Controllers\Dashboard\MemoController;
@@ -65,6 +66,8 @@ Route::middleware('auth:admins')->group(function () {
     Route::resource('news', NewsController::class)->except(['show']);
     Route::resource('posts', PostController::class)->except(['show']);
     Route::resource('sliders', SliderController::class)->except(['show']);
+    Route::resource('finance-categories', FinanceCategoryController::class)->except(['show']);
+    Route::post('finance-categories/{finance_category}/restore', [FinanceCategoryController::class, 'restore'])->name('finance-categories.restore')->withTrashed();
 
     /* --------- Utilities --------- */
     Route::withoutMiddleware(RoutePermission::class)->group(function () {
