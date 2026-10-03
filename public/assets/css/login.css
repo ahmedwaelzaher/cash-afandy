@@ -34,7 +34,7 @@
 .login-split__dots span.is-active {
     width: 20px;
     border-radius: 4px;
-    background-color: var(--Light-Red);
+    background-color: var(--Green-Dark);
 }
 
 .login-split__form-col {
@@ -65,7 +65,7 @@
 
 .login-split .form-control:focus {
     background-color: var(--Light-Gray);
-    border-color: var(--Light-Red);
+    border-color: var(--Green-Dark);
     box-shadow: none;
 }
 
@@ -75,8 +75,8 @@
 }
 
 .login-split .btn-login-primary {
-    background-color: var(--Light-Red);
-    border-color: var(--Light-Red);
+    background-color: var(--Green-Dark);
+    border-color: var(--Green-Dark);
     color: var(--White);
     font-weight: 600;
     padding-block: 0.9rem;
@@ -85,8 +85,8 @@
 
 .login-split .btn-login-primary:hover,
 .login-split .btn-login-primary:focus {
-    background-color: var(--Dark-Red);
-    border-color: var(--Dark-Red);
+    background-color: var(--Green-Darkest);
+    border-color: var(--Green-Darkest);
     color: var(--White);
 }
 
@@ -96,7 +96,7 @@
 }
 
 .login-split .forgot-password-link:hover {
-    color: var(--Light-Red);
+    color: var(--Green-Dark);
 }
 
 .login-split .btn-social {

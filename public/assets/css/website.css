@@ -1,23 +1,31 @@
 :root {
-    --Lightest-Red: #FF1A2FFF;
-    --Light-Red: #DF2334FF;
-    --Dark-Red: #CF1E30FF;
-    --Darkest-Red: #B71A2BFF;
+    --Green-Lightest: #8CC3A2FF;
+    --Green-Light: #4F9A72FF;
+    --Green-Dark: #08723BFF;
+    --Green-Darkest: #11402BFF;
+    --Red: #B12529FF;
     --White: #FFFFFFFF;
-    --Lightest-Gray: #F6F6F6FF;
-    --Light-Gray: #F3F3F3FF;
+    --Lightest-Gray: #FAF8F0FF;
+    --Light-Gray: #F2EED9FF;
     --Meduim-Gray: #D0D0D0FF;
     --Dark-Gray: #00000080;
-    --Black: #101010FF;
-    --Yellow: #FFBE4AFF;
+    --Black: #102317FF;
+    --Yellow: #ECB534FF;
     --Transparent: #FFFFFF00;
     --Disabled: #6C757D80;
-    --Links: #1A91EBFF;
+    --Links: #08723BFF;
     --Light-Grayish-Blue: #D3DAE3FF;
     --Light-Grayish-Blue-transparent: #D3DAE380;
     --Blue: #0B99FFFF;
     --Light-Green: #70E116FF;
     --Light-Orange: #EDB015FF;
+}
+
+[data-bs-theme-primary] {
+    --tblr-primary: #08723B;
+    --tblr-primary-rgb: 8, 114, 59;
+    --tblr-primary-fg: #FFFFFF;
+    --tblr-primary-lt: #E6F1EB;
 }
 
 /* ============================================================
@@ -38,22 +46,22 @@ footer .nav .nav-item .nav-link:hover {
 Navbar
 ============================================================ */
 .btn-brand {
-    background-color: var(--Dark-Red);
-    border-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
+    border-color: var(--Green-Dark);
     color: var(--White);
 }
 
 .btn-brand:hover,
 .btn-brand:focus {
-    background-color: var(--Darkest-Red);
-    border-color: var(--Darkest-Red);
+    background-color: var(--Green-Darkest);
+    border-color: var(--Green-Darkest);
     color: var(--White);
 }
 
 .btn-outline-brand {
     background-color: transparent;
-    border-color: var(--Dark-Red);
-    color: var(--Dark-Red);
+    border-color: var(--Green-Dark);
+    color: var(--Green-Dark);
 }
 
 /* ============================================================
@@ -72,19 +80,19 @@ Hero Slider
 Form Check (Radio)
 ============================================================ */
 .form-check-input[type='radio']:checked {
-    background-color: var(--Dark-Red);
-    border-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
+    border-color: var(--Green-Dark);
 }
 
 .form-check-input[type='radio']:focus {
-    border-color: var(--Dark-Red);
-    box-shadow: 0 0 0 0.25rem rgba(207, 30, 48, 0.25);
+    border-color: var(--Green-Dark);
+    box-shadow: 0 0 0 0.25rem rgba(8, 114, 59, 0.25);
 }
 
 .btn-outline-brand:hover,
 .btn-outline-brand:focus {
-    background-color: var(--Dark-Red);
-    border-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
+    border-color: var(--Green-Dark);
     color: var(--White);
 }
 
@@ -92,12 +100,10 @@ Form Check (Radio)
     background-color: var(--White);
 }
 
-.site-navbar .navbar-brand {
-    max-height: 1rem;
-}
-
 .site-navbar .logo {
-    max-width: 70%;
+    width: auto;
+    max-width: 100%;
+    height: 3rem;
 }
 
 .site-navbar .flag {
@@ -207,7 +213,7 @@ Footer
 .site-footer-social-item:hover {
     background-color: var(--White);
     transform: perspective(180px) rotateX(60deg) translateY(2px);
-    box-shadow: 0px 6px 10px -3px var(--Lightest-Red);
+    box-shadow: 0px 6px 10px -3px var(--Green-Lightest);
 }
 
 .site-footer-social {
@@ -273,7 +279,7 @@ Testimonials
 }
 
 .site-testimonials-pagination .swiper-pagination-bullet-active {
-    background-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
 }
 
 [dir='rtl'] .site-testimonials-nav i {
@@ -476,7 +482,7 @@ Deals (Coupons / Cashback Stores)
     inset-inline-start: -2.75rem;
     width: 9rem;
     padding: 0.3125rem 0;
-    background-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
     color: var(--White);
     font-size: 0.75rem;
     font-weight: 700;
@@ -542,11 +548,11 @@ Deals (Coupons / Cashback Stores)
 }
 
 .site-deals-view-all:hover {
-    color: var(--Dark-Red);
+    color: var(--Green-Dark);
 }
 
 .site-deals-pagination .swiper-pagination-bullet-active {
-    background-color: var(--Dark-Red);
+    background-color: var(--Green-Dark);
 }
 
 /* ============================================================
@@ -555,6 +561,6 @@ Coupon Code
 .site-coupon-code {
     padding: 0.75rem 1rem;
     background-color: var(--Lightest-Gray);
-    border: 2px dashed var(--Dark-Red);
+    border: 2px dashed var(--Green-Dark);
     border-radius: var(--tblr-border-radius);
 }

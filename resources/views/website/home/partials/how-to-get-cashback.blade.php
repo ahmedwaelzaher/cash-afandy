@@ -9,7 +9,7 @@
 
         <div class="row">
             <div class="col-6 col-lg-3 text-center mb-4 mb-lg-0">
-                <div class="site-cashback-orbit mx-auto mb-3" style="--step-color: var(--Lightest-Red)">
+                <div class="site-cashback-orbit mx-auto mb-3" style="--step-color: var(--Green-Lightest)">
                     <span class="site-cashback-node site-cashback-node-start"></span>
                     <span class="site-cashback-node site-cashback-node-end"></span>
 
@@ -26,7 +26,7 @@
 
             <div class="col-6 col-lg-3 text-center mb-4 mb-lg-0">
                 <div class="site-cashback-orbit site-cashback-orbit-reverse mx-auto mb-3"
-                    style="--step-color: var(--Light-Red)">
+                    style="--step-color: var(--Green-Light)">
                     <span class="site-cashback-node site-cashback-node-start"></span>
                     <span class="site-cashback-node site-cashback-node-end"></span>
 
@@ -42,7 +42,7 @@
             </div>
 
             <div class="col-6 col-lg-3 text-center mb-4 mb-lg-0">
-                <div class="site-cashback-orbit mx-auto mb-3" style="--step-color: var(--Dark-Red)">
+                <div class="site-cashback-orbit mx-auto mb-3" style="--step-color: var(--Green-Dark)">
                     <span class="site-cashback-node site-cashback-node-start"></span>
                     <span class="site-cashback-node site-cashback-node-end"></span>
 
@@ -59,7 +59,7 @@
 
             <div class="col-6 col-lg-3 text-center mb-4 mb-lg-0">
                 <div class="site-cashback-orbit site-cashback-orbit-reverse mx-auto mb-3"
-                    style="--step-color: var(--Darkest-Red)">
+                    style="--step-color: var(--Green-Darkest)">
                     <span class="site-cashback-node site-cashback-node-start"></span>
                     <span class="site-cashback-node site-cashback-node-end"></span>
 

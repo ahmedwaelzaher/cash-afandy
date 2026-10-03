@@ -15,7 +15,7 @@
                                     <h1 class="h2 mb-0">{{ $cashback->client->title }}</h1>
                                 </div>
 
-                                <span class="badge bg-red text-red-fg fs-3 px-3 py-2">
+                                <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2">
                                     {{ __('Up to :percentage%', ['percentage' => $cashback->percentage]) }}
                                 </span>
                             </div>

@@ -18,7 +18,7 @@
                             <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
                                 @foreach ($client->categories as $category)
                                     <a href="{{ route('website.coupons.index', ['category' => $category->slug]) }}"
-                                        class="badge bg-red-lt text-decoration-none">
+                                        class="badge bg-primary-lt text-decoration-none">
                                         {{ $category->title }}
                                     </a>
                                 @endforeach
