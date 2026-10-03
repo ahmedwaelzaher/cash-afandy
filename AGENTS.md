@@ -21,6 +21,7 @@
 2. **Reuse before you add.**
     - If a helper, component, CSS class, route pattern, or JS initializer already exists, use it.
     - Don't create a parallel version under a new name.
+    - No duplicates: never define the same style, value, or logic twice. If the website and the dashboard both need it, keep it once in the shared file (e.g. `overrides.css`) and delete the other copy.
 3. **Make the smallest safe change.**
     - Don't refactor, rename, or restructure anything the task didn't ask for.
     - Match nearby naming, validation, and formatting.
@@ -142,6 +143,14 @@ State any meaningful assumption.
 - Name the files/functions changed.
 - Flag side effects.
 - If multiple solutions exist, recommend the safest one for this codebase.
+
+## Project Context
+
+- Cash Afandy is a personal product: cashbacks, vouchers, coupons, and expense tools. Favor clean, maintainable code and UI/UX polish.
+- Every view must be responsive and support both RTL (Arabic) and LTR (English). Use logical CSS properties.
+- After adding `__()` tokens, run `php artisan lang:extract` then `php artisan lang:publish`. Don't hand-edit `lang/*.json`.
+- Don't start a dev server or take screenshots to verify UI. Run non-visual checks and tell the user what changed.
+- Porting from the old Waffrlly repo, or working from the Figma design? Read `docs/project-context.md` first.
 
 ---
 
