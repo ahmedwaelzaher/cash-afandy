@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Website\CashbackController;
+use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\ClientController;
 use App\Http\Controllers\Website\CouponController;
 use App\Http\Controllers\Website\HealthCheckController;
@@ -34,6 +35,8 @@ Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.i
 Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');
 
 Route::get('stores/{client}', [ClientController::class, 'show'])->name('clients.show');
+
+Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::middleware('auth:users')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
