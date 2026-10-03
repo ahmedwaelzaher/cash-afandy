@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Models\Cashback;
 use App\Models\Client;
+use App\Models\Coupon;
 use App\Models\Slider;
 use Illuminate\Contracts\View\View;
 use Redot\Http\Controllers\Controller;
@@ -66,83 +68,17 @@ class HomeController extends Controller
             ],
         ];
 
-        // Temporary example data — will be fetched from the Coupon model later.
-        $coupons = [
-            [
-                'title' => 'Jumia Egypt',
-                'description' => 'One of the largest online shopping platforms in Egypt, offering a huge variety of products across every category.',
-                'discount' => '35%',
-                'image' => 'https://picsum.photos/seed/jumia-coupon/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=jumia.com.eg',
-            ],
-            [
-                'title' => 'H&M',
-                'description' => 'Discover the latest fashion trends and international clothing collections for men, women, and kids.',
-                'discount' => '60%',
-                'image' => 'https://picsum.photos/seed/hm-coupon/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=hm.com',
-            ],
-            [
-                'title' => 'No Mercy Escape Rooms',
-                'description' => 'A thrilling escape room experience packed with challenges and puzzles that test your wits under pressure.',
-                'discount' => '10%',
-                'image' => 'https://picsum.photos/seed/no-mercy-coupon/600/300',
-                'logo' => 'https://ui-avatars.com/api/?name=NM&background=101010&color=fff&bold=true',
-            ],
-            [
-                'title' => 'Bazooka',
-                'description' => 'A distinguished restaurant serving the finest fried chicken meals with rich flavors and a diverse menu.',
-                'discount' => '35%',
-                'image' => 'https://picsum.photos/seed/bazooka-coupon/600/300',
-                'logo' => 'https://ui-avatars.com/api/?name=BZ&background=CF1E30&color=fff&bold=true',
-            ],
-            [
-                'title' => 'Jewel New Cairo',
-                'description' => 'A premier entertainment and sports destination in New Cairo, offering a diverse mix of water attractions.',
-                'discount' => '50%',
-                'image' => 'https://picsum.photos/seed/jewel-coupon/600/300',
-                'logo' => 'https://ui-avatars.com/api/?name=J&background=0B99FF&color=fff&bold=true',
-            ],
-        ];
+        $coupons = Coupon::available()
+            ->with('client')
+            ->latest('id')
+            ->take(10)
+            ->get();
 
-        // Temporary example data — will be fetched from the Cashback model later.
-        $cashbackStores = [
-            [
-                'title' => 'Aqua Decorations',
-                'description' => 'Get unique aquarium and fish tank decorations in a wide range of modern designs for your home.',
-                'percentage' => '1%',
-                'image' => 'https://picsum.photos/seed/aqua-cashback/600/300',
-                'logo' => 'https://ui-avatars.com/api/?name=AQ&background=0B99FF&color=fff&bold=true',
-            ],
-            [
-                'title' => 'Booking.com',
-                'description' => 'The world\'s leading platform for hotel reservations and vacation rentals, offering the best deals worldwide.',
-                'percentage' => '2%',
-                'image' => 'https://picsum.photos/seed/booking-cashback/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=booking.com',
-            ],
-            [
-                'title' => 'Ski Egypt',
-                'description' => 'Egypt\'s largest indoor snow park in Africa, featuring a real penguin encounter and thrilling snow activities.',
-                'percentage' => '2.5%',
-                'image' => 'https://picsum.photos/seed/ski-egypt-cashback/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=skiegy.com',
-            ],
-            [
-                'title' => 'Bath & Body Works',
-                'description' => 'A specialty retailer offering a wide range of body care products, fragrances, and home scents.',
-                'percentage' => '6%',
-                'image' => 'https://picsum.photos/seed/bbw-cashback/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=bathandbodyworks.com',
-            ],
-            [
-                'title' => 'Ubuy',
-                'description' => 'A cross-border e-commerce platform offering high-quality tools, equipment, and gadgets from around the world.',
-                'percentage' => '32%',
-                'image' => 'https://picsum.photos/seed/ubuy-cashback/600/300',
-                'logo' => 'https://www.google.com/s2/favicons?sz=128&domain=ubuy.com',
-            ],
-        ];
+        $cashbackStores = Cashback::available()
+            ->with('client')
+            ->latest('id')
+            ->take(10)
+            ->get();
 
         return view('website.index', [
             'sliders' => $sliders,

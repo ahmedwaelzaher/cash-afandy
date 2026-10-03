@@ -3,11 +3,11 @@
         @include('website.home.partials.hero-slider')
     @endif
 
-    @if (! empty($coupons))
+    @if ($coupons->isNotEmpty())
         @include('website.home.partials.latest-coupons')
     @endif
 
-    @if (! empty($cashbackStores))
+    @if ($cashbackStores->isNotEmpty())
         @include('website.home.partials.latest-cashback-stores')
     @endif
 

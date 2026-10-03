@@ -25,28 +25,9 @@
     <div class="container">
         <div id="cashback-stores-slider" class="swiper site-deals-swiper" tabindex="0">
             <div class="swiper-wrapper align-items-stretch">
-                @foreach ($cashbackStores as $store)
+                @foreach ($cashbackStores as $cashback)
                     <div class="swiper-slide h-auto">
-                        <div class="site-deals-card card h-100">
-                            <div class="site-deals-image"
-                                style="background-image: url('{{ $store['image'] }}')">
-                                <span class="site-deals-badge">{{ $store['percentage'] }}</span>
-                            </div>
-
-                            <span class="site-deals-logo">
-                                <img src="{{ $store['logo'] }}" alt="{{ $store['title'] }}" loading="lazy">
-                            </span>
-
-                            <div class="card-body text-center pt-3">
-                                <h4 class="site-deals-title mb-2">{{ $store['title'] }}</h4>
-                                <p class="site-deals-content text-body-secondary mb-3">
-                                    {{ $store['description'] }}
-                                </p>
-                                <a href="#" class="btn btn-outline-brand brand-btn">
-                                    {{ __('Get it now') }}
-                                </a>
-                            </div>
-                        </div>
+                        @include('website.partials.cashback-card')
                     </div>
                 @endforeach
             </div>
@@ -55,7 +36,7 @@
         <div class="d-flex flex-nowrap justify-content-between align-items-center gap-3 mt-3">
             <div class="swiper-pagination site-deals-pagination site-cashback-stores-pagination position-relative flex-grow-1 overflow-hidden">
             </div>
-            <a href="#" class="site-deals-view-all text-nowrap flex-shrink-0">{{ __('View all') }}</a>
+            <a href="{{ route('website.cashbacks.index') }}" class="site-deals-view-all text-nowrap flex-shrink-0">{{ __('View all') }}</a>
         </div>
     </div>
 </section>

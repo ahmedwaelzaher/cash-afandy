@@ -77,10 +77,8 @@
 
                                 @if (! is_null($cashback->verification_period))
                                     <div class="datagrid-item">
-                                        <div class="datagrid-title">{{ __('Verification Period') }}</div>
-                                        <div class="datagrid-content">
-                                            {{ trans_choice(':count day|:count days', $cashback->verification_period) }}
-                                        </div>
+                                        <div class="datagrid-title">{{ __('Verification Period (days)') }}</div>
+                                        <div class="datagrid-content">{{ $cashback->verification_period }}</div>
                                     </div>
                                 @endif
 

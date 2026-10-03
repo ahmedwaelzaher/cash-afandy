@@ -4,6 +4,7 @@
     $localeFlags = ['en' => 'us', 'ar' => 'eg'];
     $currentCountry = website_country();
     $availableCountries = \App\Models\Country::whereIn('code', setting('website_countries'))->get();
+    $navbarCategories = \App\Models\Category::all();
 @endphp
 
 <header class="site-navbar d-print-none">
@@ -13,8 +14,9 @@
                 <x-logo class="logo" />
             </a>
 
-            <form action="#" method="GET" class="site-navbar-search input-icon flex-fill d-none d-lg-flex">
-                <input type="search" class="form-control" placeholder="{{ __('Search') }}..." />
+            <form action="{{ route('website.search') }}" method="GET" class="site-navbar-search input-icon flex-fill d-none d-lg-flex">
+                <input type="search" name="search" class="form-control" value="{{ request('search') }}"
+                    placeholder="{{ __('Search') }}..." />
                 <span class="input-icon-addon">
                     <i class="fa fa-search"></i>
                 </span>
@@ -73,8 +75,9 @@
 <nav class="site-navbar-bottom navbar navbar-expand-lg">
     <div class="container">
         <div class="navbar-collapse collapse" id="site-navbar-collapse">
-            <form action="#" method="GET" class="site-navbar-search input-icon d-flex d-lg-none my-3">
-                <input type="search" class="form-control" placeholder="{{ __('Search') }}..." />
+            <form action="{{ route('website.search') }}" method="GET" class="site-navbar-search input-icon d-flex d-lg-none my-3">
+                <input type="search" name="search" class="form-control" value="{{ request('search') }}"
+                    placeholder="{{ __('Search') }}..." />
                 <span class="input-icon-addon">
                     <i class="fa fa-search"></i>
                 </span>
@@ -84,20 +87,29 @@
                 class="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-center w-100 gap-2 gap-lg-3">
                 <ul class="navbar-nav site-navbar-links">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('Coupons') }}</a>
+                        <a class="nav-link @if (request()->routeIs('website.coupons.*')) active @endif"
+                            href="{{ route('website.coupons.index') }}">{{ __('Coupons') }}</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('Cashback') }}</a>
+                        <a class="nav-link @if (request()->routeIs('website.cashbacks.*')) active @endif"
+                            href="{{ route('website.cashbacks.index') }}">{{ __('Cashback') }}</a>
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle @if (request()->routeIs('website.categories.*')) active @endif"
+                            href="#" data-bs-toggle="dropdown">
                             {{ __('Categories') }}
                         </a>
 
                         <div class="dropdown-menu">
-                            <span class="dropdown-item-text text-secondary small">{{ __('Coming soon') }}</span>
+                            @forelse ($navbarCategories as $category)
+                                <a class="dropdown-item" href="{{ route('website.categories.show', $category) }}">
+                                    {{ $category->title }}
+                                </a>
+                            @empty
+                                <span class="dropdown-item-text text-secondary small">{{ __('Coming soon') }}</span>
+                            @endforelse
                         </div>
                     </li>
 
