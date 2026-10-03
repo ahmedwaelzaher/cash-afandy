@@ -171,6 +171,12 @@ Form Check (Radio)
 /* ============================================================
 Footer
 ============================================================ */
+.site-footer-mascot {
+    width: auto;
+    max-width: 100%;
+    height: 8rem;
+}
+
 .site-footer-subscribe .form-control {
     height: 100%;
     background-color: var(--White);

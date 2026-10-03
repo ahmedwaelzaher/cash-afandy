@@ -2,11 +2,18 @@
     <footer class="container py-5">
         <div class="row">
             <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                <h3>{{ __('About :app', ['app' => app_name()]) }}</h2>
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ hashed_asset('assets/images/mascot.svg') }}" alt="{{ app_name() }}"
+                        class="site-footer-mascot flex-shrink-0" loading="lazy" />
 
-                <p class="text-body-secondary">
-                    {{  Arr::get(setting('footer_about_description'), app()->getLocale()) }}
-                </p>
+                    <div>
+                        <h3>{{ __('About :app', ['app' => app_name()]) }}</h2>
+
+                        <p class="text-body-secondary mb-0">
+                            {{  Arr::get(setting('footer_about_description'), app()->getLocale()) }}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div class="col-6 col-lg-2 mb-4 mb-lg-0">
