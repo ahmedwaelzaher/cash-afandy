@@ -7,6 +7,7 @@ use App\Http\Controllers\Website\CouponController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\ProfileController;
+use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\StoreSubscriberController;
@@ -37,6 +38,8 @@ Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('c
 Route::get('stores/{client}', [ClientController::class, 'show'])->name('clients.show');
 
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+
+Route::get('search', SearchController::class)->name('search');
 
 Route::middleware('auth:users')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
