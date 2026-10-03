@@ -58,6 +58,44 @@ Navbar
 }
 
 /* ============================================================
+Social Buttons
+============================================================ */
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border-radius: 0.625rem;
+    padding-block: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-social-magic-link,
+.btn-social-google {
+    background-color: var(--White);
+    border: 1px solid var(--Meduim-Gray);
+    color: var(--Black);
+}
+
+.btn-social-magic-link:hover,
+.btn-social-google:hover {
+    background-color: var(--Lightest-Gray);
+    color: var(--Black);
+}
+
+.btn-social-facebook {
+    background-color: var(--Blue);
+    border-color: var(--Blue);
+    color: var(--White);
+}
+
+.btn-social-facebook:hover {
+    background-color: var(--Blue);
+    color: var(--White);
+    opacity: 0.9;
+}
+
+/* ============================================================
 Hero Slider
 ============================================================ */
 .site-hero-slider .swiper-slide {

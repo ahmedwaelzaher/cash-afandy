@@ -99,56 +99,6 @@
     color: var(--Green-Dark);
 }
 
-.login-split .btn-social {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    border-radius: 0.625rem;
-    padding-block: 0.9rem;
-    font-weight: 500;
-}
-
-.login-split .btn-social-magic-link {
-    background-color: var(--White);
-    border: 1px solid var(--Meduim-Gray);
-    color: var(--Black);
-}
-
-.login-split .btn-social-magic-link:hover {
-    background-color: var(--Lightest-Gray);
-    color: var(--Black);
-}
-
-.login-split .btn-social-google {
-    background-color: var(--White);
-    border: 1px solid var(--Meduim-Gray);
-    color: var(--Black);
-}
-
-.login-split .btn-social-google:hover {
-    background-color: var(--Lightest-Gray);
-    color: var(--Black);
-}
-
-.login-split .btn-social-facebook {
-    background-color: var(--Blue);
-    border-color: var(--Blue);
-    color: var(--White);
-}
-
-.login-split .btn-social-facebook:hover {
-    background-color: var(--Blue);
-    color: var(--White);
-    opacity: 0.9;
-}
-
-.login-split .btn-social[disabled],
-.login-split .btn-social[aria-disabled='true'] {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
 .login-split__footer-text {
     color: var(--Dark-Gray);
 }
