@@ -86,21 +86,9 @@
                 <button type="submit" class="btn btn-brand w-100">{{ __('Continue') }}</button>
             </div>
 
-            <div class="hr-text my-3">{{ __('OR') }}</div>
+            <x-social-login divider />
 
-            <div class="d-flex flex-column gap-3 mb-4">
-                <button type="button" class="btn btn-social btn-social-google" disabled aria-disabled="true">
-                    <x-social-icon social="google" size="sm" />
-                    {{ __('Sign in with Google') }}
-                </button>
-
-                <button type="button" class="btn btn-social btn-social-facebook" disabled aria-disabled="true">
-                    <x-social-icon social="facebook" size="sm" />
-                    {{ __('Sign in with Facebook') }}
-                </button>
-            </div>
-
-            <p class="text-muted text-center mb-0">
+            <p class="text-muted text-center mt-4 mb-0">
                 {{ __('Already started your savings journey?') }}
                 <a href="{{ route('website.login') }}">{{ __('Login now') }}</a>
             </p>

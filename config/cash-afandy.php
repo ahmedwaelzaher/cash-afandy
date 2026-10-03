@@ -154,6 +154,18 @@ return [
         'cloudflare_turnstile_secret_key' => [
             'default' => '',
         ],
+        'google_client_id' => [
+            'default' => '',
+        ],
+        'google_client_secret' => [
+            'default' => '',
+        ],
+        'facebook_client_id' => [
+            'default' => '',
+        ],
+        'facebook_client_secret' => [
+            'default' => '',
+        ],
         'head_code' => [
             'default' => '',
         ],

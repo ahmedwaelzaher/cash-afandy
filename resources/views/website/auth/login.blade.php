@@ -46,15 +46,7 @@
                             {{ __('Login with Magic Link') }}
                         </a>
 
-                        <button type="button" class="btn btn-social btn-social-google" disabled aria-disabled="true">
-                            <x-social-icon social="google" size="sm" />
-                            {{ __('Sign in with Google') }}
-                        </button>
-
-                        <button type="button" class="btn btn-social btn-social-facebook" disabled aria-disabled="true">
-                            <x-social-icon social="facebook" size="sm" />
-                            {{ __('Sign in with Facebook') }}
-                        </button>
+                        <x-social-login />
                     </div>
 
                     <p class="login-split__footer-text text-center mb-0">

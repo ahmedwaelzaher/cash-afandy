@@ -10,6 +10,7 @@ use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\ProfileController;
 use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
+use App\Http\Controllers\Website\SocialiteController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\StoreSubscriberController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,11 @@ Route::get('stores/{client}', [ClientController::class, 'show'])->name('clients.
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('search', SearchController::class)->name('search');
+
+Route::middleware('guest:users')->group(function () {
+    Route::get('auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->whereIn('provider', SocialiteController::PROVIDERS)->name('socialite.redirect');
+    Route::get('auth/{provider}/callback', [SocialiteController::class, 'callback'])->whereIn('provider', SocialiteController::PROVIDERS)->name('socialite.callback');
+});
 
 Route::middleware('auth:users')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
