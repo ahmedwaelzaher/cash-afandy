@@ -96,7 +96,7 @@ Form Check (Radio)
 .site-navbar .logo {
     width: auto;
     max-width: 100%;
-    height: 4.5rem;
+    height: 3.5rem;
 }
 
 .site-navbar .flag {
@@ -113,13 +113,13 @@ Form Check (Radio)
 }
 
 .site-navbar-search .form-control {
-    background-color: var(--Light-Gray);
-    border: none;
+    background-color: var(--White);
+    border: 1px solid var(--Light-Gray);
     border-radius: var(--tblr-border-radius-pill);
 }
 
 .site-navbar-search .form-control:focus {
-    background-color: var(--Light-Gray);
+    background-color: var(--White);
     box-shadow: none;
 }
 
@@ -173,13 +173,13 @@ Footer
 ============================================================ */
 .site-footer-subscribe .form-control {
     height: 100%;
-    background-color: var(--Light-Gray);
-    border: none;
+    background-color: var(--White);
+    border: 1px solid var(--Light-Gray);
     border-radius: 0;
 }
 
 .site-footer-subscribe .form-control:focus {
-    background-color: var(--Light-Gray);
+    background-color: var(--White);
     box-shadow: none;
 }
 

@@ -57,21 +57,21 @@
 }
 
 .login-split .form-control {
-    background-color: var(--Light-Gray);
-    border: 1px solid var(--Transparent);
+    background-color: var(--White);
+    border: 1px solid var(--Light-Gray);
     border-radius: 0.625rem;
     padding-block: 0.9rem;
 }
 
 .login-split .form-control:focus {
-    background-color: var(--Light-Gray);
+    background-color: var(--White);
     border-color: var(--Green-Dark);
     box-shadow: none;
 }
 
 .login-split .input-group-flat .input-group-text {
-    background-color: var(--Light-Gray);
-    border: 1px solid var(--Transparent);
+    background-color: var(--White);
+    border: 1px solid var(--Light-Gray);
 }
 
 .login-split .btn-login-primary {
