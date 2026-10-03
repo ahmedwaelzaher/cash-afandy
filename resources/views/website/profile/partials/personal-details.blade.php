@@ -56,7 +56,7 @@
 
 <div class="row">
     <div class="col-12 col-md-6 mb-3">
-        <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender')" validation="required" inline />
+        <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender') ?? \App\Enums\Gender::Male->value" validation="required" inline />
     </div>
 
     @if ($withReferral)
