@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\CashbackFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -96,6 +97,20 @@ class Cashback extends Model
                 'type' => 'datetime',
             ],
         ];
+    }
+
+    /**
+     * Scope a query to only include cashbacks visible on the website.
+     */
+    public function scopeAvailable(Builder $query): void
+    {
+        $country = website_country();
+
+        $query->where('active', true)
+            ->where('launch_date', '<=', now())
+            ->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()))
+            ->whereHas('client', fn (Builder $query) => $query->where('active', true))
+            ->when($country, fn (Builder $query) => $query->where('country_id', $country->id));
     }
 
     /**
