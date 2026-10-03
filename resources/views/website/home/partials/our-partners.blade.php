@@ -12,7 +12,7 @@
         <div class="swiper-wrapper align-items-center">
             @foreach ($clients->shuffle() as $client)
                 <div class="swiper-slide">
-                    <a class="site-partners-logo" href="{{ $client->url }}" target="_blank" rel="noopener noreferrer"
+                    <a class="site-partners-logo" href="{{ route('website.clients.show', $client) }}"
                         title="{{ $client->title }}">
                         <img src="{{ $client->logo }}" alt="{{ $client->title }}" loading="lazy">
                     </a>
@@ -25,7 +25,7 @@
         <div class="swiper-wrapper align-items-center">
             @foreach ($clients->shuffle() as $client)
                 <div class="swiper-slide">
-                    <a class="site-partners-logo" href="{{ $client->url }}" target="_blank" rel="noopener noreferrer"
+                    <a class="site-partners-logo" href="{{ route('website.clients.show', $client) }}"
                         title="{{ $client->title }}">
                         <img src="{{ $client->logo }}" alt="{{ $client->title }}" loading="lazy">
                     </a>
