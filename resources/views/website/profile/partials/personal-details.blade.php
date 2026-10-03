@@ -11,7 +11,7 @@
 @endphp
 
 <div class="mb-3">
-    <x-input type="tel" name="phone" :title="__('Phone Number')" :value="$value('phone')" :placeholder="__('Phone Number')" />
+    <x-phone name="phone" :title="__('Phone Number')" :value="$value('phone')" />
 </div>
 
 @if ($splitBirthdate)

@@ -253,6 +253,39 @@ select.is-invalid ~ .ts-wrapper {
 }
 
 /* ---------------------------------
+ * Intl Tel Input
+ * --------------------------------- */
+
+.phone-control .iti {
+    display: block;
+    width: 100%;
+}
+
+.phone-control .iti__tel-input {
+    width: 100%;
+}
+
+:root {
+    --iti-hover-color: rgba(var(--tblr-body-color-rgb), 0.04);
+    --iti-border-color: var(--tblr-border-color);
+    --iti-country-selector-bg: var(--tblr-bg-surface);
+    --iti-icon-color: var(--tblr-muted);
+}
+
+.iti__country-selector {
+    color: var(--tblr-body-color) !important;
+    background-color: var(--tblr-bg-surface) !important;
+    border-color: var(--tblr-border-color) !important;
+    border-radius: var(--tblr-border-radius) !important;
+    box-shadow: var(--tblr-box-shadow) !important;
+}
+
+.iti__search-input {
+    color: var(--tblr-body-color) !important;
+    background-color: var(--tblr-bg-surface) !important;
+}
+
+/* ---------------------------------
  * Jquery Confirm
  * --------------------------------- */
 

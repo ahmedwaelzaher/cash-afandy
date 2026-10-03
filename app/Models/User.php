@@ -171,7 +171,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function personalDetailsRules(mixed $countryId): array
     {
         return [
-            'phone' => ['nullable', 'string', 'max:20'],
+            // Stored in international format (+201001234567), the format the phone input reads back.
+            'phone' => ['nullable', 'string', 'max:20', 'starts_with:+', 'phone'],
             'birthdate' => ['required', 'date', 'before:today'],
             'gender' => ['required', Rule::enum(Gender::class)],
             'country_id' => ['required', 'exists:countries,id'],

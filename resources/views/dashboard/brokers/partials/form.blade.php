@@ -8,7 +8,7 @@
     </div>
 
     <div class="col-12 col-md-6 mb-3">
-        <x-input name="phone" :title="__('Phone')" :value="old('phone', $entry?->phone)" validation="nullable|max:30" />
+        <x-phone name="phone" :title="__('Phone')" :value="old('phone', $entry?->phone)" />
     </div>
 </div>
 

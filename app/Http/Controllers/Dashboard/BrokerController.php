@@ -32,7 +32,7 @@ class BrokerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:30',
+            'phone' => 'nullable|string|max:30|starts_with:+|phone',
             'url' => 'nullable|url',
         ]);
 
@@ -59,7 +59,7 @@ class BrokerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:30',
+            'phone' => 'nullable|string|max:30|starts_with:+|phone',
             'url' => 'nullable|url',
         ]);
 
