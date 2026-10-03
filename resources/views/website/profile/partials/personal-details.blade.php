@@ -3,10 +3,12 @@
 
     @param array $details     Current values: phone, birthdate (Y-m-d), birth_day, birth_month, birth_year, gender, country_id, state_id.
     @param bool  $splitBirthdate  Show the birthdate as day / month / year selects, so a partial date can be prefilled.
+    @param bool  $withReferral    Show the invite code switch next to the gender, and its field below (registration only).
 --}}
 @php
     $details ??= [];
     $splitBirthdate ??= false;
+    $withReferral ??= false;
     $value = fn (string $key) => old($key, $details[$key] ?? null);
 @endphp
 
@@ -40,10 +42,6 @@
     </div>
 @endif
 
-<div class="mb-3">
-    <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender')" validation="required" inline />
-</div>
-
 <div class="row">
     <div class="col-12 col-md-6 mb-3">
         <x-countries id="country-id" name="country_id" :title="__('Country')" :value="$value('country_id')" validation="required" />
@@ -55,3 +53,22 @@
             :text="app()->getLocale() === 'ar' ? 'native' : 'name'" bind-country.selector="#country-id" />
     </div>
 </div>
+
+<div class="row">
+    <div class="col-12 col-md-6 mb-3">
+        <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender')" validation="required" inline />
+    </div>
+
+    @if ($withReferral)
+        <div class="col-12 col-md-6 mb-3">
+            <x-label :title="__('Do you have a code?')" for="has-referral-code" />
+            <x-toggle id="has-referral-code" :on="__('Yes, I have an invite code')" :off="__('No, I don\'t have an invite code')" />
+        </div>
+    @endif
+</div>
+
+@if ($withReferral)
+    <div class="mb-3" visible-when="$has-referral-code">
+        <x-input type="text" name="referral_code" :title="__('Invite Code')" :value="old('referral_code')" :placeholder="__('Invite Code')" />
+    </div>
+@endif

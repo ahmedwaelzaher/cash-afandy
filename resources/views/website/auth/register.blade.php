@@ -37,22 +37,7 @@
                 </div>
             </div>
 
-            @include('website.profile.partials.personal-details')
-
-            <div class="row align-items-center">
-                <div class="col-12 col-md-6 mb-3">
-                    <span class="form-label mb-0">{{ __('Do you have a code?') }}</span>
-                </div>
-
-                <div class="col-12 col-md-6 mb-3">
-                    <x-toggle id="has-referral-code" :on="__('Yes, I have an invite code')" :off="__('No, I don\'t have an invite code')" />
-                </div>
-            </div>
-
-            <div class="mb-3" visible-when="$has-referral-code">
-                <x-input type="text" name="referral_code" :title="__('Invite Code')" value="{{ old('referral_code') }}"
-                    :placeholder="__('Invite Code')" />
-            </div>
+            @include('website.profile.partials.personal-details', ['withReferral' => true])
 
             @if (setting('cloudflare_turnstile_site_key'))
                 <x-captcha :title="__('Captcha')" name="captcha" />
