@@ -668,3 +668,50 @@ select.is-invalid ~ .ts-wrapper {
         overflow: hidden !important;
     }
 }
+
+/* ---------------------------------
+ * Brand Theme
+ * --------------------------------- */
+
+[data-bs-theme-primary] {
+    --tblr-primary: #08723b;
+    --tblr-primary-rgb: 8, 114, 59;
+    --tblr-primary-fg: #ffffff;
+    --tblr-primary-darken: #065a2f;
+    --tblr-primary-lt: #e6f1eb;
+    --tblr-primary-lt-rgb: 230, 241, 235;
+    --tblr-primary-bg-subtle: #cde3d8;
+    --tblr-primary-border-subtle: #9cc7b0;
+    --tblr-primary-text-emphasis: #0a4a2a;
+    --tblr-link-color: var(--tblr-primary);
+    --tblr-link-color-rgb: var(--tblr-primary-rgb);
+    --tblr-link-hover-color-rgb: 17, 64, 43;
+}
+
+[data-bs-theme-primary][data-bs-theme='dark'] {
+    --tblr-primary: #4f9a72;
+    --tblr-primary-rgb: 79, 154, 114;
+    --tblr-primary-fg: #102317;
+    --tblr-primary-darken: #3f7c5b;
+    --tblr-primary-lt: #20363c;
+    --tblr-primary-bg-subtle: #233c40;
+    --tblr-primary-border-subtle: #2e534c;
+    --tblr-primary-text-emphasis: #8cc3a2;
+    --tblr-link-color: var(--tblr-primary);
+    --tblr-link-color-rgb: var(--tblr-primary-rgb);
+    --tblr-link-hover-color-rgb: 140, 195, 162;
+}
+
+/* ---------------------------------
+ * Brand Logo
+ * --------------------------------- */
+
+.container-tight .navbar-brand img {
+    width: auto;
+    height: 5rem;
+}
+
+.page-loader img {
+    width: auto;
+    height: 6rem;
+}

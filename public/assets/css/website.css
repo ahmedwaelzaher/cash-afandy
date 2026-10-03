@@ -1,7 +1,7 @@
 :root {
     --Green-Lightest: #8CC3A2FF;
     --Green-Light: #4F9A72FF;
-    --Green-Dark: #08723BFF;
+    --Green-Dark: var(--tblr-primary);
     --Green-Darkest: #11402BFF;
     --Red: #B12529FF;
     --White: #FFFFFFFF;
@@ -13,19 +13,12 @@
     --Yellow: #ECB534FF;
     --Transparent: #FFFFFF00;
     --Disabled: #6C757D80;
-    --Links: #08723BFF;
+    --Links: var(--tblr-link-color);
     --Light-Grayish-Blue: #D3DAE3FF;
     --Light-Grayish-Blue-transparent: #D3DAE380;
     --Blue: #0B99FFFF;
     --Light-Green: #70E116FF;
     --Light-Orange: #EDB015FF;
-}
-
-[data-bs-theme-primary] {
-    --tblr-primary: #08723B;
-    --tblr-primary-rgb: 8, 114, 59;
-    --tblr-primary-fg: #FFFFFF;
-    --tblr-primary-lt: #E6F1EB;
 }
 
 /* ============================================================
