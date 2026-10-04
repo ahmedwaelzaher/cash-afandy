@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Website;
 
-use App\Models\Country;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,7 +20,6 @@ class ProfileController extends Controller
         return view('website.profile.edit', [
             'user' => current_user(),
             'details' => $this->personalDetails(current_user()),
-            'currencies' => Country::query()->distinct()->orderBy('currency')->pluck('currency', 'currency'),
         ]);
     }
 
@@ -110,7 +108,6 @@ class ProfileController extends Controller
             'theme' => ['sometimes', 'required', 'string', 'in:light,dark'],
             'language' => ['sometimes', 'required', 'string', 'in:' . implode(',', setting('website_locales'))],
             'country_id' => ['sometimes', 'nullable', 'exists:countries,id'],
-            'currency' => ['sometimes', 'nullable', 'string', 'size:3', 'exists:countries,currency'],
         ]);
 
         $request->user()->preferences()->update($validated);
