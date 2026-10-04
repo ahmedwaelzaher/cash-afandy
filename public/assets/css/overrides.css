@@ -261,8 +261,10 @@ select.is-invalid ~ .ts-wrapper {
     width: 100%;
 }
 
+/* Phone numbers are always written left to right, even in RTL pages. */
 .phone-control .iti__tel-input {
     width: 100%;
+    direction: ltr;
 }
 
 :root {
