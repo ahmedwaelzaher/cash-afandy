@@ -164,6 +164,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the user's income and expense transactions.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
      * Get the validation rules for the user's personal details.
      *
      * Shared by registration, profile completion and profile update.
