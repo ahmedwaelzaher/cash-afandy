@@ -11,6 +11,18 @@
                 </p>
             </div>
 
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3">
+                    <x-input type="text" name="first_name" :title="__('First name')" :value="old('first_name', auth('users')->user()->first_name)"
+                        :placeholder="__('First name')" validation="required" />
+                </div>
+
+                <div class="col-12 col-md-6 mb-3">
+                    <x-input type="text" name="last_name" :title="__('Last name')" :value="old('last_name', auth('users')->user()->last_name)"
+                        :placeholder="__('Last name')" validation="required" />
+                </div>
+            </div>
+
             @include('website.profile.partials.personal-details', ['splitBirthdate' => true])
 
             <div class="form-footer">

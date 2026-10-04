@@ -185,7 +185,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasCompletedProfile(): bool
     {
-        return $this->birthdate && $this->gender && $this->country_id && $this->state_id;
+        return filled($this->first_name) && filled($this->last_name)
+            && $this->birthdate && $this->gender && $this->country_id && $this->state_id;
     }
 
     /**

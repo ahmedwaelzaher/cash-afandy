@@ -106,7 +106,12 @@ class SocialiteController extends Controller
      */
     protected function createUser(SocialiteUser $socialUser): User
     {
+        $raw = $socialUser->getRaw();
+
+        // Prefer the separate name parts (Google: given/family, Facebook: first/last), splitting the full name is a fallback.
         [$firstName, $lastName] = array_pad(explode(' ', trim($socialUser->getName() ?? ''), 2), 2, '');
+        $firstName = $raw['given_name'] ?? $raw['first_name'] ?? $firstName;
+        $lastName = $raw['family_name'] ?? $raw['last_name'] ?? $lastName;
 
         $user = new User([
             'first_name' => $firstName ?: Str::before($socialUser->getEmail(), '@'),
@@ -139,7 +144,7 @@ class SocialiteController extends Controller
 
         if ($provider === 'facebook') {
             $driver->scopes(['user_birthday', 'user_gender', 'user_location'])
-                ->fields(['name', 'email', 'birthday', 'gender', 'location']);
+                ->fields(['name', 'first_name', 'last_name', 'email', 'birthday', 'gender', 'location']);
         }
 
         return $driver;

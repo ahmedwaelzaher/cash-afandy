@@ -76,6 +76,8 @@ class ProfileController extends Controller
     public function storeCompletion(Request $request)
     {
         $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'birth_day' => ['required', 'integer', 'between:1,31'],
             'birth_month' => ['required', 'integer', 'between:1,12'],
             'birth_year' => ['required', 'integer', 'min:1900'],
@@ -93,7 +95,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate(User::personalDetailsRules($request->country_id));
 
-        $request->user()->update($validated);
+        $request->user()->update([...$request->only('first_name', 'last_name'), ...$validated]);
         $request->session()->forget('profile_completion');
 
         return redirect()->intended(route('website.index'))->with('success', __('Your profile has been completed.'));
