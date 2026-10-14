@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\Website\Finance\CategoryController as FinanceCategoryController;
-use App\Http\Controllers\Api\Website\Finance\RecurringTransactionController;
-use App\Http\Controllers\Api\Website\Finance\TransactionController;
 use App\Http\Controllers\Api\Website\HomeController;
 use App\Http\Controllers\Api\Website\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -25,9 +23,6 @@ Route::middleware('auth:users-api')->group(function () {
 
     Route::prefix('finance')->name('finance.')->group(function () {
         Route::apiResource('categories', FinanceCategoryController::class)->except(['show']);
-        Route::apiResource('transactions', TransactionController::class)->except(['show']);
-        Route::put('transactions/{transaction}/confirm', [TransactionController::class, 'confirm'])->name('transactions.confirm');
-        Route::apiResource('recurring', RecurringTransactionController::class)->except(['show']);
     });
 });
 

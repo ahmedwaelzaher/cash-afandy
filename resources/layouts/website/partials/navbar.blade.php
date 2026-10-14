@@ -144,10 +144,6 @@
                                     <span class="dropdown-item-title">{{ __('Profile') }}</span>
                                 </a>
 
-                                <a href="{{ route('website.finance.transactions.index') }}" class="dropdown-item">
-                                    <span class="dropdown-item-title">{{ __('Transactions') }}</span>
-                                </a>
-
                                 <a href="{{ route('website.finance.categories.index') }}" class="dropdown-item">
                                     <span class="dropdown-item-title">{{ __('Finance Categories') }}</span>
                                 </a>

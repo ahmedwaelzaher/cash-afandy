@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Exists;
 use Spatie\Translatable\HasTranslations;
 
 class FinanceCategory extends Model
@@ -69,28 +66,6 @@ class FinanceCategory extends Model
     public function scopeAvailableTo(Builder $query, User $user): void
     {
         $query->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', $user->id));
-    }
-
-    /**
-     * Get the validation rule for a category the given user can use: a default or their own, not deleted.
-     */
-    public static function existsFor(User $user): Exists
-    {
-        return Rule::exists('finance_categories', 'id')
-            ->whereNull('deleted_at')
-            ->where(fn ($query) => $query->whereNull('user_id')->orWhere('user_id', $user->id));
-    }
-
-    /**
-     * Get the categories available to the given user, defaults last, grouped by type.
-     */
-    public static function groupedFor(User $user): Collection
-    {
-        return static::availableTo($user)
-            ->orderByRaw('user_id is null')
-            ->orderBy('id')
-            ->get()
-            ->groupBy(fn (FinanceCategory $category) => $category->type->value);
     }
 
     /**
