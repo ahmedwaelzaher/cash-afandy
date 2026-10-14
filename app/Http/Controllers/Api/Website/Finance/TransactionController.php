@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Website\Finance;
 
+use App\Enums\TransactionStatus;
 use App\Models\FinanceCategory;
 use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +26,7 @@ class TransactionController extends Controller
         return $this->respond([
             'filters' => $filters,
             'totals' => $totals,
+            'pending' => $request->user()->transactions()->pending()->with('category')->oldest('occurred_on')->get(),
             'transactions' => $query->with('category')->latest('occurred_on')->latest('id')->paginate(20),
         ]);
     }
@@ -53,6 +55,22 @@ class TransactionController extends Controller
         $validated['type'] = FinanceCategory::find($validated['finance_category_id'])->type;
 
         $transaction->update($validated);
+
+        return $this->respond($transaction->load('category'));
+    }
+
+    /**
+     * Confirm the actual amount of a pending (variable) transaction of the current user.
+     */
+    public function confirm(Request $request, Transaction $transaction): JsonResponse
+    {
+        abort_unless($transaction->user_id === $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'amount' => Transaction::rules($request->user())['amount'],
+        ]);
+
+        $transaction->update([...$validated, 'status' => TransactionStatus::Confirmed]);
 
         return $this->respond($transaction->load('category'));
     }

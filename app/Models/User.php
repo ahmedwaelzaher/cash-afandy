@@ -172,6 +172,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the user's recurring (fixed and variable) income and expenses.
+     */
+    public function recurringTransactions(): HasMany
+    {
+        return $this->hasMany(RecurringTransaction::class);
+    }
+
+    /**
      * Get the validation rules for the user's personal details.
      *
      * Shared by registration, profile completion and profile update.

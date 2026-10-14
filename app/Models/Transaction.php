@@ -22,6 +22,7 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'finance_category_id',
+        'recurring_transaction_id',
         'type',
         'amount',
         'occurred_on',
@@ -47,12 +48,7 @@ class Transaction extends Model
     public static function rules(User $user): array
     {
         return [
-            'finance_category_id' => [
-                'required',
-                Rule::exists('finance_categories', 'id')
-                    ->whereNull('deleted_at')
-                    ->where(fn ($query) => $query->whereNull('user_id')->orWhere('user_id', $user->id)),
-            ],
+            'finance_category_id' => ['required', FinanceCategory::existsFor($user)],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999.99'],
             'occurred_on' => ['required', 'date'],
             'note' => ['nullable', 'string', 'max:255'],
@@ -130,11 +126,27 @@ class Transaction extends Model
     }
 
     /**
+     * Get the recurring income or expense this transaction was posted from.
+     */
+    public function recurring(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTransaction::class, 'recurring_transaction_id')->withTrashed();
+    }
+
+    /**
      * Scope the query to the confirmed transactions, the only ones counted in totals.
      */
     public function scopeConfirmed(Builder $query): void
     {
         $query->where('status', TransactionStatus::Confirmed);
+    }
+
+    /**
+     * Scope the query to the pending transactions, posted from a variable recurring item and awaiting the actual amount.
+     */
+    public function scopePending(Builder $query): void
+    {
+        $query->where('status', TransactionStatus::Pending);
     }
 
     /**

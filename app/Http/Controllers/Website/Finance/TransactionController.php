@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website\Finance;
 
+use App\Enums\TransactionStatus;
 use App\Models\FinanceCategory;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -25,7 +26,8 @@ class TransactionController extends Controller
             'transactions' => $query->with('category')->latest('occurred_on')->latest('id')->paginate(20)->withQueryString(),
             'totals' => $totals,
             'filters' => $filters,
-            'categories' => $this->categories($request),
+            'pending' => $request->user()->transactions()->pending()->with('category')->oldest('occurred_on')->get(),
+            'categories' => FinanceCategory::groupedFor($request->user()),
         ]);
     }
 
@@ -53,7 +55,7 @@ class TransactionController extends Controller
 
         return view('website.finance.transactions.edit', [
             'transaction' => $transaction,
-            'categories' => $this->categories($request),
+            'categories' => FinanceCategory::groupedFor($request->user()),
         ]);
     }
 
@@ -73,6 +75,22 @@ class TransactionController extends Controller
     }
 
     /**
+     * Confirm the actual amount of a pending (variable) transaction, so it counts in the totals.
+     */
+    public function confirm(Request $request, Transaction $transaction)
+    {
+        abort_unless($transaction->user_id === $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'amount' => Transaction::rules($request->user())['amount'],
+        ]);
+
+        $transaction->update([...$validated, 'status' => TransactionStatus::Confirmed]);
+
+        return $this->updated(__('Transaction'));
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request, Transaction $transaction)
@@ -82,17 +100,5 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return $this->deleted(__('Transaction'));
-    }
-
-    /**
-     * Get the categories available to the user, grouped by type.
-     */
-    protected function categories(Request $request)
-    {
-        return FinanceCategory::availableTo($request->user())
-            ->orderByRaw('user_id is null')
-            ->orderBy('id')
-            ->get()
-            ->groupBy(fn (FinanceCategory $category) => $category->type->value);
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\ClientController;
 use App\Http\Controllers\Website\CouponController;
 use App\Http\Controllers\Website\Finance\CategoryController as FinanceCategoryController;
+use App\Http\Controllers\Website\Finance\RecurringTransactionController;
 use App\Http\Controllers\Website\Finance\TransactionController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
@@ -62,6 +63,8 @@ Route::middleware('auth:users')->group(function () {
         Route::prefix('finance')->name('finance.')->group(function () {
             Route::resource('categories', FinanceCategoryController::class)->except(['show']);
             Route::resource('transactions', TransactionController::class)->except(['create', 'show']);
+            Route::put('transactions/{transaction}/confirm', [TransactionController::class, 'confirm'])->name('transactions.confirm');
+            Route::resource('recurring', RecurringTransactionController::class)->except(['show']);
         });
     });
 });

@@ -7,7 +7,11 @@
                     <p class="text-secondary mb-0">{{ __('Track every pound you earn or spend.') }}</p>
                 </div>
 
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('website.finance.recurring.index') }}" class="btn">
+                        <i class="fas fa-repeat me-2"></i>{{ __('Recurring') }}
+                    </a>
+
                     <a href="{{ route('website.finance.categories.index') }}" class="btn">
                         <i class="fas fa-tags me-2"></i>{{ __('Categories') }}
                     </a>
@@ -17,6 +21,53 @@
                     </button>
                 </div>
             </div>
+
+            {{-- Variable recurring items wait here until the actual amount is confirmed --}}
+            @if ($pending->isNotEmpty())
+                <div class="card border-warning mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-hourglass-half text-warning me-2"></i>{{ __('Awaiting confirmation') }}
+                        </h3>
+                    </div>
+
+                    <div class="card-body pt-2">
+                        <p class="text-secondary small">{{ __('These were added with the expected amount. Confirm the actual amount so they count in your totals.') }}</p>
+
+                        <div class="list-group list-group-flush">
+                            @foreach ($pending as $transaction)
+                                <div class="list-group-item d-flex flex-wrap align-items-center gap-3 px-0">
+                                    <span class="avatar avatar-sm rounded-circle flex-shrink-0"
+                                        style="color: {{ $transaction->category->color ?? 'var(--tblr-secondary)' }}">
+                                        <i class="{{ $transaction->category->icon ?: 'fas fa-tag' }}"></i>
+                                    </span>
+
+                                    <div class="flex-fill text-truncate">
+                                        <div class="fw-medium text-truncate">{{ $transaction->note ?: $transaction->category->title }}</div>
+                                        <div class="text-secondary small">{{ $transaction->occurred_on->translatedFormat('j F Y') }}</div>
+                                    </div>
+
+                                    <x-form class="d-flex align-items-center gap-2" :action="route('website.finance.transactions.confirm', $transaction)" method="PUT">
+                                        <div class="input-group input-group-sm" style="max-inline-size: 11rem">
+                                            <input type="number" name="amount" class="form-control" step="0.01" min="0.01"
+                                                value="{{ $transaction->amount }}" aria-label="{{ __('Amount') }}" required />
+                                            <span class="input-group-text">{{ __('EGP') }}</span>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-sm btn-primary">{{ __('Confirm') }}</button>
+                                    </x-form>
+
+                                    <x-form :action="route('website.finance.transactions.destroy', $transaction)" method="DELETE" finance-confirm-delete>
+                                        <button type="submit" class="btn btn-sm btn-icon btn-ghost-danger" title="{{ __('Delete') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </x-form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             {{-- Totals of the filtered period --}}
             <div class="row row-cards mb-4">
