@@ -4,7 +4,6 @@ use App\Http\Controllers\Website\CashbackController;
 use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\ClientController;
 use App\Http\Controllers\Website\CouponController;
-use App\Http\Controllers\Website\Finance\CategoryController as FinanceCategoryController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\ProfileController;
@@ -57,10 +56,6 @@ Route::middleware('auth:users')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences.update');
-
-        Route::prefix('finance')->name('finance.')->group(function () {
-            Route::resource('categories', FinanceCategoryController::class)->except(['show']);
-        });
     });
 });
 

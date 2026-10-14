@@ -134,11 +134,6 @@ return Sidebar::make([
                 ->title(__('Sliders'))
                 ->route('dashboard.sliders.index')
                 ->icon('fa fa-images'),
-
-            Item::make()
-                ->title(__('Finance Categories'))
-                ->route('dashboard.finance-categories.index')
-                ->icon('fa fa-wallet'),
         ]),
 
     Item::make()

@@ -10,7 +10,6 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -153,14 +152,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function preferences(): HasOne
     {
         return $this->hasOne(UserPreference::class);
-    }
-
-    /**
-     * Get the user's own finance categories.
-     */
-    public function financeCategories(): HasMany
-    {
-        return $this->hasMany(FinanceCategory::class);
     }
 
     /**

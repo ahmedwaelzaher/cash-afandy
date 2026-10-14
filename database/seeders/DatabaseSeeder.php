@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminSeeder::class,
             StaticPageSeeder::class,
-            FinanceCategorySeeder::class,
 
             //
         ]);
