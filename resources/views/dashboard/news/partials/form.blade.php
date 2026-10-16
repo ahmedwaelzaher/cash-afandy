@@ -14,7 +14,7 @@
     </div>
 
     <div class="col-12 col-md-6 mb-3">
-        <x-select name="category_id" :title="__('Category')" :query="$categories" text="title" :value="old('category_id', $entry?->category_id)" removable />
+        <x-select-remote name="category_id" :title="__('Category')" :query="$categories" text="title" :value="old('category_id', $entry?->category_id)" removable />
     </div>
 </div>
 

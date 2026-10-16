@@ -22,11 +22,11 @@
 
 <div class="row">
     <div class="col-12 col-md-6 mb-3">
-        <x-select name="categories[]" :title="__('Categories')" :query="$categories" text="title" :value="old('categories', $entry?->categories->pluck('id')->toArray() ?? [])" multiple validation="required" />
+        <x-select-remote name="categories[]" :title="__('Categories')" :query="$categories" text="title" :value="old('categories', $entry?->categories->pluck('id')->toArray() ?? [])" multiple validation="required" />
     </div>
 
     <div class="col-12 col-md-6 mb-3">
-        <x-select name="countries[]" :title="__('Countries')" :query="$countries" text="name" :value="old('countries', $entry?->countries->pluck('id')->toArray() ?? [])" multiple validation="required" />
+        <x-select-remote name="countries[]" :title="__('Countries')" :query="$countries" text="name" :value="old('countries', $entry?->countries->pluck('id')->toArray() ?? [])" multiple validation="required" />
     </div>
 </div>
 

@@ -2,20 +2,29 @@
 
 namespace App\Models;
 
+use App\Notifications\NewAdminNotification;
 use Database\Factories\AdminFactory;
-use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Redot\Traits\HasSessions;
 use Spatie\Permission\Traits\HasRoles;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasRoles, Notifiable;
+    use HasApiTokens, HasRoles, HasSessions, Notifiable;
 
     /** @use HasFactory<AdminFactory> */
     use HasFactory;
+
+    /**
+     * Roles live on the session guard. Without this, API requests
+     * (admins-api) look up roles on a guard that has none.
+     */
+    protected $guard_name = 'admins';
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +57,7 @@ class Admin extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'email_verified_at' => 'datetime',
         'active' => 'boolean',
         'last_login_at' => 'datetime',
     ];
@@ -92,16 +102,20 @@ class Admin extends Authenticatable
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Create an admin and send their initial credentials.
      */
-    protected static function booted(): void
+    public static function invite(array $attributes, ?string $role = null): static
     {
-        ResetPassword::createUrlUsing(function (Admin $admin, string $token) {
-            return url(route('dashboard.password.reset', [
-                'token' => $token,
-                'email' => $admin->email,
-            ], false));
-        });
+        $password = Str::random(8);
+        $admin = static::create([...$attributes, 'password' => $password]);
+
+        if (! empty($role)) {
+            $admin->assignRole($role);
+        }
+
+        $admin->notify(new NewAdminNotification($password));
+
+        return $admin;
     }
 
     /**

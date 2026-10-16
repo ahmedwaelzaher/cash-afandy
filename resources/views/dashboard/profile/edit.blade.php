@@ -7,7 +7,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-auto mb-3">
-                    <x-avatar :name="$user->name" :image="$user->profile_picture" size="xl" avatar-preview />
+                    <x-avatar :name="$admin->name" :image="$admin->profile_picture" size="xl" avatar-preview />
                 </div>
 
                 <div class="col mb-3">
@@ -17,11 +17,11 @@
             </div>
 
             <div class="mb-3">
-                <x-input name="name" :title="__('Name')" :value="$user->name" validation="required" />
+                <x-input name="name" :title="__('Name')" :value="$admin->name" validation="required" />
             </div>
 
             <div class="mb-3">
-                <x-input type="email" name="email" :title="__('Email address')" :value="$user->email"
+                <x-input type="email" name="email" :title="__('Email address')" :value="$admin->email"
                     validation="required|email" />
             </div>
 

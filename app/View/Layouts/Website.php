@@ -4,6 +4,7 @@ namespace App\View\Layouts;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Redot\Models\Language;
 
 class Website extends Component
 {
@@ -22,6 +23,8 @@ class Website extends Component
     {
         $this->inline = $this->inline || request()->has('inline');
 
-        return view('layouts.website.base');
+        return view('layouts.website.base', [
+            'direction' => Language::current()->direction,
+        ]);
     }
 }

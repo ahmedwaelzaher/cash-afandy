@@ -7,7 +7,7 @@
 
             <div class="card-body">
                 <div class="mb-3">
-                    <x-select name="admins[]" :title="__('Administrators')" :query="$admins" template="admin" :value="old('admins', [])" multiple validation="required" />
+                    <x-select-remote name="admins[]" :title="__('Administrators')" :query="$admins" template="admin" :value="old('admins', [])" multiple validation="required" />
                 </div>
 
                 <div class="mb-3">

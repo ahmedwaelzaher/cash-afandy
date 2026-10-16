@@ -5,6 +5,8 @@ namespace App\Livewire\Datatables;
 use App\Models\ShortenedUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
+use Redot\Datatables\Actions\BulkAction;
 use Redot\Datatables\Columns\NumericColumn;
 use Redot\Datatables\Columns\TagsColumn;
 use Redot\Datatables\Columns\TextColumn;
@@ -47,10 +49,21 @@ class ShortenedUrls extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
             Action::edit('dashboard.shortened-urls.edit'),
             Action::delete('dashboard.shortened-urls.destroy'),
         ]);
+    }
+
+    /**
+     * Get the bulk actions for the datatable.
+     */
+    public function bulkActions(): array
+    {
+        return [
+            BulkAction::delete()
+                ->success(fn () => $this->toastify()->success(__('Selected :resource have been deleted.', ['resource' => __('Shortened URLs')]))),
+        ];
     }
 
     /**

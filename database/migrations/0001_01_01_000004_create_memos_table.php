@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('admin_id')->constrained()->cascadeOnDelete();
             $table->string('title');
-            $table->string('icon')->nullable()->default('fa fa-sticky-note');
+            $table->string('icon')->nullable()->default('ti ti-note');
             $table->timestamp('date')->nullable();
             $table->text('content')->nullable();
             $table->json('attachments')->nullable();

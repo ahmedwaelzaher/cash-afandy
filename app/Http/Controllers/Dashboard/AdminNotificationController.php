@@ -44,6 +44,7 @@ class AdminNotificationController extends Controller
             title: $validated['title'],
             url: $validated['url'] ?? null,
             level: $validated['level'],
+            lightbox: $request->boolean('lightbox'),
         ));
 
         return $this->success(__('Notification has been sent.'), 'dashboard.admin-notifications.create');

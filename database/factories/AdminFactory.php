@@ -26,4 +26,20 @@ class AdminFactory extends Factory
             'remember_token' => Str::random(10),
         ];
     }
+
+    /**
+     * Indicate that the admin is verified.
+     */
+    public function verified(): AdminFactory
+    {
+        return $this->state(fn (array $attributes) => ['email_verified_at' => now()]);
+    }
+
+    /**
+     * Indicate that the admin is unverified.
+     */
+    public function unverified(): AdminFactory
+    {
+        return $this->state(fn (array $attributes) => ['email_verified_at' => null]);
+    }
 }

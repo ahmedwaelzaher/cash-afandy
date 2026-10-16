@@ -43,11 +43,12 @@ class Form extends Component
         $this->id ??= uniqid('form-');
         $this->method = strtoupper($this->method);
         $this->formMethod = $this->method === 'GET' ? 'GET' : 'POST';
-        $this->identifier = base64_encode(sprintf('%s:%s', $this->action, $this->method));
 
         if ($this->route) {
             $this->action = route($this->route, $this->routeParams);
         }
+
+        $this->identifier = base64_encode(sprintf('%s:%s', $this->action, $this->method));
 
         $keep = request()->query('keep', []);
 

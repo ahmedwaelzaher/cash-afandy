@@ -48,7 +48,7 @@
     </div>
 
     <div class="col-12 col-md-6 mb-3">
-        <x-select id="state-id" name="state_id" :title="__('State')" :value="$value('state_id')" validation="required"
+        <x-select-remote id="state-id" name="state_id" :title="__('State')" :value="$value('state_id')" validation="required"
             :query="\App\Models\State::query()->where('country_id', '{country}')"
             :text="app()->getLocale() === 'ar' ? 'native' : 'name'" bind-country.selector="#country-id" />
     </div>

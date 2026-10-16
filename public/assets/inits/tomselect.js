@@ -141,8 +141,6 @@ return (selector, options = {}) => {
 
     const defaultOptions = {
         create: $select.hasAttr('tags'),
-        dropdownParent: 'body',
-        copyClassesToDropdown: false,
         placeholder: __('Select an option'),
 
         onInitialize: function () {
@@ -189,8 +187,8 @@ return (selector, options = {}) => {
         const message = event.data;
         if (!message || message.key !== $select.attr('id')) return;
 
-        // If fanybox is still open, close the last opened fanybox.
-        if ($.fancybox.instances.length > 0) $.fancybox.instances.pop().close();
+        // If a lightbox is still open, close the last opened lightbox.
+        Glare.close();
 
         const value = _.get(message, 'data.value');
         if (value === undefined || value === null || value === '') return;

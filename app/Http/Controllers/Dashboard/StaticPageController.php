@@ -36,9 +36,21 @@ class StaticPageController extends Controller
             'content.*' => 'nullable|string',
         ]);
 
+        $validated['active'] = $request->has('active');
+
         StaticPage::create($validated);
 
         return $this->created(__('Page'), 'dashboard.static-pages.index');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(StaticPage $staticPage)
+    {
+        return view('dashboard.static-pages.show', [
+            'staticPage' => $staticPage,
+        ]);
     }
 
     /**
@@ -62,6 +74,8 @@ class StaticPageController extends Controller
             'content' => 'nullable|array',
             'content.*' => 'nullable|string',
         ]);
+
+        $validated['active'] = $request->has('active');
 
         $staticPage->update($validated);
 

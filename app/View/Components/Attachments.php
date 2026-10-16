@@ -36,26 +36,31 @@ class Attachments extends Component
      */
     public function getFileIcon(string $mimeType): string
     {
-        return match ($mimeType) {
-            'application/pdf' => 'fa-file-pdf',
-            'application/msword' => 'fa-file-word',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'fa-file-word',
-            'application/vnd.ms-excel' => 'fa-file-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'fa-file-excel',
-            'application/vnd.ms-powerpoint' => 'fa-file-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'fa-file-powerpoint',
-            'application/zip' => 'fa-file-archive',
-            'application/x-rar-compressed' => 'fa-file-archive',
-            'application/x-7z-compressed' => 'fa-file-archive',
-            'text/plain' => 'fa-file-alt',
-            'text/html' => 'fa-file-code',
-            'text/css' => 'fa-file-code',
-            'text/javascript' => 'fa-file-code',
-            'application/json' => 'fa-file-code',
-            'video/' => 'fa-file-video',
-            'audio/' => 'fa-file-audio',
-            default => 'fa-file',
-        };
+        $icons = [
+            'application/pdf' => 'ti ti-file-type-pdf',
+            'application/msword' => 'ti ti-file-type-doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'ti ti-file-type-doc',
+            'application/vnd.ms-excel' => 'ti ti-file-type-xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'ti ti-file-type-xls',
+            'application/vnd.ms-powerpoint' => 'ti ti-file-type-ppt',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'ti ti-file-type-ppt',
+            'application/zip' => 'ti ti-file-zip',
+            'application/x-rar-compressed' => 'ti ti-file-zip',
+            'application/x-7z-compressed' => 'ti ti-file-zip',
+            'text/plain' => 'ti ti-file-text',
+            'text/html' => 'ti ti-file-code',
+            'text/css' => 'ti ti-file-code',
+            'text/javascript' => 'ti ti-file-code',
+            'application/json' => 'ti ti-file-code',
+            'video/' => 'ti ti-video',
+            'audio/' => 'ti ti-file-music',
+        ];
+
+        foreach ($icons as $type => $icon) {
+            if (str_starts_with($mimeType, $type)) return $icon;
+        }
+
+        return 'ti ti-file';
     }
 
     /**

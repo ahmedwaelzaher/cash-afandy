@@ -3,13 +3,14 @@
 use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\AdminImpersonateController;
 use App\Http\Controllers\Dashboard\AdminNotificationController;
+use App\Http\Controllers\Dashboard\BackupController;
 use App\Http\Controllers\Dashboard\BrokerController;
 use App\Http\Controllers\Dashboard\CashbackController;
 use App\Http\Controllers\Dashboard\CategoryController;
 use App\Http\Controllers\Dashboard\ClientController;
 use App\Http\Controllers\Dashboard\CouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
-use App\Http\Controllers\Dashboard\ExtractLanguageTokensController;
+use App\Http\Controllers\Dashboard\FailedJobController;
 use App\Http\Controllers\Dashboard\LanguageController;
 use App\Http\Controllers\Dashboard\LanguageTokenController;
 use App\Http\Controllers\Dashboard\MemoController;
@@ -17,11 +18,10 @@ use App\Http\Controllers\Dashboard\NewsController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\PostController;
 use App\Http\Controllers\Dashboard\ProfileController;
-use App\Http\Controllers\Dashboard\PublishLanguageTokensController;
 use App\Http\Controllers\Dashboard\QrCodeController;
 use App\Http\Controllers\Dashboard\RepresentativeController;
-use App\Http\Controllers\Dashboard\RevertLanguageTokensController;
 use App\Http\Controllers\Dashboard\RoleController;
+use App\Http\Controllers\Dashboard\ServerStatsController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\ShortenedUrlController;
 use App\Http\Controllers\Dashboard\SliderController;
@@ -97,11 +97,17 @@ Route::middleware('auth:admins')->group(function () {
     Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
+    Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+    Route::post('backups/run', [BackupController::class, 'run'])->name('backups.run');
+    Route::get('server-stats', [ServerStatsController::class, 'index'])->name('server-stats.index');
+    Route::resource('failed-jobs', FailedJobController::class)->only(['index', 'destroy']);
+    Route::post('failed-jobs/{failedJob}/retry', [FailedJobController::class, 'retry'])->name('failed-jobs.retry');
+
     Route::resource('languages', LanguageController::class)->except(['show']);
     Route::resource('languages.tokens', LanguageTokenController::class)->only(['index', 'edit', 'update']);
-    Route::get('languages/{language}/tokens/extract', ExtractLanguageTokensController::class)->name('languages.tokens.extract');
-    Route::get('languages/{language}/tokens/publish', PublishLanguageTokensController::class)->name('languages.tokens.publish');
-    Route::get('languages/{language}/tokens/revert', RevertLanguageTokensController::class)->name('languages.tokens.revert');
+    Route::get('languages/{language}/tokens/extract', [LanguageTokenController::class, 'extract'])->name('languages.tokens.extract');
+    Route::get('languages/{language}/tokens/publish', [LanguageTokenController::class, 'publish'])->name('languages.tokens.publish');
+    Route::get('languages/{language}/tokens/revert', [LanguageTokenController::class, 'revert'])->name('languages.tokens.revert');
 });
 
 /*
@@ -114,20 +120,5 @@ Route::middleware('auth:admins')->group(function () {
 */
 
 Route::withoutMiddleware(RoutePermission::class)->group(function () {
-    RedotAuth::routes(
-        guard: 'admins',
-        scope: fn ($query) => $query->where('active', true),
-        views: [
-            'login' => 'dashboard.auth.login',
-            'forgot-password' => 'dashboard.auth.forgot-password',
-            'reset-password' => 'dashboard.auth.reset-password',
-            'magic-link' => 'dashboard.auth.magic-link',
-            'magic-link-code' => 'dashboard.auth.magic-link-code',
-            'unlock' => 'dashboard.auth.unlock',
-        ],
-        disable: [
-            'register',
-            'email-verification',
-        ],
-    );
+    RedotAuth::routes('dashboard');
 });

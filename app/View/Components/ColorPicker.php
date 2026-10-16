@@ -2,10 +2,7 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
-
-class ColorPicker extends Component
+class ColorPicker extends FormField
 {
     /**
      * View path for the component.
@@ -20,18 +17,4 @@ class ColorPicker extends Component
         public ?string $title = null,
         public ?string $hint = null,
     ) {}
-
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
-    {
-        $this->id ??= uniqid('color-picker-');
-
-        return function (): View {
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
-    }
 }

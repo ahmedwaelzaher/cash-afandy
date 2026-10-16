@@ -26,6 +26,11 @@ class DashboardNotification extends Notification
     public NotificationLevel $level = NotificationLevel::Info;
 
     /**
+     * Whether the notification URL should open in lightbox.
+     */
+    public bool $lightbox = false;
+
+    /**
      * The extra data for the notification.
      */
     public array $data = [];
@@ -33,20 +38,31 @@ class DashboardNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(string $title, ?string $url = null, NotificationLevel|string|null $level = null, array $data = [])
-    {
+    public function __construct(
+        string $title,
+        ?string $url = null,
+        NotificationLevel|string|null $level = null,
+        array $data = [],
+        bool $lightbox = false,
+    ) {
         $this->title = $title;
         $this->url = $url;
         $this->level = NotificationLevel::resolve($level);
         $this->data = $data;
+        $this->lightbox = $lightbox;
     }
 
     /**
      * Make a new notification instance statically.
      */
-    public static function make(string $title, ?string $url = null, NotificationLevel|string|null $level = null, array $data = []): static
-    {
-        return new static($title, $url, $level, $data);
+    public static function make(
+        string $title,
+        ?string $url = null,
+        NotificationLevel|string|null $level = null,
+        array $data = [],
+        bool $lightbox = false,
+    ): static {
+        return new static($title, $url, $level, $data, $lightbox);
     }
 
     /**
@@ -75,6 +91,16 @@ class DashboardNotification extends Notification
     public function level(NotificationLevel|string $level): static
     {
         $this->level = NotificationLevel::resolve($level);
+
+        return $this;
+    }
+
+    /**
+     * Set whether the notification URL should open in lightbox.
+     */
+    public function lightbox(bool $lightbox = true): static
+    {
+        $this->lightbox = $lightbox;
 
         return $this;
     }
@@ -110,6 +136,7 @@ class DashboardNotification extends Notification
             'title' => $this->title,
             'url' => $this->url,
             'level' => $this->level->value,
+            'lightbox' => $this->lightbox,
             'data' => $this->data,
         ];
     }

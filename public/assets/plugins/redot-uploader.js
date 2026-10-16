@@ -81,6 +81,7 @@ class RedotUploader {
             item: 'uploader-item',
             empty: 'uploader-empty',
             input: 'uploader-input',
+            trigger: 'uploader-trigger',
         },
     };
 
@@ -160,9 +161,9 @@ class RedotUploader {
     bindEvents() {
         const { attributes } = this.options;
 
-        // Trigger file input on click only when clicking on empty space
-        this.$wrapper.on('click', (e) => {
-            if ($(e.target).closest(`[${this.options.attributes.list}]`).length > 0) return;
+        // Open the file picker from the trigger only, so scrollbar and list
+        // interactions never open a file dialog by accident.
+        this.$wrapper.on('click', `[${attributes.trigger}]`, () => {
             this.$fileInput.trigger('click');
         });
 
@@ -182,11 +183,6 @@ class RedotUploader {
 
         // Handle drag and drop
         this.initDragAndDrop();
-
-        // Handle form submission
-        this.$container.closest('form').on('submit', () => {
-            this.saveToInput();
-        });
     }
 
     /**
@@ -308,29 +304,29 @@ class RedotUploader {
         const isImage = fileData.type.startsWith('image/');
 
         const $item = $(`
-            <div ${attributes.item} class="uploader-item">
-                <div class="uploader-item-preview">
-                    ${isImage ? '<img class="uploader-item-image">' : this.getFileIcon(fileData.type)}
-                    ${isImage ? '<a class="fancybox-preview"></a>' : ''}
+            <div ${attributes.item} class="uploader-item position-relative d-flex align-items-center gap-2 overflow-hidden">
+                <div class="uploader-item-preview position-relative d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden rounded-2" sortable-handle>
+                    ${isImage ? '<img class="uploader-item-image w-100 h-100">' : this.getFileIcon(fileData.type)}
+                    ${isImage ? '<a class="lightbox-preview position-absolute top-0 start-0 d-flex align-items-center justify-content-center w-100 h-100 text-decoration-none"></a>' : ''}
                 </div>
-                <div class="uploader-item-info">
-                    <div class="uploader-item-name">${_.escape(fileData.name)}</div>
-                    <div class="uploader-item-size">${this.formatFileSize(fileData.size)}</div>
+                <div class="uploader-item-info d-flex align-items-baseline gap-2 flex-fill">
+                    <div class="uploader-item-name flex-fill text-truncate fw-medium">${_.escape(fileData.name)}</div>
+                    <div class="uploader-item-size flex-shrink-0 text-secondary">${this.formatFileSize(fileData.size)}</div>
                     <div class="uploader-item-progress">
-                        <div class="progress">
+                        <div class="progress rounded-0 bg-transparent">
                             <div class="progress-bar" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
-                <div class="uploader-item-actions">
+                <div class="uploader-item-actions d-flex align-items-center flex-shrink-0">
                     <button type="button" class="btn btn-icon" action="upload">
-                        <i class="fas fa-upload"></i>
+                        <i class="ti ti-upload"></i>
                     </button>
                     <button type="button" class="btn btn-icon ${this.options.returnType === 'url' ? 'd-none' : ''}" action="rename">
-                        <i class="fas fa-pencil-alt"></i>
+                        <i class="ti ti-edit"></i>
                     </button>
                     <button type="button" class="btn btn-icon" action="remove">
-                        <i class="fas fa-trash text-danger"></i>
+                        <i class="ti ti-trash"></i>
                     </button>
                 </div>
             </div>
@@ -346,15 +342,17 @@ class RedotUploader {
             $item.find('.uploader-item-image').attr('src', fileData.thumbnail || fileData.url);
         }
 
-        // Handle fancybox preview
-        $item.find('.fancybox-preview').on('click', (e) => {
+        // Handle lightbox preview
+        $item.find('.lightbox-preview').on('click', (e) => {
             if (!fileData.url) return;
 
-            $.fancybox.open({
-                src: fileData.url,
-                type: 'image',
-                caption: fileData.name,
-            });
+            Glare.open([
+                {
+                    src: fileData.url,
+                    type: 'image',
+                    caption: fileData.name,
+                },
+            ]);
         });
 
         // Handle remove action
@@ -401,26 +399,26 @@ class RedotUploader {
      */
     getFileIcon(mimeType) {
         const iconMap = {
-            'application/pdf': 'fa-file-pdf',
-            'application/msword': 'fa-file-word',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'fa-file-word',
-            'application/vnd.ms-excel': 'fa-file-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'fa-file-excel',
-            'application/vnd.ms-powerpoint': 'fa-file-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'fa-file-powerpoint',
-            'application/zip': 'fa-file-archive',
-            'application/x-rar-compressed': 'fa-file-archive',
-            'application/x-7z-compressed': 'fa-file-archive',
-            'text/plain': 'fa-file-alt',
-            'text/html': 'fa-file-code',
-            'text/css': 'fa-file-code',
-            'text/javascript': 'fa-file-code',
-            'application/json': 'fa-file-code',
-            'video/': 'fa-file-video',
-            'audio/': 'fa-file-audio',
+            'application/pdf': 'ti-file-type-pdf',
+            'application/msword': 'ti-file-type-doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'ti-file-type-doc',
+            'application/vnd.ms-excel': 'ti-file-type-xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'ti-file-type-xls',
+            'application/vnd.ms-powerpoint': 'ti-file-type-ppt',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ti-file-type-ppt',
+            'application/zip': 'ti-file-zip',
+            'application/x-rar-compressed': 'ti-file-zip',
+            'application/x-7z-compressed': 'ti-file-zip',
+            'text/plain': 'ti-file-text',
+            'text/html': 'ti-file-code',
+            'text/css': 'ti-file-code',
+            'text/javascript': 'ti-file-code',
+            'application/json': 'ti-file-code',
+            'video/': 'ti-video',
+            'audio/': 'ti-file-music',
         };
 
-        let iconClass = 'fa-file';
+        let iconClass = 'ti-file';
 
         for (const [type, icon] of Object.entries(iconMap)) {
             if (mimeType.startsWith(type)) {
@@ -429,14 +427,14 @@ class RedotUploader {
             }
         }
 
-        return `<i class="fas ${iconClass} fa-3x text-muted"></i>`;
+        return `<i class="ti ${iconClass} text-muted"></i>`;
     }
 
     /**
      * Format file size.
      */
     formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return '';
 
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -541,6 +539,7 @@ class RedotUploader {
      * Rename a file.
      */
     renameFile($item) {
+        const uploader = this;
         const fileData = $item.data('file');
 
         // Get name and extension
@@ -556,23 +555,24 @@ class RedotUploader {
             </div>
         `);
 
-        $.confirm({
+        bootbox.dialog({
             title: __('Rename'),
-            content: $inputGroup,
+            message: $inputGroup,
             buttons: {
                 cancel: {
-                    text: __('Cancel'),
-                    btnClass: 'btn-secondary',
+                    label: __('Cancel'),
+                    className: 'btn-secondary',
                 },
                 confirm: {
-                    text: __('Rename'),
-                    btnClass: 'btn-primary',
-                    action: function () {
-                        const name = this.$content.find('input').val();
+                    label: __('Rename'),
+                    className: 'btn-primary',
+                    callback: function () {
+                        const name = this.find('.bootbox-body input').val();
 
                         if (name) {
                             fileData.name = `${name}.${extension}`;
                             $item.find('.uploader-item-name').text(fileData.name);
+                            uploader.trigger('file:renamed', { file: fileData, item: $item });
                         }
                     },
                 },
@@ -726,19 +726,22 @@ class RedotUploader {
         const { multiple, returnType } = this.options;
 
         const files = this.getFiles();
+        let value = '';
 
-        if (files.length === 0) {
-            this.$input.val('');
+        if (files.length > 0) {
+            if (returnType === 'url') {
+                const urls = files.map((file) => file.url);
+                value = multiple ? JSON.stringify(urls) : urls[0];
+            } else {
+                value = JSON.stringify(multiple ? files : files[0]);
+            }
+        }
+
+        if (this.$input.val() === value) {
             return;
         }
 
-        if (returnType === 'url') {
-            const urls = files.map((file) => file.url);
-            this.$input.val(multiple ? JSON.stringify(urls) : urls[0]);
-            return;
-        }
-
-        this.$input.val(JSON.stringify(multiple ? files : files[0]));
+        this.$input.val(value).trigger('change');
     }
 
     /**
@@ -747,9 +750,12 @@ class RedotUploader {
     initSortable() {
         if (!this.options.sortable) return;
 
+        const touchQuery = window.matchMedia('(hover: none)');
+        const sortableHandle = () => (touchQuery.matches ? '[sortable-handle]' : `[${this.options.attributes.item}]`);
+
         const defaultSortableOptions = {
             animation: 150,
-            handle: `[${this.options.attributes.item}]`,
+            handle: sortableHandle(),
         };
 
         const requiredSortableOptions = {
@@ -762,7 +768,7 @@ class RedotUploader {
             },
         };
 
-        new Sortable(
+        const sortable = new Sortable(
             this.$list.get(0),
             _.merge(
                 _.isPlainObject(this.options.sortable) ? this.options.sortable : {},
@@ -770,6 +776,12 @@ class RedotUploader {
                 requiredSortableOptions,
             ),
         );
+
+        // On touch devices, only the file icon/preview starts a drag so
+        // the rest of the row can scroll the attached-files list.
+        touchQuery.addEventListener('change', () => {
+            sortable.option('handle', sortableHandle());
+        });
     }
 
     /**
@@ -779,6 +791,7 @@ class RedotUploader {
         const { attributes } = this.options;
         const hasFiles = this.$list.find(`[${attributes.item}]`).length > 0;
 
+        this.$container.toggleClass('has-files', hasFiles);
         this.$container.find(`[${attributes.empty}]`).toggle(!hasFiles);
     }
 
@@ -811,5 +824,10 @@ class RedotUploader {
      */
     trigger(name, data = {}) {
         this.$input.trigger(`uploader:${name}`, _.merge({ uploader: this }, data));
+
+        // Keep the hidden input in sync after the file list changes.
+        if (name !== 'initialized') {
+            this.saveToInput();
+        }
     }
 }

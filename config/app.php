@@ -86,6 +86,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Faker Locales
+    |--------------------------------------------------------------------------
+    |
+    | Map application locales to Faker locales used when generating fake data
+    | per language (e.g. seeders and factories for translatable attributes).
+    |
+    */
+
+    'faker_locales' => [
+        'en' => 'en_US',
+        'ar' => 'ar_EG',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

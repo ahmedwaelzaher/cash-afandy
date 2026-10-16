@@ -14,15 +14,15 @@
 
 <div class="row">
     <div class="col-12 col-md-4 mb-3">
-        <x-select name="client_id" :title="__('Client')" :query="$clients" text="title" :value="old('client_id', $entry?->client_id)" validation="required" />
+        <x-select-remote name="client_id" :title="__('Client')" :query="$clients" text="title" :value="old('client_id', $entry?->client_id)" validation="required" />
     </div>
 
     <div class="col-12 col-md-4 mb-3">
-        <x-select name="representative_id" :title="__('Representative')" :query="$representatives" text="full_name" :value="old('representative_id', $entry?->representative_id)" validation="required" />
+        <x-select-remote name="representative_id" :title="__('Representative')" :query="$representatives" text="full_name" :value="old('representative_id', $entry?->representative_id)" validation="required" />
     </div>
 
     <div class="col-12 col-md-4 mb-3">
-        <x-select name="country_id" :title="__('Country')" :query="$countries" text="name" :value="old('country_id', $entry?->country_id)" validation="required" />
+        <x-select-remote name="country_id" :title="__('Country')" :query="$countries" text="name" :value="old('country_id', $entry?->country_id)" validation="required" />
     </div>
 </div>
 

@@ -6,17 +6,12 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 
-class Radios extends Component
+class Radios extends FormField
 {
     /**
      * View path for the component.
      */
     public string $view = 'components.radios';
-
-    /**
-     * Determine if the field is required.
-     */
-    public bool $required = false;
 
     /**
      * Create a new component instance.
@@ -27,7 +22,7 @@ class Radios extends Component
         public ?string $hint = null,
         public ?string $name = null,
         public array|Collection $options = [],
-        public ?string $value = null,
+        protected ?string $value = null,
         public array|string $disabled = [],
         public bool $inline = false,
         public ?string $validation = null,
@@ -38,17 +33,11 @@ class Radios extends Component
      */
     public function render(): View|Closure|string
     {
-        $this->id ??= uniqid('radios-');
-
-        if (str_contains($this->validation ?: '', 'required')) {
-            $this->required = true;
-        }
-
         // If the disabled is csv, we will convert it to an array.
         if (! is_array($this->disabled)) {
             $this->disabled = is_string($this->disabled) ? parse_csv($this->disabled) : [$this->disabled];
         }
 
-        return view($this->view);
+        return parent::render();
     }
 }

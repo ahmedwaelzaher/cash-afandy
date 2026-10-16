@@ -68,15 +68,4 @@ Route::middleware('auth:users')->group(function () {
 |
 */
 
-RedotAuth::routes(
-    guard: 'users',
-    views: [
-        'login' => 'website.auth.login',
-        'register' => 'website.auth.register',
-        'forgot-password' => 'website.auth.forgot-password',
-        'reset-password' => 'website.auth.reset-password',
-        'magic-link' => 'website.auth.magic-link',
-        'magic-link-code' => 'website.auth.magic-link-code',
-        'verify-email' => 'website.auth.verify-email',
-    ],
-);
+RedotAuth::routes('website');

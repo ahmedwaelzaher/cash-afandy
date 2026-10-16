@@ -8,16 +8,16 @@
     </div>
 
     <div class="col-12 col-md-3 mb-3">
-        <x-select name="client_id" :title="__('Client')" :query="$clients" text="title" :value="old('client_id', $entry?->client_id)" validation="required" />
+        <x-select-remote name="client_id" :title="__('Client')" :query="$clients" text="title" :value="old('client_id', $entry?->client_id)" validation="required" />
     </div>
 
     <div class="col-12 col-md-3 mb-3">
-        <x-select name="representative_id" :title="__('Representative')" :query="$representatives" text="full_name" :value="old('representative_id', $entry?->representative_id)" validation="required" />
+        <x-select-remote name="representative_id" :title="__('Representative')" :query="$representatives" text="full_name" :value="old('representative_id', $entry?->representative_id)" validation="required" />
     </div>
 </div>
 
 <div class="mb-3">
-    <x-select name="countries[]" :title="__('Countries')" :query="$countries" text="name" :value="old('countries', $entry?->countries->pluck('id')->toArray() ?? [])" multiple validation="required" />
+    <x-select-remote name="countries[]" :title="__('Countries')" :query="$countries" text="name" :value="old('countries', $entry?->countries->pluck('id')->toArray() ?? [])" multiple validation="required" />
 </div>
 
 <div class="mb-3">

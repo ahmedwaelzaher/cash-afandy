@@ -20,15 +20,15 @@ class SettingController extends Controller
         return [
             'application-information' => [
                 'title' => __('Information'),
-                'icon' => 'fa fa-info-circle',
+                'icon' => 'ti ti-info-circle',
             ],
             'theme-customizations' => [
                 'title' => __('Customizations'),
-                'icon' => 'fa fa-palette',
+                'icon' => 'ti ti-palette',
             ],
             '3rd-party-services' => [
                 'title' => __('Integrations'),
-                'icon' => 'fa fa-plug',
+                'icon' => 'ti ti-plug',
             ],
             'social-login' => [
                 'title' => __('Social Login Integrations'),
@@ -40,7 +40,7 @@ class SettingController extends Controller
             ],
             'custom-code' => [
                 'title' => __('Code'),
-                'icon' => 'fa fa-code',
+                'icon' => 'ti ti-code',
             ],
         ];
     }
@@ -60,16 +60,13 @@ class SettingController extends Controller
      */
     public function update(Request $request)
     {
-        $defaults = Setting::defaults();
-        $keys = array_keys($defaults);
-
         // Check if all validations pass
         $request->validate(Setting::rules());
 
-        foreach ($keys as $key) {
-            $value = match (true) {
-                $request->hasFile($key) => $this->uploadFile($request->file($key), 'settings'),
-                is_bool($defaults[$key]) => $request->boolean($key),
+        foreach (array_keys(Setting::schema()) as $key) {
+            $value = match (Setting::type($key)) {
+                'file' => $request->hasFile($key) ? $this->uploadFile($request->file($key), 'settings') : null,
+                'boolean' => $request->boolean($key),
                 default => $request->input($key),
             };
 

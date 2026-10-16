@@ -21,7 +21,7 @@ class MemoFactory extends Factory
         return [
             'admin_id' => Admin::factory(),
             'title' => $this->faker->sentence,
-            'icon' => 'fa fa-sticky-note',
+            'icon' => 'ti ti-note',
             'date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
             'content' => $this->faker->paragraph,
         ];

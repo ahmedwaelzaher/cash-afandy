@@ -1,4 +1,4 @@
-@if ($title && $floating === false)
+@if ($title)
     <x-label :title="$title" :for="$id" :required="$required" />
 @endif
 
@@ -12,18 +12,7 @@
         <span class="input-group-text">{{ $prepend }}</span>
     @endif
 
-    @if ($floating)
-        <div class="form-floating">
-            <input type="{{ $type }}" id="{{ $id }}" placeholder="{{ $title }}"
-                {{ $attributes->class(['form-control']) }} />
-
-            @if ($title)
-                <x-label :title="$title" :for="$id" :required="$required" />
-            @endif
-        </div>
-    @else
-        <input type="{{ $type }}" id="{{ $id }}" {{ $attributes->class(['form-control']) }} />
-    @endif
+    <input type="{{ $type }}" id="{{ $id }}" {{ $attributes->class(['form-control']) }} />
 
     @if ($isPassword)
         <button type="button" class="input-group-text" tabindex="-1" onclick="togglePasswordField(this)">

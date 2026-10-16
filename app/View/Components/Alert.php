@@ -14,10 +14,10 @@ class Alert extends Component
     public string $view = 'components.alert';
 
     const TYPES_ICONS = [
-        'success' => 'fas fa-check-circle',
-        'error' => 'fas fa-exclamation-circle',
-        'warning' => 'fas fa-exclamation-triangle',
-        'info' => 'fas fa-info-circle',
+        'success' => 'ti ti-circle-check',
+        'error' => 'ti ti-circle-x',
+        'warning' => 'ti ti-alert-triangle',
+        'info' => 'ti ti-info-circle',
     ];
 
     /**

@@ -19,7 +19,7 @@ class ProfileController extends Controller
     public function edit()
     {
         return view('dashboard.profile.edit', [
-            'user' => current_admin(),
+            'admin' => current_admin(),
         ]);
     }
 
@@ -32,21 +32,21 @@ class ProfileController extends Controller
             'profile_picture' => ['nullable', 'image', 'max:1024'],
             'name' => ['string', 'max:255'],
             'email' => ['email', 'max:255', Rule::unique(Admin::class)->ignore($request->user()->id)],
-            'password' => ['nullable', 'confirmed', 'min:8', Password::defaults()],
+            'password' => ['nullable', 'string', 'confirmed', 'min:8', Password::defaults()],
         ]);
 
-        $user = $request->user();
-        $user->fill($request->only('name', 'email'));
+        $admin = $request->user();
+        $admin->fill($request->only('name', 'email'));
 
         if ($request->filled('password')) {
-            $user->password = $request->get('password');
+            $admin->password = $request->input('password');
         }
 
         if ($request->hasFile('profile_picture')) {
-            $user->profile_picture = $this->uploadFile($request->file('profile_picture'), 'dashboard/profile_pictures');
+            $admin->profile_picture = $this->uploadFile($request->file('profile_picture'), 'dashboard/profile_pictures');
         }
 
-        $user->save();
+        $admin->save();
 
         return $this->updated(__('Profile'));
     }

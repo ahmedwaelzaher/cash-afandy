@@ -5,7 +5,7 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 
-class Input extends Component
+class Input extends FormField
 {
     /**
      * View path for the component.
@@ -28,7 +28,6 @@ class Input extends Component
         public ?string $append = null,
         public string $type = 'text',
         public bool $flat = false,
-        public bool $floating = false,
     ) {}
 
     /**
@@ -36,18 +35,22 @@ class Input extends Component
      */
     public function render(): View|Closure|string
     {
-        $this->id ??= uniqid('input-');
         $this->isPassword = strtolower($this->type) === 'password';
 
         if ($this->isPassword) {
             $this->flat = true;
         }
 
-        return function ($data): View {
-            return view($this->view, [
-                'isInputGroup' => $data['prepend'] || $data['append'] || $data['isPassword'],
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return parent::render();
+    }
+
+    /**
+     * Prepare the attributes and any extra view data once attributes are available.
+     */
+    protected function prepare(array $data): array
+    {
+        return [
+            'isInputGroup' => $data['prepend'] || $data['append'] || $this->isPassword,
+        ];
     }
 }

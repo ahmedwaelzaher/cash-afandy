@@ -1,180 +1,72 @@
-<x-form id="logout" :action="route('website.logout')" method="POST" class="d-none" disable-validation />
-
 @php
-    $localeFlags = ['en' => 'us', 'ar' => 'eg'];
     $currentCountry = website_country();
     $availableCountries = \App\Models\Country::whereIn('code', setting('website_countries'))->get();
+    $otherLocales = array_values(array_diff(setting('website_locales'), [app()->getLocale()]));
     $navbarCategories = \App\Models\Category::all();
 @endphp
 
 <header class="site-navbar d-print-none">
-    <div class="site-navbar-top">
-        <div class="container justify-content-between d-flex align-items-center gap-3">
-            <a class="navbar-brand my-2" href="{{ route('website.index') }}">
-                <x-logo class="logo" variant="horizontal" />
-            </a>
-
-            <form action="{{ route('website.search') }}" method="GET" class="site-navbar-search input-icon flex-fill d-none d-lg-flex">
-                <input type="search" name="search" class="form-control" value="{{ request('search') }}"
-                    placeholder="{{ __('Search') }}..." />
-                <span class="input-icon-addon">
-                    <i class="fa fa-search"></i>
-                </span>
-            </form>
-
-            <div class="d-none d-lg-flex align-items-center gap-2">
-                @if ($currentCountry)
-                    <div class="dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <span class="flag flag-country-{{ $currentCountry->code }}"></span>
-                            {{ app()->getLocale() === 'ar' ? $currentCountry->native : $currentCountry->name }}
-                        </a>
-
-                        <div class="dropdown-menu dropdown-menu-end">
-                            @foreach ($availableCountries as $country)
-                                <a class="dropdown-item" href="{{ url()->current() }}?country={{ $country->code }}">
-                                    <span class="flag flag-country-{{ $country->code }}"></span>
-                                    {{ app()->getLocale() === 'ar' ? $country->native : $country->name }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                @if (count(setting('website_locales')) > 1)
-                    <div class="dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            @isset($localeFlags[app()->getLocale()])
-                                <span class="flag flag-country-{{ $localeFlags[app()->getLocale()] }}"></span>
-                            @endisset
-                            {{ config('app.locales.' . app()->getLocale()) }}
-                        </a>
-
-                        <div class="dropdown-menu dropdown-menu-end">
-                            @foreach (setting('website_locales') as $locale)
-                                <a class="dropdown-item" href="{{ url()->current() }}?locale={{ $locale }}">
-                                    @isset($localeFlags[$locale])
-                                        <span class="flag flag-country-{{ $localeFlags[$locale] }}"></span>
-                                    @endisset
-                                    {{ config('app.locales.' . $locale) }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </div>
-
-            <button class="navbar-toggler d-lg-none ms-auto" type="button" data-bs-toggle="collapse"
-                data-bs-target="#site-navbar-collapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <div class="container site-header">
+        <a class="navbar-brand" href="{{ route('website.index') }}"><x-logo class="logo" variant="horizontal" :lazy="false" /></a>
+        <div class="site-header-search" id="site-header-search">
+            @include('website.partials.search-form', ['id' => 'navbar-search'])
         </div>
-    </div>
-</header>
-
-<nav class="site-navbar-bottom navbar navbar-expand-lg">
-    <div class="container">
-        <div class="navbar-collapse collapse" id="site-navbar-collapse">
-            <form action="{{ route('website.search') }}" method="GET" class="site-navbar-search input-icon d-flex d-lg-none my-3">
-                <input type="search" name="search" class="form-control" value="{{ request('search') }}"
-                    placeholder="{{ __('Search') }}..." />
-                <span class="input-icon-addon">
-                    <i class="fa fa-search"></i>
-                </span>
-            </form>
-
-            <div
-                class="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-center w-100 gap-2 gap-lg-3">
-                <ul class="navbar-nav site-navbar-links">
-                    <li class="nav-item">
-                        <a class="nav-link @if (request()->routeIs('website.coupons.*')) active @endif"
-                            href="{{ route('website.coupons.index') }}">{{ __('Coupons') }}</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link @if (request()->routeIs('website.cashbacks.*')) active @endif"
-                            href="{{ route('website.cashbacks.index') }}">{{ __('Cashback') }}</a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle @if (request()->routeIs('website.categories.*')) active @endif"
-                            href="#" data-bs-toggle="dropdown">
-                            {{ __('Categories') }}
-                        </a>
-
-                        <div class="dropdown-menu">
-                            @forelse ($navbarCategories as $category)
-                                <a class="dropdown-item" href="{{ route('website.categories.show', $category) }}">
-                                    {{ $category->title }}
-                                </a>
-                            @empty
-                                <span class="dropdown-item-text text-secondary small">{{ __('Coming soon') }}</span>
-                            @endforelse
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('Articles') }}</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('News') }}</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('Offers') }}</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __('About Us') }}</a>
-                    </li>
-                </ul>
-
-                <div class="site-navbar-auth d-flex flex-column flex-lg-row gap-2 my-3 my-lg-0">
-                    @auth('users')
+        <div class="site-header-actions">
+            @auth('users')
+                <div class="dropdown">
+                    <button type="button" class="btn btn-brand site-account-button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Profile') }}"><x-icon icon="fa-regular fa-user" /><span>{{ __('Profile') }}</span></button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <span class="dropdown-header text-break">{{ current_user()->full_name }}</span>
+                        <a href="{{ route('website.profile.edit') }}" class="dropdown-item">{{ __('Profile') }}</a>
+                        <x-form :action="route('website.logout')" method="POST" disable-validation>
+                            <button type="submit" class="dropdown-item">{{ __('Logout') }}</button>
+                        </x-form>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('website.login') }}" class="btn btn-brand site-account-button" aria-label="{{ __('Login') }}"><x-icon icon="fa-regular fa-user" /><span>{{ __('Login') }}</span></a>
+            @endauth
+            <button class="btn btn-icon d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#site-navbar-menu" aria-controls="site-navbar-menu" aria-expanded="false" aria-label="{{ __('Menu') }}"><x-icon icon="fa-solid fa-bars" /></button>
+        </div>
+        <div class="offcanvas-xl offcanvas-start site-navbar-menu" tabindex="-1" id="site-navbar-menu" aria-labelledby="site-navbar-title">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title h3 mb-0" id="site-navbar-title">{{ __('Menu') }}</h2>
+                <button type="button" class="btn btn-icon" data-bs-dismiss="offcanvas" data-bs-target="#site-navbar-menu" aria-label="{{ __('Close') }}"><x-icon icon="fa-solid fa-xmark" /></button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="site-navbar-links" aria-label="{{ __('Main navigation') }}">
+                    <a @class(['nav-link', 'active' => request()->routeIs('website.coupons.*')]) href="{{ route('website.coupons.index') }}" @if (request()->routeIs('website.coupons.*')) aria-current="page" @endif>{{ __('Coupons') }}</a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('website.cashbacks.*')]) href="{{ route('website.cashbacks.index') }}" @if (request()->routeIs('website.cashbacks.*')) aria-current="page" @endif>{{ __('Cashback') }}</a>
+                    @if ($navbarCategories->isNotEmpty())
                         <div class="dropdown">
-                            <a href="#" class="nav-link dropdown-toggle d-flex align-items-center gap-2"
-                                data-bs-toggle="dropdown">
-                                <span class="nav-link-icon"><i class="fa fa-user"></i></span>
-                                {{ current_user()->full_name }}
-                            </a>
-
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a href="{{ route('website.profile.edit') }}" class="dropdown-item">
-                                    <span class="dropdown-item-title">{{ __('Profile') }}</span>
-                                </a>
-
-                                <a href="#" class="dropdown-item"
-                                    onclick="event.preventDefault(); $('#logout').submit()">
-                                    <span class="dropdown-item-title">{{ __('Logout') }}</span>
-                                </a>
+                            <button @class(['nav-link dropdown-toggle', 'active' => request()->routeIs('website.categories.*')]) type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ __('Categories') }}</button>
+                            <div class="dropdown-menu">
+                                @foreach ($navbarCategories as $category)
+                                    <a class="dropdown-item" href="{{ route('website.categories.show', $category) }}">{{ $category->title }}</a>
+                                @endforeach
                             </div>
                         </div>
-                    @else
-                        <div class="site-navbar-cta d-flex gap-2">
-                            <a href="{{ route('website.register') }}" class="btn btn-outline-brand brand-btn">
-                                {{ __('Subscribe') }}
-                            </a>
-
-                            <a href="{{ route('website.login') }}" class="btn btn-brand brand-btn">
-                                {{ __('Login') }}
-                            </a>
-                        </div>
-                    @endauth
-
-                    @if ($currentCountry)
-                        <div class="dropdown d-flex d-lg-none align-items-center gap-3 mt-2">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <span class="flag flag-country-{{ $currentCountry->code }}"></span>
-                                {{ app()->getLocale() === 'ar' ? $currentCountry->native : $currentCountry->name }}
-                            </a>
-
+                    @endif
+                </nav>
+                <div class="site-navbar-settings">
+                    @if ($currentCountry && setting('show_website_countries_dropdown'))
+                        <div class="dropdown">
+                            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Country') }}"><span class="site-setting-label d-xl-none">{{ __('Country') }}</span><x-flag :code="$currentCountry->code" size="sm" /> {{ app()->getLocale() === 'ar' ? $currentCountry->native : $currentCountry->name }}</button>
                             <div class="dropdown-menu">
                                 @foreach ($availableCountries as $country)
-                                    <a class="dropdown-item" href="{{ url()->current() }}?country={{ $country->code }}">
-                                        <span class="flag flag-country-{{ $country->code }}"></span>
-                                        {{ app()->getLocale() === 'ar' ? $country->native : $country->name }}
-                                    </a>
+                                    <a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['country' => $country->code]) }}"><x-flag :code="$country->code" size="sm" /> {{ app()->getLocale() === 'ar' ? $country->native : $country->name }}</a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    @if (count($otherLocales) === 1)
+                        <a class="nav-link site-language-link" href="{{ request()->fullUrlWithQuery(['locale' => $otherLocales[0]]) }}" lang="{{ $otherLocales[0] }}" aria-label="{{ __('Language') }}: {{ config('app.locales.' . $otherLocales[0]) }}"><span class="site-setting-label d-xl-none">{{ __('Language') }}</span>{{ config('app.locales.' . $otherLocales[0]) }}</a>
+                    @elseif (count($otherLocales) > 1)
+                        <div class="dropdown">
+                            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ config('app.locales.' . app()->getLocale()) }}</button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                @foreach ($otherLocales as $locale)
+                                    <a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['locale' => $locale]) }}" lang="{{ $locale }}">{{ config('app.locales.' . $locale) }}</a>
                                 @endforeach
                             </div>
                         </div>
@@ -183,4 +75,4 @@
             </div>
         </div>
     </div>
-</nav>
+</header>

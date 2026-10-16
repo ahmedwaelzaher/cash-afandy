@@ -28,11 +28,14 @@ class StaticPageFactory extends Factory
         $data = [
             'title' => [],
             'content' => [],
+            'active' => true,
         ];
 
         foreach (array_keys(config('app.locales')) as $locale) {
-            $data['title'][$locale] = $this->faker->sentence(3);
-            $data['content'][$locale] = $this->faker->paragraphs(3, true);
+            $faker = fake_locale($locale);
+
+            $data['title'][$locale] = $faker->realText(40);
+            $data['content'][$locale] = $faker->realText(500);
         }
 
         return $data;

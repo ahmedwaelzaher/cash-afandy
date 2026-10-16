@@ -18,6 +18,10 @@ class HomeController extends Controller
      */
     public function __invoke()
     {
+        if (request()->has('verified')) {
+            toastify()->success(__('Your email address has been verified.'));
+        }
+
         $sliders = Slider::query()
             ->where('active', true)
             ->where('locale', app()->getLocale())

@@ -23,11 +23,11 @@
         <x-repeater-card>
             <div class="row">
                 <div class="col-12 col-md-6 mb-3">
-                    <x-select name="client_id" :title="__('Client')" :query="$clients" text="title" validation="required" />
+                    <x-select-remote name="client_id" :title="__('Client')" :query="$clients" text="title" validation="required" />
                 </div>
 
                 <div class="col-12 col-md-6 mb-3">
-                    <x-select name="country_id" :title="__('Country')" :query="$countries" text="name" validation="required" />
+                    <x-select-remote name="country_id" :title="__('Country')" :query="$countries" text="name" validation="required" />
                 </div>
             </div>
         </x-repeater-card>

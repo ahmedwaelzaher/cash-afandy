@@ -2,12 +2,10 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\ComponentAttributeBag;
 
-class Uploader extends Component
+class Uploader extends FormField
 {
     /**
      * View path for the component.
@@ -21,7 +19,7 @@ class Uploader extends Component
         public ?string $id = null,
         public ?string $title = null,
         public ?string $hint = null,
-        public array|string|Collection|null $value = null,
+        protected array|string|Collection|null $value = null,
         public string $directory = 'general',
         public string $accept = '*',
         public string $serverValidation = '',
@@ -30,32 +28,24 @@ class Uploader extends Component
     ) {}
 
     /**
-     * Get the view / contents that represent the component.
+     * Prepare the attributes and any extra view data once attributes are available.
      */
-    public function render(): View|Closure|string
+    protected function prepare(array $data): array
     {
-        $this->id ??= uniqid('uploader-');
-
         // Convert array to JSON string
         if (is_array($this->value) || $this->value instanceof Collection) {
             $this->value = json_encode($this->value, JSON_UNESCAPED_UNICODE);
         }
 
-        return function (): View {
-            $this->attributes(function (ComponentAttributeBag $attributes) {
-                $attributes = $attributes->merge([
-                    'init' => 'uploader',
-                    'uploader-accept' => $this->accept,
-                    'uploader-config' => $this->getUploaderConfig(),
-                ]);
-
-                return $attributes;
-            });
-
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
+        $this->attributes(function (ComponentAttributeBag $attributes) {
+            return $attributes->merge([
+                'init' => 'uploader',
+                'uploader-accept' => $this->accept,
+                'uploader-config' => $this->getUploaderConfig(),
             ]);
-        };
+        });
+
+        return [];
     }
 
     /**

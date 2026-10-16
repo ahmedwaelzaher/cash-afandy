@@ -31,138 +31,156 @@ return Sidebar::make([
 
     Item::make()
         ->title(__('Dashboard'))
-        ->icon('fa fa-home')
+        ->icon('ti ti-home')
         ->route('dashboard.index'),
 
     Item::make()
-        ->title(__('Website Management'))
-        ->icon('fa fa-globe')
+        ->title(__('Website'))
+        ->icon('ti ti-world')
         ->children([
             Item::make()
-                ->title(__('Users Management'))
+                ->title(__('Users'))
                 ->route('dashboard.users.index')
-                ->icon('fa fa-users'),
+                ->icon('ti ti-users'),
 
             Item::make()
                 ->title(__('Static Pages'))
                 ->route('dashboard.static-pages.index')
-                ->icon('fa fa-file-text')
+                ->icon('ti ti-file-text')
                 ->hidden(config('redot.features.website.enabled') === false),
 
             Item::make()
                 ->title(__('Subscribers'))
                 ->route('dashboard.subscribers.index')
-                ->icon('fa fa-envelope'),
-        ]),
-
-    Item::make()
-        ->title(__('Utilities'))
-        ->icon('fa fa-clipboard')
-        ->children([
-            Item::make()
-                ->title(__('Memos'))
-                ->route('dashboard.memos.index')
-                ->icon('fa fa-sticky-note'),
-
-            Item::make()
-                ->title(__('QR Code'))
-                ->route('dashboard.qr-code.index')
-                ->icon('fa fa-qrcode'),
+                ->icon('ti ti-mail'),
 
             Item::make()
                 ->title(__('Shortened URLs'))
                 ->route('dashboard.shortened-urls.index')
-                ->icon('fa fa-link')
+                ->icon('ti ti-link')
                 ->hidden(config('redot.features.website.enabled') === false),
-
-            Item::make()
-                ->title(__('Send Notification'))
-                ->route('dashboard.admin-notifications.create')
-                ->icon('fa fa-bell'),
-
-            Item::make()
-                ->title(__('Impersonate Admin'))
-                ->route('dashboard.impersonate-admins.create')
-                ->icon('fa fa-user-secret'),
-
-            Item::make()
-                ->title(__('Impersonate User'))
-                ->route('dashboard.impersonate-users.create')
-                ->icon('fa fa-user-ninja'),
         ]),
 
     Item::make()
-        ->title(__('Cash Afandy'))
-        ->icon('fa fa-piggy-bank')
+        ->title(__('Access'))
+        ->icon('ti ti-shield-lock')
         ->children([
             Item::make()
-                ->title(__('Categories'))
-                ->route('dashboard.categories.index')
-                ->icon('fa fa-tags'),
-
-            Item::make()
-                ->title(__('Clients'))
-                ->route('dashboard.clients.index')
-                ->icon('fa fa-store'),
-
-            Item::make()
-                ->title(__('Brokers'))
-                ->route('dashboard.brokers.index')
-                ->icon('fa fa-handshake'),
-
-            Item::make()
-                ->title(__('Coupons'))
-                ->route('dashboard.coupons.index')
-                ->icon('fa fa-ticket'),
-
-            Item::make()
-                ->title(__('Cashbacks'))
-                ->route('dashboard.cashbacks.index')
-                ->icon('fa fa-piggy-bank'),
-
-            Item::make()
-                ->title(__('News'))
-                ->route('dashboard.news.index')
-                ->icon('fa fa-newspaper'),
-
-            Item::make()
-                ->title(__('Posts'))
-                ->route('dashboard.posts.index')
-                ->icon('fa fa-blog'),
-
-            Item::make()
-                ->title(__('Sliders'))
-                ->route('dashboard.sliders.index')
-                ->icon('fa fa-images'),
-        ]),
-
-    Item::make()
-        ->title(__('Settings'))
-        ->icon('fa fa-cog')
-        ->children([
-            Item::make()
-                ->title(__('Profile'))
-                ->route('dashboard.profile.edit')
-                ->icon('fa fa-user'),
+                ->title(__('Admins'))
+                ->route('dashboard.admins.index')
+                ->icon('ti ti-user-shield'),
 
             Item::make()
                 ->title(__('Roles'))
                 ->route('dashboard.roles.index')
-                ->icon('fa fa-lock'),
+                ->icon('ti ti-lock'),
 
             Item::make()
-                ->title(__('Admins'))
-                ->route('dashboard.admins.index')
-                ->icon('fa fa-user-shield'),
+                ->title(__('Impersonate Admin'))
+                ->route('dashboard.impersonate-admins.create')
+                ->icon('ti ti-spy'),
 
+            Item::make()
+                ->title(__('Impersonate User'))
+                ->route('dashboard.impersonate-users.create')
+                ->icon('ti ti-mask'),
+        ]),
+
+    Item::make()
+        ->title(__('Cash Afandy'))
+        ->icon('ti ti-coin')
+        ->children([
+            Item::make()
+                ->title(__('Categories'))
+                ->route('dashboard.categories.index')
+                ->icon('ti ti-tags'),
+
+            Item::make()
+                ->title(__('Clients'))
+                ->route('dashboard.clients.index')
+                ->icon('ti ti-building-store'),
+
+            Item::make()
+                ->title(__('Brokers'))
+                ->route('dashboard.brokers.index')
+                ->icon('ti ti-heart-handshake'),
+
+            Item::make()
+                ->title(__('Coupons'))
+                ->route('dashboard.coupons.index')
+                ->icon('ti ti-ticket'),
+
+            Item::make()
+                ->title(__('Cashbacks'))
+                ->route('dashboard.cashbacks.index')
+                ->icon('ti ti-coin'),
+
+            Item::make()
+                ->title(__('News'))
+                ->route('dashboard.news.index')
+                ->icon('ti ti-news'),
+
+            Item::make()
+                ->title(__('Posts'))
+                ->route('dashboard.posts.index')
+                ->icon('ti ti-article'),
+
+            Item::make()
+                ->title(__('Sliders'))
+                ->route('dashboard.sliders.index')
+                ->icon('ti ti-photo'),
+        ]),
+
+    Item::make()
+        ->title(__('System'))
+        ->icon('ti ti-settings')
+        ->children([
             Item::make()
                 ->title(__('Settings'))
                 ->route('dashboard.settings.edit')
-                ->icon('fa fa-cogs'),
+                ->icon('ti ti-adjustments'),
 
             Item::make()
                 ->title(__('Languages'))
                 ->route('dashboard.languages.index')
-                ->icon('fa fa-language'),
+                ->icon('ti ti-language'),
+
+            Item::make()
+                ->title(__('Backups'))
+                ->route('dashboard.backups.index')
+                ->icon('ti ti-database-export'),
+            Item::make()
+                ->title(__('Server Stats'))
+                ->route('dashboard.server-stats.index')
+                ->icon('ti ti-server'),
+            Item::make()
+                ->title(__('Failed Jobs'))
+                ->route('dashboard.failed-jobs.index')
+                ->icon('ti ti-alert-circle'),
+        ]),
+
+    Item::make()
+        ->title(__('Tools'))
+        ->icon('ti ti-tools')
+        ->children([
+            Item::make()
+                ->title(__('Memos'))
+                ->route('dashboard.memos.index')
+                ->icon('ti ti-note'),
+
+            Item::make()
+                ->title(__('QR Code'))
+                ->route('dashboard.qr-code.index')
+                ->icon('ti ti-qrcode'),
+
+            Item::make()
+                ->title(__('Notifications'))
+                ->route('dashboard.notifications.index')
+                ->icon('ti ti-bell'),
+
+            Item::make()
+                ->title(__('Send Notification'))
+                ->route('dashboard.admin-notifications.create')
+                ->icon('ti ti-bell-plus'),
         ]),
 ]);

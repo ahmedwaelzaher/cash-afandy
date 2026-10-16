@@ -5,6 +5,8 @@ namespace App\Livewire\Datatables;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
+use Redot\Datatables\Actions\BulkAction;
 use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
@@ -46,10 +48,10 @@ class Users extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
             Action::view('dashboard.users.show')->visible(route_allowed('dashboard.users.show')),
             Action::edit('dashboard.users.edit')->visible(route_allowed('dashboard.users.edit')),
-            Action::make(__('Impersonate'), 'fas fa-user-secret')
+            Action::make(__('Impersonate'), 'ti ti-spy')
                 ->visible(route_allowed('dashboard.impersonate-users.create'))
                 ->condition(fn (User $user) => ! $user->trashed())
                 ->route('dashboard.impersonate-users.store', method: 'post', bounded: false)
@@ -58,6 +60,21 @@ class Users extends Datatable
             Action::delete('dashboard.users.destroy')->visible(route_allowed('dashboard.users.destroy'))->condition(fn (User $user) => ! $user->trashed()),
             Action::restore('dashboard.users.restore')->visible(route_allowed('dashboard.users.restore'))->condition(fn (User $user) => $user->trashed()),
         ]);
+    }
+
+    /**
+     * Get the bulk actions for the datatable.
+     */
+    public function bulkActions(): array
+    {
+        return [
+            BulkAction::delete()
+                ->visible(route_allowed('dashboard.users.destroy'))
+                ->success(fn () => $this->toastify()->success(__('Selected :resource have been deleted.', ['resource' => __('Users')]))),
+            BulkAction::restore()
+                ->visible(route_allowed('dashboard.users.restore'))
+                ->success(fn () => $this->toastify()->success(__('Selected :resource have been restored.', ['resource' => __('Users')]))),
+        ];
     }
 
     /**

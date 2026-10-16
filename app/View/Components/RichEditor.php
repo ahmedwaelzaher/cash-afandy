@@ -2,10 +2,9 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
+use Illuminate\View\ComponentAttributeBag;
 
-class RichEditor extends Component
+class RichEditor extends Textarea
 {
     /**
      * View path for the component.
@@ -13,26 +12,14 @@ class RichEditor extends Component
     public string $view = 'components.rich-editor';
 
     /**
-     * Create a new component instance.
+     * Prepare the attributes and any extra view data once attributes are available.
      */
-    public function __construct(
-        public ?string $id = null,
-        public ?string $title = null,
-        public ?string $hint = null,
-        public ?string $value = null,
-    ) {}
-
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
+    protected function prepare(array $data): array
     {
-        $this->id ??= uniqid('rich-editor-');
+        $this->attributes(function (ComponentAttributeBag $attributes) {
+            return $attributes->merge(['init' => 'hugerte']);
+        });
 
-        return function (): View {
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return [];
     }
 }

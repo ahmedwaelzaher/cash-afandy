@@ -2,11 +2,9 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\ComponentAttributeBag;
 
-class Textarea extends Component
+class Textarea extends FormField
 {
     /**
      * View path for the component.
@@ -20,27 +18,21 @@ class Textarea extends Component
         public ?string $id = null,
         public ?string $title = null,
         public ?string $hint = null,
-        public ?string $value = null,
+        protected ?string $value = null,
         public bool $autosize = false,
     ) {}
 
     /**
-     * Get the view / contents that represent the component.
+     * Prepare the attributes and any extra view data once attributes are available.
      */
-    public function render(): View|Closure|string
+    protected function prepare(array $data): array
     {
-        $this->id ??= uniqid('textarea-');
+        if ($this->autosize) {
+            $this->attributes(function (ComponentAttributeBag $attributes) {
+                return $attributes->merge(['data-bs-toggle' => 'autosize']);
+            });
+        }
 
-        return function (): View {
-            if ($this->autosize) {
-                $this->attributes(function (ComponentAttributeBag $attributes) {
-                    return $attributes->merge(['data-bs-toggle' => 'autosize']);
-                });
-            }
-
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return [];
     }
 }

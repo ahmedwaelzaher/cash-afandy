@@ -12,6 +12,8 @@ class StaticPageController extends Controller
      */
     public function show(StaticPage $staticPage)
     {
+        abort_unless($staticPage->active, 404);
+
         return view('website.static-pages.show', [
             'staticPage' => $staticPage,
         ]);

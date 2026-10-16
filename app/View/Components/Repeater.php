@@ -2,11 +2,9 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 
-class Repeater extends Component
+class Repeater extends FormField
 {
     /**
      * View path for the component.
@@ -20,25 +18,19 @@ class Repeater extends Component
         public ?string $id = null,
         public ?string $title = null,
         public ?string $hint = null,
-        public array|string|Collection|null $value = null,
+        protected array|string|Collection|null $value = null,
     ) {}
 
     /**
-     * Get the view / contents that represent the component.
+     * Prepare the attributes and any extra view data once attributes are available.
      */
-    public function render(): View|Closure|string
+    protected function prepare(array $data): array
     {
-        $this->id ??= uniqid('repeater-');
-
         // Convert array to JSON string
         if (is_array($this->value) || $this->value instanceof Collection) {
             $this->value = json_encode($this->value, JSON_UNESCAPED_UNICODE);
         }
 
-        return function (): View {
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return [];
     }
 }

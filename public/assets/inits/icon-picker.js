@@ -7,8 +7,6 @@
  */
 return (selector, options = {}) => {
     const defaultOptions = {
-        endpoint: 'https://api.fontawesome.com',
-        version: '6.4.2',
         maxResults: 100,
         searchDebounce: 100,
     };

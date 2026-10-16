@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\StaticPageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -23,6 +24,16 @@ class StaticPage extends Model
         'title',
         'slug',
         'content',
+        'active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'active' => 'boolean',
     ];
 
     /**
@@ -51,6 +62,10 @@ class StaticPage extends Model
                 'title' => __('Slug'),
                 'type' => 'string',
             ],
+            'active' => [
+                'title' => __('Active'),
+                'type' => 'boolean',
+            ],
             'created_at' => [
                 'title' => __('Created At'),
                 'type' => 'datetime',
@@ -68,6 +83,8 @@ class StaticPage extends Model
     protected static function booted(): void
     {
         static::creating(function (self $staticPage) {
+            if (filled($staticPage->slug)) return;
+
             $title = $staticPage->getTranslation('title', config('app.fallback_locale'));
             $slug = Str::slug($title);
 
@@ -87,5 +104,21 @@ class StaticPage extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    /**
+     * Scope a query to only include active pages.
+     */
+    public function scopeActive($query): void
+    {
+        $query->where('active', true);
+    }
+
+    /**
+     * Scope a query to only include inactive pages.
+     */
+    public function scopeInactive($query): void
+    {
+        $query->where('active', false);
     }
 }

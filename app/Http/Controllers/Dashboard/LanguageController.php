@@ -32,7 +32,7 @@ class LanguageController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:2|unique:languages,code',
+            'code' => 'required|alpha|max:2|unique:languages,code',
             'source' => 'required|in:' . implode(',', array_keys(config('app.locales'))),
             'direction' => 'required|in:ltr,rtl',
         ]);

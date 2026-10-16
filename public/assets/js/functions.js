@@ -20,6 +20,24 @@ if (typeof window.$ !== 'undefined') {
 
             return $element.get(0).hasAttribute(name);
         },
+
+        /**
+         * Get the theme of the given element.
+         *
+         * @param {object} $element
+         * @returns {string}
+         */
+        theme: function () {
+            let $element = this;
+
+            let attr = 'data-bs-theme';
+            let theme = $element.closest(`[${attr}]`).attr(attr);
+
+            // If the theme is inherit, return the theme of the html element
+            if (theme === 'inherit') return $('html').attr(attr);
+
+            return theme;
+        },
     });
 
     /**
@@ -175,6 +193,58 @@ function slugify(string, options = {}) {
 }
 
 /* ---------------------------------
+ * Fuzzy Search
+ * --------------------------------- */
+
+/**
+ * Score how well `query` fuzzy-matches `text`.
+ * Returns a higher score for better matches, or null when there is no match.
+ *
+ * Matching rules:
+ * - Exact substring matches rank highest (earlier + denser is better)
+ * - Otherwise characters must appear in order (subsequence)
+ * - Consecutive hits and matches at word starts score higher
+ *
+ * @param {string} query
+ * @param {string} text
+ * @returns {number|null}
+ */
+function fuzzyScore(query, text) {
+    if (!query || !text) return null;
+
+    query = query.toLowerCase();
+    text = text.toLowerCase();
+
+    // Exact substring: prefer earlier and denser matches
+    const index = text.indexOf(query);
+    if (index !== -1) {
+        return 1000 - index + (query.length / text.length) * 100;
+    }
+
+    let qi = 0;
+    let score = 0;
+    let consecutive = 0;
+    let lastMatch = -1;
+
+    for (let ti = 0; ti < text.length && qi < query.length; ti++) {
+        if (text[ti] !== query[qi]) continue;
+
+        consecutive = lastMatch === ti - 1 ? consecutive + 1 : 1;
+        score += 1 + consecutive * 5;
+
+        // Bonus for matching at the start of a word / segment
+        if (ti === 0 || /[\s\-_\/]/.test(text[ti - 1])) {
+            score += 10;
+        }
+
+        lastMatch = ti;
+        qi++;
+    }
+
+    return qi === query.length ? score : null;
+}
+
+/* ---------------------------------
  * Confirmation Dialogs
  * --------------------------------- */
 
@@ -186,27 +256,27 @@ function slugify(string, options = {}) {
  */
 function warnBeforeAction(action, options = {}) {
     const defaultOptions = {
-        type: 'red',
+        size: 'small',
         title: __('Are you sure?'),
-        content: __('This action cannot be undone.'),
-        escapeKey: true,
-        backgroundDismiss: true,
+        message: __('This action cannot be undone.'),
+        onEscape: true,
+        backdrop: true,
         buttons: {
             cancel: {
-                text: __('No'),
-                btnClass: 'btn btn-secondary',
+                label: __('No'),
+                className: 'btn',
             },
             confirm: {
-                text: __('Yes'),
-                btnClass: 'btn-primary',
-                action: function () {
+                label: __('Yes'),
+                className: 'btn-danger',
+                callback: function () {
                     return action.call(this);
                 },
             },
         },
     };
 
-    $.confirm(_.merge(defaultOptions, options));
+    bootbox.dialog(_.merge(defaultOptions, options));
 }
 
 /**
@@ -217,28 +287,31 @@ function warnBeforeAction(action, options = {}) {
 function awaitConfirmation(options = {}) {
     return new Promise((resolve, reject) => {
         const defaultOptions = {
-            type: 'blue',
-            escapeKey: true,
-            backgroundDismiss: true,
+            size: 'small',
+            message: __('Are you sure?'),
+            onEscape: function () {
+                reject();
+            },
+            backdrop: true,
             buttons: {
                 cancel: {
-                    text: __('No'),
-                    btnClass: 'btn btn-secondary',
-                    action: function () {
+                    label: __('No'),
+                    className: 'btn',
+                    callback: function () {
                         return reject();
                     },
                 },
                 confirm: {
-                    text: __('Yes'),
-                    btnClass: 'btn-primary',
-                    action: function () {
+                    label: __('Yes'),
+                    className: 'btn-primary',
+                    callback: function () {
                         return resolve();
                     },
                 },
             },
         };
 
-        $.confirm(_.merge(defaultOptions, options));
+        bootbox.dialog(_.merge(defaultOptions, options));
     });
 }
 
@@ -461,8 +534,8 @@ function getFieldValue($field, form = 'body', key = 'name') {
         return +$field.val();
     }
 
-    if (window.tinymce && tinymce.get($field.attr('id'))) {
-        return tinymce.get($field.attr('id')).getContent();
+    if (window.hugerte && hugerte.get($field.attr('id'))) {
+        return hugerte.get($field.attr('id')).getContent();
     }
 
     if ($field.data('uploader')) {
@@ -549,21 +622,33 @@ function setFieldValue($field, value, form = 'body', key = 'name') {
         // Convert the value to an array if it's not already one.
         value = Array.isArray(value) ? value : value.toString().split(',');
 
-        // Set the selected values for the select element.
+        const tomselect = $field.data('tomselect');
+
+        // Add saved tags that are not among the select's predefined options.
         for (const val of value) {
-            $field.find(`option[value="${val}"]`).attr('selected', true);
+            const $option = $field.find('option').filter((i, option) => option.value === String(val));
+
+            if ($option.length) {
+                $option.attr('selected', true);
+            } else if ($field.hasAttr('tags')) {
+                $field.append(new Option(val, val, true, true));
+
+                if (tomselect) {
+                    tomselect.addOption({ value: val, text: val });
+                }
+            }
         }
 
         // Set the value for the tom select element.
-        if ($field.data('tomselect')) {
-            $field.data('tomselect').setValue(value);
+        if (tomselect) {
+            tomselect.setValue(value);
         }
 
         return $field.val(value);
     }
 
-    if (window.tinymce && tinymce.get($field.attr('id'))) {
-        return tinymce.get($field.attr('id')).setContent(value);
+    if (window.hugerte && hugerte.get($field.attr('id'))) {
+        return hugerte.get($field.attr('id')).setContent(value);
     }
 
     if ($field.data('repeater')) {
@@ -603,12 +688,12 @@ function checkOtherField(field, other, otherValue) {
         const otherField = item.find(`[initial-name^="${other}"]`);
 
         if (otherField.length) {
-            return otherField.val() == otherValue;
+            return getFieldValue(otherField.first(), item, 'initial-name') == otherValue;
         }
     }
 
     if ($form.find(`[name="${other}"]`).length) {
-        return $form.find(`[name="${other}"]`).val() == otherValue;
+        return getFieldValue($form.find(`[name="${other}"]`).first(), $form) == otherValue;
     }
 
     return false;
@@ -617,6 +702,25 @@ function checkOtherField(field, other, otherValue) {
 /* ---------------------------------
  * DOM & UI Utilities
  * --------------------------------- */
+
+/**
+ * Get computed CSS property value(s) from the given element.
+ *
+ * @param {Element} element
+ * @param {string|string[]} properties
+ * @returns {string|object}
+ */
+function getCssProperties(element, properties) {
+    const styles = getComputedStyle(element);
+    const keys = Array.isArray(properties) ? properties : [properties];
+    const values = {};
+
+    for (const property of keys) {
+        values[property] = styles.getPropertyValue(property).trim();
+    }
+
+    return Array.isArray(properties) ? values : values[properties];
+}
 
 /**
  * Make the given element draggable.
@@ -736,6 +840,145 @@ function applyAvatarPreview(source, target) {
     });
 
     reader.readAsDataURL($input.get(0).files[0]);
+}
+
+/**
+ * Create a loading overlay for the given element.
+ * Returns `show` and `hide` functions. Shows immediately unless `show` is false.
+ *
+ * @param {object} $element
+ * @param {object} options
+ * @returns {{ show: function, hide: function }}
+ */
+function createLoading($element, options = {}) {
+    const defaultOptions = {
+        delay: 0,
+        fade: true,
+        lock: true,
+        show: true,
+        callbacks: {
+            show: () => {},
+            hide: () => {},
+        },
+        spinner: {
+            size: 'md',
+            type: 'border',
+            color: null,
+        },
+    };
+
+    // Merge the default options with the given options.
+    options = _.merge(defaultOptions, options);
+
+    const duration = options.fade === true ? 150 : options.fade || 0;
+    const $elements = $.query($element);
+
+    // Generate the HTML for the spinner.
+    const { type, size, color } = options.spinner;
+    const kind = type === 'grow' ? 'spinner-grow' : 'spinner-border';
+    const classes = [kind];
+
+    if (size === 'sm' || size === 'lg') {
+        classes.push(`${kind}-${size}`);
+    }
+
+    if (color) {
+        classes.push(`text-${color}`);
+    }
+
+    spinnerHtml = `<div class="${classes.join(' ')}" role="status"></div>`;
+
+    // Define the fade function.
+    const fade = ($overlay, opacity, complete) => {
+        if (duration) {
+            $overlay.stop(true).animate({ opacity }, duration, complete);
+        } else {
+            complete();
+        }
+    };
+
+    // Define the cleanup function.
+    const cleanup = ($el) => {
+        $el.removeClass('inline-loading')
+            .removeAttr('aria-busy')
+            .removeData('inline-loading-timer inline-loading-shown');
+
+        if ($el.hasAttr('inline-loading-static')) {
+            $el.css('position', '').removeAttr('inline-loading-static');
+        }
+    };
+
+    // Define the show element function.
+    const showElement = ($el) => {
+        // Early return if the element already has a loading overlay or timer.
+        if ($el.children('[inline-loading]').length || $el.data('inline-loading-timer')) {
+            return;
+        }
+
+        const apply = () => {
+            $el.removeData('inline-loading-timer');
+
+            if ($el.css('position') === 'static') {
+                $el.attr('inline-loading-static', true).css('position', 'relative');
+            }
+
+            const $overlay = $(
+                `<div inline-loading class="inline-loading-overlay${options.lock ? '' : ' unlocked'}">${spinnerHtml}</div>`,
+            );
+
+            $el.addClass('inline-loading').attr('aria-busy', true).append($overlay);
+
+            if (duration) {
+                $overlay.css('opacity', 0);
+            }
+
+            fade($overlay, 1, () => {
+                $el.data('inline-loading-shown', true);
+                options.callbacks.show();
+            });
+        };
+
+        if (options.delay) {
+            $el.data('inline-loading-timer', setTimeout(apply, options.delay));
+        } else {
+            apply();
+        }
+    };
+
+    // Define the hide element function.
+    const hideElement = ($el) => {
+        const timer = $el.data('inline-loading-timer');
+        const shown = $el.data('inline-loading-shown');
+        const $overlay = $el.children('[inline-loading]');
+
+        if (timer) {
+            clearTimeout(timer);
+        }
+
+        if (!$overlay.length) {
+            cleanup($el);
+            return;
+        }
+
+        fade($overlay, 0, () => {
+            $overlay.remove();
+            cleanup($el);
+
+            if (shown) {
+                options.callbacks.hide();
+            }
+        });
+    };
+
+    // Define the show and hide functions.
+    const show = () => $elements.each((_, el) => showElement($(el)));
+    const hide = () => $elements.each((_, el) => hideElement($(el)));
+
+    if (options.show) {
+        show();
+    }
+
+    return { show, hide };
 }
 
 /* ---------------------------------

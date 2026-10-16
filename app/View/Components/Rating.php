@@ -5,7 +5,7 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 
-class Rating extends Component
+class Rating extends FormField
 {
     /**
      * View path for the component.
@@ -20,10 +20,11 @@ class Rating extends Component
         public ?string $title = null,
         public ?string $hint = null,
         public ?string $name = null,
-        public ?string $value = null,
+        protected ?string $value = null,
         public int $stars = 5,
         public string|int $size = '24px',
-        public string $icon = 'fas fa-star',
+        public string $icon = 'ti ti-star',
+        public ?string $validation = null,
     ) {}
 
     /**
@@ -31,13 +32,8 @@ class Rating extends Component
      */
     public function render(): View|Closure|string
     {
-        $this->id ??= uniqid('rating-');
         $this->size = is_numeric($this->size) ? $this->size . 'px' : $this->size;
 
-        return function ($data): View {
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return parent::render();
     }
 }

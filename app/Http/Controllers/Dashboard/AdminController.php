@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Admin;
-use App\Notifications\NewAdminNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Redot\Http\Controllers\Controller;
 
 class AdminController extends Controller
@@ -37,22 +35,23 @@ class AdminController extends Controller
             'role' => 'nullable|exists:roles,name',
         ]);
 
-        $password = Str::random(8);
-
-        $admin = Admin::create([
+        Admin::invite([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => $password,
             'active' => $request->has('active'),
-        ]);
-
-        if ($validated['role']) {
-            $admin->assignRole($validated['role']);
-        }
-
-        $admin->notify(new NewAdminNotification($password));
+        ], $validated['role'] ?? null);
 
         return $this->created(__('Admin'), 'dashboard.admins.index');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Admin $admin)
+    {
+        return view('dashboard.admins.show', [
+            'admin' => $admin,
+        ]);
     }
 
     /**
@@ -74,10 +73,12 @@ class AdminController extends Controller
             'role' => 'nullable|exists:roles,name',
         ]);
 
-        cache()->flush(); // Clear cache to refresh permissions
-
         // Sync roles for the admin
-        $admin->syncRoles($validated['role']);
+        if (! empty($validated['role'])) {
+            $admin->syncRoles($validated['role']);
+        } else {
+            $admin->syncRoles([]);
+        }
 
         $admin->update([
             'active' => $request->has('active'),

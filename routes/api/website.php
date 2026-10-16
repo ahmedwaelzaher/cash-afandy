@@ -30,4 +30,4 @@ Route::middleware('auth:users-api')->group(function () {
 |
 */
 
-RedotAuth::routes(guard: 'users-api');
+RedotAuth::routes('website-api');

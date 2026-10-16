@@ -36,12 +36,5 @@ Route::middleware('auth:admins-api')->group(function () {
 */
 
 Route::prefix('auth')->group(function () {
-    RedotAuth::routes(
-        guard: 'admins-api',
-        scope: fn ($query) => $query->where('active', true),
-        disable: [
-            'register',
-            'email-verification',
-        ],
-    );
+    RedotAuth::routes('dashboard-api');
 });

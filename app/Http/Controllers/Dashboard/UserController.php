@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\User;
-use App\Notifications\NewUserNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Redot\Http\Controllers\Controller;
 
 class UserController extends Controller
@@ -37,13 +35,7 @@ class UserController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
         ]);
 
-        $password = Str::random(8);
-
-        $user = User::create(array_merge($validated, [
-            'password' => $password,
-        ]));
-
-        $user->notify(new NewUserNotification($password));
+        User::invite($validated);
 
         return $this->created(__('User'), 'dashboard.users.index');
     }

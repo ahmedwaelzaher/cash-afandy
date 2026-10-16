@@ -5,6 +5,7 @@ namespace App\Livewire\Datatables;
 use App\Models\Admin;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
@@ -49,10 +50,11 @@ class Admins extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
+            Action::view('dashboard.admins.show')->visible(route_allowed('dashboard.admins.show')),
             Action::edit('dashboard.admins.edit')->visible(route_allowed('dashboard.admins.edit')),
             Action::delete('dashboard.admins.destroy')->visible(route_allowed('dashboard.admins.destroy')),
-            Action::make(__('Impersonate'), 'fas fa-user-secret')
+            Action::make(__('Impersonate'), 'ti ti-spy')
                 ->visible(route_allowed('dashboard.impersonate-admins.create'))
                 ->condition(fn ($admin) => $admin->active)
                 ->route('dashboard.impersonate-admins.store', method: 'post', bounded: false)

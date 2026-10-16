@@ -83,7 +83,6 @@ class RoleController extends Controller
         }
 
         $role->update($validated);
-        cache()->flush(); // Clear cache to refresh permissions
 
         $role->syncPermissions($validated['permissions'] ?? []);
 

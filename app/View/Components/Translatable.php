@@ -58,11 +58,11 @@ class Translatable extends Component
             $validation = $this->validation;
 
             if ($this->validateLocales && ! in_array($locale, $this->validateLocales)) {
-                $validation = null;
+                $validation = $this->validationWithoutRequiredRule();
             }
 
             if ($this->validateOnlyMainLocale && $index > 0) {
-                $validation = null;
+                $validation = $this->validationWithoutRequiredRule();
             }
 
             $this->localesConfig[$locale] = [
@@ -74,5 +74,18 @@ class Translatable extends Component
         }
 
         return view($this->view);
+    }
+
+    /**
+     * Get the validation rules without the required rule.
+     */
+    protected function validationWithoutRequiredRule(): ?string
+    {
+        $rules = array_filter(
+            array_map('trim', explode('|', $this->validation ?? '')),
+            fn (string $rule): bool => $rule !== '' && $rule !== 'required',
+        );
+
+        return $rules ? implode('|', $rules) : null;
     }
 }

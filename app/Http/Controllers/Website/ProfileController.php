@@ -32,22 +32,26 @@ class ProfileController extends Controller
             'first_name' => ['string', 'max:255'],
             'last_name' => ['string', 'max:255'],
             'email' => ['email', 'max:255', Rule::unique(User::class)->ignore($request->user()->id)],
-            'password' => ['nullable', 'confirmed', 'min:8', Password::defaults()],
+            'password' => ['nullable', 'string', 'confirmed', 'min:8', Password::defaults()],
             ...User::personalDetailsRules($request->country_id),
         ]);
 
         $user = $request->user();
         $user->fill($request->only('first_name', 'last_name', 'email', 'phone', 'birthdate', 'gender', 'country_id', 'state_id'));
 
-        if ($user->isDirty('email')) {
+        if ($emailWasChanged = $user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
         if ($request->filled('password')) {
-            $user->password = $request->get('password');
+            $user->password = $request->input('password');
         }
 
         $user->save();
+
+        if ($emailWasChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return $this->updated(__('Profile'));
     }

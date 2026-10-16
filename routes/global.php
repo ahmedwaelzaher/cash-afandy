@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\HugeRteController;
 use App\Http\Controllers\SelectController;
-use App\Http\Controllers\TinymceController;
 use App\Http\Controllers\UploaderController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('tinymce/upload', [TinymceController::class, 'store'])->name('tinymce.upload');
+Route::post('tinymce/upload', [HugeRteController::class, 'store'])->name('tinymce.upload');
+Route::post('hugerte/upload', [HugeRteController::class, 'store'])->name('hugerte.upload');
 
 Route::get('tomselect/search', [SelectController::class, 'index'])->name('select.search');
 Route::get('tomselect/fetch', [SelectController::class, 'show'])->name('select.fetch');

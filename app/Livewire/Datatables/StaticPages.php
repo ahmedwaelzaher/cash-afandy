@@ -5,8 +5,11 @@ namespace App\Livewire\Datatables;
 use App\Models\StaticPage;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\BulkAction;
+use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
+use Redot\Datatables\Filters\TernaryFilter;
 
 class StaticPages extends Datatable
 {
@@ -27,6 +30,7 @@ class StaticPages extends Datatable
             TextColumn::make('title', __('Title'))
                 ->sortable()
                 ->searchable(),
+            TernaryColumn::make('active', __('Active')),
         ];
     }
 
@@ -36,9 +40,31 @@ class StaticPages extends Datatable
     public function actions(): array
     {
         return [
-            Action::view('website.static-pages.show')->fancybox(false)->newTab(),
+            Action::view('dashboard.static-pages.show')->visible(route_allowed('dashboard.static-pages.show')),
             Action::edit('dashboard.static-pages.edit')->visible(route_allowed('dashboard.static-pages.edit')),
             Action::delete('dashboard.static-pages.destroy')->visible(route_allowed('dashboard.static-pages.destroy')),
+        ];
+    }
+
+    /**
+     * Get the bulk actions for the datatable.
+     */
+    public function bulkActions(): array
+    {
+        return [
+            BulkAction::delete()
+                ->visible(route_allowed('dashboard.static-pages.destroy'))
+                ->success(fn () => $this->toastify()->success(__('Selected :resource have been deleted.', ['resource' => __('Pages')]))),
+        ];
+    }
+
+    /**
+     * Get the filters for the datatable.
+     */
+    public function filters(): array
+    {
+        return [
+            TernaryFilter::make('active', __('Active')),
         ];
     }
 }

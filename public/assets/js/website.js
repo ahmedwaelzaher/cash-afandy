@@ -1,38 +1,31 @@
 $(() => {
-    let $navbarTop = $('.site-navbar');
-    let $navbarBottom = $('.site-navbar-bottom');
+    const $header = $('.site-navbar');
+    if (!$header.length || $header.data('navbar-initialized')) return;
+    $header.data('navbar-initialized', true);
 
-    let setNavbarHeightVar = () => {
-        let navbarBottomHeight = $navbarBottom.is(':visible') ? $navbarBottom.outerHeight() : 0;
-        let height = ($navbarTop.outerHeight() || 0) + navbarBottomHeight;
-
-        $(document.documentElement).css('--site-navbar-height', `${height}px`);
+    /* Tabler manages offcanvas focus, Escape, backdrop and scroll locking. */
+    const updateHeader = () => {
+        document.documentElement.style.setProperty('--site-navbar-height', `${$header.outerHeight() || 0}px`);
     };
-
-    setNavbarHeightVar();
-    $(window).on('resize', setNavbarHeightVar);
-
+    updateHeader();
+    $(window).on('resize.website', updateHeader);
     if (window.ResizeObserver) {
-        let observer = new ResizeObserver(setNavbarHeightVar);
-
-        if ($navbarTop.length) observer.observe($navbarTop[0]);
-        if ($navbarBottom.length) observer.observe($navbarBottom[0]);
+        new ResizeObserver(updateHeader).observe($header[0]);
     }
-});
+    const $menu = $('#site-navbar-menu');
+    $menu.on('show.bs.offcanvas hidden.bs.offcanvas', (event) => {
+        $header.find('[data-bs-toggle="offcanvas"]').attr('aria-expanded', event.type === 'show' ? 'true' : 'false');
+    });
 
-$(() => {
-    let $cta = $('.site-navbar-cta').children('.btn');
-
-    if (!$cta.length) return;
-
-    let equalizeCtaWidth = () => {
-        $cta.css('width', 'auto');
-
-        let maxWidth = Math.max(...$cta.map((_, el) => $(el).outerWidth()).get());
-
-        $cta.css('width', maxWidth);
+    let framePending = false;
+    const updateScroll = () => {
+        $header.toggleClass('is-scrolled', window.scrollY > 10);
+        framePending = false;
     };
-
-    equalizeCtaWidth();
-    $(window).on('resize', equalizeCtaWidth);
+    $(window).on('scroll.website', () => {
+        if (framePending) return;
+        framePending = true;
+        requestAnimationFrame(updateScroll);
+    });
+    updateScroll();
 });

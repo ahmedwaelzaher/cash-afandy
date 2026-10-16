@@ -155,3 +155,10 @@ State any meaningful assumption.
 ---
 
 This is production code. Stability, permission safety, and consistency with existing Redot/Laravel patterns beat modernizing or refactoring unrelated code.
+
+## Core update conventions
+
+- Authentication uses panels in `app/Providers/AuthServiceProvider.php` and `app/Actions/Auth/CreateUser.php`. Preserve Cash Afandy personal-details validation and creation there.
+- Runtime settings are registered in `app/settings.php`; feature overrides remain in `config/cash-afandy.php`.
+- The upgraded frontend uses Tabler Icons, Bootbox, Glare and HugeRTE. Keep project-specific website assets separate from core styles.
+- Treat `public/assets/dist` as generated output of `dependencies:build`.

@@ -6,6 +6,7 @@ use App\Models\Admin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Redot\Http\Controllers\Controller;
 use Redot\Traits\CanUploadFile;
 
@@ -30,7 +31,7 @@ class ProfileController extends Controller
             'profile_picture' => ['nullable', 'image', 'max:1024'],
             'name' => ['string', 'max:255'],
             'email' => ['email', 'max:255', Rule::unique(Admin::class)->ignore($request->user()->id)],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', 'confirmed', 'min:8', Password::defaults()],
         ]);
 
         $admin = $request->user();

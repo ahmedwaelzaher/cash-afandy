@@ -4,6 +4,7 @@ namespace App\Livewire\Datatables;
 
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
 use Redot\Models\Language;
@@ -44,12 +45,12 @@ class Languages extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
             Action::edit('dashboard.languages.edit')->visible(route_allowed('dashboard.languages.edit')),
             Action::delete('dashboard.languages.destroy')->visible(route_allowed('dashboard.languages.destroy')),
-            Action::make(__('Tokens'), 'fas fa-language')
+            Action::make(__('Tokens'), 'ti ti-language')
                 ->route('dashboard.languages.tokens.index')
-                ->visible(route_allowed('dashboard.languages.tokens')),
+                ->visible(route_allowed('dashboard.languages.tokens.index')),
         ]);
     }
 }

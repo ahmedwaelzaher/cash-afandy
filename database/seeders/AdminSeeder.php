@@ -15,6 +15,7 @@ class AdminSeeder extends Seeder
         $admin = Admin::factory()->create([
             'name' => 'Administrator',
             'email' => 'admin@email.com',
+            'email_verified_at' => now(),
             'password' => 'password',
             'active' => true,
         ]);

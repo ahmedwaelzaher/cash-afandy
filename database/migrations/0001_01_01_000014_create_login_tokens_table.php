@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('email');
             $table->string('token', 64)->unique();
-            $table->string('code', 6);
+            $table->string('code', 64);
             $table->string('guard');
             $table->timestamp('expires_at');
             $table->timestamps();

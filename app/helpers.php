@@ -3,6 +3,8 @@
 use App\Models\Admin;
 use App\Models\Country;
 use App\Models\User;
+use Faker\Generator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Stevebauman\Location\Facades\Location;
 
@@ -12,6 +14,14 @@ use Stevebauman\Location\Facades\Location;
 function static_page_url(string $slug, array $parameters = [], bool $absolute = true): string
 {
     return route('website.static-pages.show', array_merge($parameters, ['staticPage' => $slug]), $absolute);
+}
+
+/**
+ * Get a Faker instance for the given application locale.
+ */
+function fake_locale(string $locale): Generator
+{
+    return fake(config("app.faker_locales.{$locale}", config('app.faker_locale')));
 }
 
 /**
@@ -28,6 +38,20 @@ function current_admin(): ?Admin
 function current_user(): ?User
 {
     return auth('users')->user() ?? auth('users-api')->user();
+}
+
+/**
+ * Get the active browser sessions for the current account on the given guard.
+ */
+function current_sessions(string $guard): Collection
+{
+    if (config('session.driver') !== 'database' || ! $user = auth($guard)->user()) {
+        return collect();
+    }
+
+    return $user->sessions()->wherePivot('guard', $guard)
+        ->where('last_activity', '>=', now()->subMinutes(config('session.lifetime'))->timestamp)
+        ->orderByDesc('last_activity')->get();
 }
 
 /**

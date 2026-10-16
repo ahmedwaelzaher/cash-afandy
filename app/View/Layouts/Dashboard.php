@@ -5,6 +5,7 @@ namespace App\View\Layouts;
 use App\Models\Admin;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Redot\Models\Language;
 use Redot\Sidebar\Item;
 use Redot\Sidebar\Sidebar;
 
@@ -55,6 +56,8 @@ class Dashboard extends Component
             $this->title = $this->active->title;
         }
 
-        return view('layouts.dashboard.base');
+        return view('layouts.dashboard.base', [
+            'direction' => Language::current()->direction,
+        ]);
     }
 }

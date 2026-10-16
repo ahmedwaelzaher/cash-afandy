@@ -60,10 +60,10 @@ return (selector, options = {}) => {
         allow_empty: true,
         default_filter: null,
         icons: {
-            add_group: 'fas fa-folder-plus',
-            add_rule: 'fas fa-plus-circle',
-            remove_group: 'fas fa-trash',
-            remove_rule: 'fas fa-times',
+            add_group: 'ti ti-folder-plus',
+            add_rule: 'ti ti-circle-plus',
+            remove_group: 'ti ti-trash',
+            remove_rule: 'ti ti-x',
         },
     };
 

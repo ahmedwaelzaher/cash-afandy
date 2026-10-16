@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Gender;
-use Carbon\Carbon;
+use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,14 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
+use Redot\Traits\HasSessions;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasRoles, Notifiable, SoftDeletes;
+    use HasApiTokens, HasRoles, HasSessions, Notifiable, SoftDeletes;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -123,24 +122,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected static function booted(): void
     {
-        ResetPassword::createUrlUsing(function (User $user, string $token) {
-            return url(route('website.password.reset', [
-                'token' => $token,
-                'email' => $user->email,
-            ], false));
-        });
-
-        VerifyEmail::createUrlUsing(function (User $user) {
-            return URL::temporarySignedRoute(
-                'website.verification.verify',
-                Carbon::now()->addMinutes(config('auth.verification.expire', 60)),
-                [
-                    'id' => $user->getKey(),
-                    'hash' => sha1($user->getEmailForVerification()),
-                ]
-            );
-        });
-
         static::created(function (User $user) {
             $user->preferences()->create();
         });
@@ -194,5 +175,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
+    }
+
+    /**
+     * Create a user and send their initial credentials.
+     */
+    public static function invite(array $attributes): static
+    {
+        $password = Str::random(8);
+        $user = static::create([...$attributes, 'password' => $password]);
+
+        $user->notify(new NewUserNotification($password));
+
+        return $user;
     }
 }

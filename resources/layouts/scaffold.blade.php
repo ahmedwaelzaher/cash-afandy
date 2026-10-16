@@ -43,11 +43,13 @@
     <link rel="stylesheet" href="{{ hashed_asset('/vendor/jquery-confirm/jquery-confirm.min.css') }}" />
     <link rel="stylesheet" href="{{ hashed_asset('/vendor/fancybox/fancybox.min.css') }}" />
 
+    <link rel="stylesheet" href="{{ hashed_asset('/vendor/tabler-icons/tabler-icons.min.css') }}" />
+    <link rel="stylesheet" href="{{ hashed_asset('/vendor/glare/glare.min.css') }}" />
+
     @stack('plugins-styles')
 
     <link rel="stylesheet" href="{{ hashed_asset('/vendor/tabler/css/tabler-vendors.min.css') }}" />
     <link rel="stylesheet" href="{{ hashed_asset('/assets/css/app.css') }}" />
-    <link rel="stylesheet" href="{{ hashed_asset("/assets/css/themer.css") }}" />
     <link rel="stylesheet" href="{{ hashed_asset('/assets/css/overrides.css') }}" />
 
     @stack('styles')
@@ -59,7 +61,7 @@
             if (window.top === window.self) return;
 
             let parent = window.parent.document.body;
-            let hasFancyboxActive = parent.classList.contains('fancybox-active');
+            let hasFancyboxActive = parent.classList.contains('fancybox-active') || !!parent.querySelector('.glare-container');
 
             if (hasFancyboxActive) {
                 document.body.classList.add('inline-layout');
@@ -83,6 +85,8 @@
     {{-- Plugins --}}
     <script src="{{ hashed_asset('/vendor/jquery-confirm/jquery-confirm.min.js') }}"></script>
     <script src="{{ hashed_asset('/vendor/fancybox/fancybox.min.js') }}"></script>
+    <script src="{{ hashed_asset('/vendor/bootbox/bootbox.min.js') }}"></script>
+    <script src="{{ hashed_asset('/vendor/glare/glare.min.js') }}"></script>
     <script src="{{ hashed_asset('/vendor/sortable/sortable.min.js') }}"></script>
     <script src="{{ hashed_asset('/assets/plugins/redot-visibility.js') }}"></script>
     <script src="{{ hashed_asset('/assets/plugins/redot-validator.js') }}"></script>

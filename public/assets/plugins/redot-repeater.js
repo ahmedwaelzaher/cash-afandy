@@ -49,7 +49,7 @@ class RedotRepeater {
         scrollable: true,
 
         /**
-         * Show a confirmation dialog before removing or clearing items, accepts boolean or jQuery Confirm options.
+         * Show a confirmation dialog before removing or clearing items, accepts boolean or Bootbox options.
          */
         confirmable: true,
 

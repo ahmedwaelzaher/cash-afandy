@@ -22,40 +22,51 @@ $(document).ready(() => {
 });
 
 /* ---------------------------------
- * JQuery Confirm
+ * Anchor links
  * --------------------------------- */
 
-jconfirm.defaults = {
-    ...jconfirm.defaults,
+// The <base> tag makes bare "#hash" hrefs resolve against the site root,
+// which triggers a full navigation. Handle same-page anchors manually.
+// Add the `disable-anchor` attribute to a link to opt out of this behavior.
+$(document).on('click', 'a[href^="#"]:not([data-bs-toggle]):not([disable-anchor])', (event) => {
+    if (event.isDefaultPrevented()) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
-    icon: 'fa fa-info-circle',
-    type: 'dark',
-    theme: 'material',
-    animateFromElement: false,
+    const hash = $(event.currentTarget).attr('href');
 
-    buttons: {
-        // ...
-    },
+    // A bare "#" has no target, but left alone it would resolve against the
+    // <base> tag and navigate to the site root — swallow it instead.
+    if (hash === '#') return event.preventDefault();
 
-    // ...
-};
+    const target = document.getElementById(hash.slice(1));
+    if (!target) return;
+
+    event.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth' });
+    history.pushState(null, '', location.pathname + location.search + hash);
+});
 
 /* ---------------------------------
- * Fancybox
+ * Bootbox
  * --------------------------------- */
 
-$.fancybox.instances = [];
-$.extend(true, $.fancybox.defaults, {
-    beforeLoad: function (instance, slide) {
-        $.fancybox.instances.push(instance);
+bootbox.setDefaults({
+    animate: true,
+    backdrop: 'static',
+    centerVertical: true,
+    container: 'body',
+});
 
-        // Append type to fancybox container
-        let type = instance.current.contentType;
-        slide.$slide.closest('.fancybox-container').addClass(`fancybox-type-${type}`);
-    },
-    afterClose: function (instance) {
-        $.fancybox.instances = $.fancybox.instances.filter((i) => i !== instance);
-    },
+/* ---------------------------------
+ * Glare
+ * --------------------------------- */
+
+$(document).on('click', '[data-lightbox]', (event) => {
+    if (event.isDefaultPrevented()) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    Glare.open([event.currentTarget], { defaultType: 'iframe' });
 });
 
 /* ---------------------------------
@@ -68,14 +79,15 @@ $.ajaxSetup({
     },
     statusCode: {
         419: () => {
-            $.confirm({
+            bootbox.dialog({
                 title: __('Session Expired'),
-                content: __('Your session has expired. Please refresh the page to continue.'),
+                message: __('Your session has expired. Please refresh the page to continue.'),
+                onEscape: false,
                 buttons: {
                     confirm: {
-                        text: __('Refresh'),
-                        btnClass: 'btn-primary',
-                        action: () => window.location.reload(),
+                        label: __('Refresh'),
+                        className: 'btn-primary',
+                        callback: () => window.location.reload(),
                     },
                 },
             });

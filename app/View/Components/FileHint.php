@@ -18,7 +18,7 @@ class FileHint extends Component
      */
     public function __construct(
         public ?string $file = null,
-        public bool $fancybox = true,
+        public bool $lightbox = true,
     ) {}
 
     /**
@@ -30,9 +30,9 @@ class FileHint extends Component
             $this->attributes(function (ComponentAttributeBag $attributes) {
                 $attributes = $attributes->class(['text-decoration-none']);
 
-                if ($this->fancybox) {
+                if ($this->lightbox) {
                     $attributes = $attributes->merge([
-                        'data-fancybox' => '',
+                        'data-lightbox' => '',
                     ]);
                 }
 

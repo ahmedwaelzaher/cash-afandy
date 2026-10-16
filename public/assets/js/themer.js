@@ -25,11 +25,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('[data-theme]').forEach((element) => {
+        document.querySelectorAll('[set-theme]').forEach((element) => {
             element.addEventListener('click', (event) => {
                 event.preventDefault();
 
-                let theme = element.dataset.theme;
+                let theme = element.getAttribute('set-theme');
 
                 document.documentElement.setAttribute('data-bs-theme', theme);
                 localStorage.setItem(`${themerKey}-theme`, theme);

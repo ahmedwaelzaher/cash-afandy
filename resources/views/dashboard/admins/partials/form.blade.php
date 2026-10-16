@@ -4,7 +4,7 @@
     </div>
 
     <div class="col-12 col-md-6 mb-3">
-        <x-select name="role" :title="__('Role')" :query="\Spatie\Permission\Models\Role::class" key="name" :value="old('role', $entry?->roles()->first()?->name)" create="dashboard.roles.create" removable />
+        <x-select-remote name="role" :title="__('Role')" :query="\Spatie\Permission\Models\Role::class" key="name" :value="old('role', $entry?->roles()->first()?->name)" create="dashboard.roles.create" removable />
     </div>
 </div>
 

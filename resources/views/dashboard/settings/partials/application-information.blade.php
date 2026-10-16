@@ -50,12 +50,12 @@
     </div>
 
     <div class="mb-3" visible-when="$show-website-countries-dropdown">
-        <x-select name="website_countries[]" :title="__('Website Countries')" :query="\App\Models\Country::class" key="code"
+        <x-select-remote name="website_countries[]" :title="__('Website Countries')" :query="\App\Models\Country::class" key="code"
             text="name" :value="setting('website_countries', [])" multiple validation="required|min:1" />
     </div>
 
     <div class="mb-3">
-        <x-select name="default_website_country" :title="__('Default Website Country')" :query="\App\Models\Country::class" key="code"
+        <x-select-remote name="default_website_country" :title="__('Default Website Country')" :query="\App\Models\Country::class" key="code"
             text="name" :value="setting('default_website_country')" validation="required" />
     </div>
 @endif

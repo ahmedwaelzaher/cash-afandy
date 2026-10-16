@@ -74,7 +74,7 @@ class LanguageTokens extends Datatable
     {
         return [
             Action::edit('dashboard.languages.tokens.edit')
-                ->fancybox()
+                ->lightbox()
                 ->parameters(['language' => $this->language])
                 ->visible(route_allowed('dashboard.languages.tokens.edit')),
         ];

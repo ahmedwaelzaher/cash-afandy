@@ -9,7 +9,7 @@
                 @if (str_starts_with($attachment['type'], 'image/'))
                     <img class="uploader-item-image" src="{{ $attachment['thumbnail'] ?? $attachment['url'] }}" alt="{{ $attachment['name'] }}">
                 @else
-                    <i class="fas {{ $getFileIcon($attachment['type']) }} fa-3x text-muted"></i>
+                    <x-icon :icon="$getFileIcon($attachment['type'])" class="fs-1 text-muted" />
                 @endif
             </div>
 

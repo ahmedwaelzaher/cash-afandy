@@ -24,14 +24,9 @@ class RedotIconPicker {
      */
     options = {
         /**
-         * The FontAwesome API endpoint.
+         * The local Tabler Icons manifest used as the icon catalog.
          */
-        endpoint: 'https://api.fontawesome.com',
-
-        /**
-         * The FontAwesome version to use.
-         */
-        version: '6.4.2',
+        source: '/vendor/tabler-icons/tabler-icons.json',
 
         /**
          * The maximum number of icons to fetch.
@@ -49,13 +44,25 @@ class RedotIconPicker {
         attributes: {
             template: 'iconpicker-template',
             modal: 'iconpicker-modal',
+            style: 'iconpicker-style',
             search: 'iconpicker-search',
             list: 'iconpicker-list',
             icon: 'iconpicker-icon',
             empty: 'iconpicker-empty',
-            loading: 'iconpicker-loading',
+            animation: 'iconpicker-animation',
+            rotation: 'iconpicker-rotation',
         },
     };
+
+    /**
+     * Available Tabler icons from the local manifest.
+     */
+    icons = null;
+
+    /**
+     * Icons returned by the last search.
+     */
+    visibleIcons = [];
 
     /**
      * Create a new instance.
@@ -106,25 +113,26 @@ class RedotIconPicker {
         const self = this;
         const attrs = self.options.attributes;
 
-        $.confirm({
+        bootbox.dialog({
             container: this.$wrapper,
-            icon: 'far fa-font-awesome me-2',
             title: __('Select an icon'),
-            content: `<div ${attrs.modal}>${$(`[${attrs.template}]`).html()}</div>`,
-            onOpenBefore: function () {
-                self.bindModalEvents(this.$content);
-                self.searchIcons(this.$content);
+            message: `<div ${attrs.modal}>${$(`[${attrs.template}]`).html()}</div>`,
+            onShow: function () {
+                const $content = $(this).find('.bootbox-body');
+
+                self.bindModalEvents($content);
+                self.searchIcons($content);
             },
             buttons: {
                 cancel: {
-                    text: __('Cancel'),
-                    btnClass: 'btn-secondary',
+                    label: __('Cancel'),
+                    className: 'btn-secondary',
                 },
                 confirm: {
-                    text: __('Select'),
-                    btnClass: 'btn-primary',
-                    action: function () {
-                        self.saveSelection(this.$content);
+                    label: __('Save'),
+                    className: 'btn-primary',
+                    callback: function () {
+                        self.saveSelection(this.find('.bootbox-body'));
                     },
                 },
             },
@@ -149,42 +157,131 @@ class RedotIconPicker {
             $content.find(`[${attrs.icon}]`).removeClass('selected');
             $(this).addClass('selected');
         });
+
+        $content.on('click', `[${attrs.style}]`, (event) => {
+            $content.find(`[${attrs.style}]`).removeClass('active');
+            $(event.currentTarget).addClass('active');
+            this.searchIcons($content, $content.find(`[${attrs.search}]`).val().trim());
+        });
+
+        $content.on('change', `[${attrs.animation}], [${attrs.rotation}]`, () => {
+            this.updateIconEffects($content);
+        });
     }
 
     /**
-     * Search for icons using the FontAwesome API.
+     * Get the selected animation and rotation classes.
+     */
+    getEffects($content) {
+        const attrs = this.options.attributes;
+
+        const animation = $content.find(`[${attrs.animation}]`).val();
+        const rotation = $content.find(`[${attrs.rotation}]`).val();
+
+        return [animation, rotation].filter(Boolean).join(' ');
+    }
+
+    /**
+     * Apply the selected animation and rotation to the icons in the grid.
+     */
+    updateIconEffects($content) {
+        const attrs = this.options.attributes;
+        const effects = this.getEffects($content);
+
+        $content.find(`[${attrs.icon}]`).each(function () {
+            let $icons = $(this).find('i');
+            $icons.attr('class', `${$(this).attr(attrs.icon)} ${effects}`.trim());
+        });
+    }
+
+    /**
+     * Search the locally hosted Tabler icon catalog.
      */
     async searchIcons($content, term = '') {
         const attrs = this.options.attributes;
+        const loading = createLoading($content.find(`[${attrs.list}]`));
 
-        // Show the loading state.
-        $content.find(`[${attrs.loading}]`).show();
         $content.find(`[${attrs.empty}]`).hide();
 
-        const query = `query {
-            search(version: "${this.options.version}", query: "${term}", first: ${this.options.maxResults}) {
-                id,
-                familyStylesByLicense {
-                    free {
-                        family,
-                        style
-                    }
-                }
-            }
-        }`;
-
         try {
-            const response = await fetch(`${this.options.endpoint}/?query=${query}`);
-            const data = await response.json();
+            if (this.icons === null) {
+                this.icons = await this.loadIcons();
+            }
 
-            this.populateIcons($content, data.data.search);
+            const query = term.toLowerCase().replace(/\s+/g, '-');
+            const style = $content.find(`[${attrs.style}].active`).attr(attrs.style);
+            const variants = this.styleVariants(this.icons, style);
+
+            this.visibleIcons = this.rankIcons(variants, query);
+            this.populateIcons($content, this.visibleIcons);
         } catch (error) {
             console.error('Error fetching icons:', error);
+
+            this.visibleIcons = [];
             this.showError($content);
+        } finally {
+            loading.hide();
+        }
+    }
+
+    /**
+     * Load the Tabler icon manifest.
+     */
+    async loadIcons() {
+        const response = await fetch(this.options.source);
+
+        if (!response.ok) {
+            throw new Error(`Unable to load Tabler Icons: ${response.status}`);
         }
 
-        // Hide the loading state.
-        $content.find(`[${attrs.loading}]`).hide();
+        return response.json();
+    }
+
+    /**
+     * Rank icon variants by fuzzy score, capped at maxResults.
+     */
+    rankIcons(icons, query) {
+        if (!query) {
+            return icons.slice(0, this.options.maxResults);
+        }
+
+        const matches = [];
+
+        for (const icon of icons) {
+            const score = fuzzyScore(query, icon.name);
+
+            if (score !== null) {
+                matches.push({ icon, score });
+            }
+        }
+
+        matches.sort((a, b) => b.score - a.score || a.icon.name.localeCompare(b.icon.name));
+
+        return matches.slice(0, this.options.maxResults).map(({ icon }) => icon);
+    }
+
+    /**
+     * Expand the icons into the renderable variants of the selected style tab.
+     *
+     * The "all" tab lists every available variant of each icon, while the
+     * "outline" and "filled" tabs only list the icons available in that style.
+     */
+    styleVariants(icons, style) {
+        const variants = [];
+
+        for (const icon of icons) {
+            const styles = icon.styles ?? ['outline'];
+
+            if ((style === 'all' || style === 'outline') && styles.includes('outline')) {
+                variants.push({ name: icon.name, class: `ti ti-${icon.name}` });
+            }
+
+            if ((style === 'all' || style === 'filled') && styles.includes('filled')) {
+                variants.push({ name: icon.name, class: `ti ti-${icon.name}-filled` });
+            }
+        }
+
+        return variants;
     }
 
     /**
@@ -192,19 +289,15 @@ class RedotIconPicker {
      */
     populateIcons($content, icons) {
         const attrs = this.options.attributes;
+        const effects = this.getEffects($content);
 
         $content.find(`[${attrs.icon}]`).remove();
 
         for (const icon of icons) {
-            // Skip if the icon has no free styles.
-            if (icon.familyStylesByLicense.free.length === 0) {
-                continue;
-            }
+            const cls = icon.class;
+            const iconCls = `${cls} ${effects}`.trim();
 
-            const style = icon.familyStylesByLicense.free[0].style;
-            const cls = `fa-${style} fa-${icon.id}`;
-
-            $content.find(`[${attrs.list}]`).append(`<div ${attrs.icon}="${cls}"><i class="${cls}"></i></div>`);
+            $content.find(`[${attrs.list}]`).append(`<div ${attrs.icon}="${cls}"><i class="${iconCls}"></i></div>`);
         }
 
         const $empty = $content.find(`[${attrs.empty}]`);
@@ -234,6 +327,10 @@ class RedotIconPicker {
             return;
         }
 
-        this.$input.val($selected.attr(attrs.icon)).trigger('change');
+        const animation = $content.find(`[${attrs.animation}]`).val();
+        const rotation = $content.find(`[${attrs.rotation}]`).val();
+        const value = [$selected.attr(attrs.icon), animation, rotation].filter(Boolean).join(' ');
+
+        this.$input.val(value).trigger('change');
     }
 }

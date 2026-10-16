@@ -14,6 +14,10 @@ class DashboardController extends Controller
      */
     public function __invoke()
     {
+        if (request()->has(('verified'))) {
+            toastify()->success(__('Your email address has been verified.'));
+        }
+
         return view('dashboard.index');
     }
 }

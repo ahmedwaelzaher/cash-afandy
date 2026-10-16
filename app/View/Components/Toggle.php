@@ -2,10 +2,7 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
-
-class Toggle extends Component
+class Toggle extends FormField
 {
     /**
      * View path for the component.
@@ -19,23 +16,18 @@ class Toggle extends Component
         public ?string $id = null,
         public ?string $title = null,
         public ?string $hint = null,
-        public ?bool $value = false,
+        protected ?bool $value = false,
         public ?string $on = null,
         public ?string $off = null,
     ) {}
 
     /**
-     * Get the view / contents that represent the component.
+     * Prepare the attributes and any extra view data once attributes are available.
      */
-    public function render(): View|Closure|string
+    protected function prepare(array $data): array
     {
-        $this->id ??= uniqid('toggle-');
-        $this->value ??= false;
+        $this->value = (bool) $this->value;
 
-        return function (): View {
-            return view($this->view, [
-                'required' => str_contains($this->attributes->get('validation') ?: '', 'required'),
-            ]);
-        };
+        return [];
     }
 }

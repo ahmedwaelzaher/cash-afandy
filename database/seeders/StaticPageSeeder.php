@@ -32,10 +32,11 @@ class StaticPageSeeder extends Seeder
         ];
 
         foreach ($pages as $slug => $title) {
-            $content = [
-                'ar' => fake()->paragraphs(3, true),
-                'en' => fake()->paragraphs(3, true),
-            ];
+            $content = [];
+
+            foreach (array_keys(config('app.locales')) as $locale) {
+                $content[$locale] = fake_locale($locale)->realText(500);
+            }
 
             StaticPage::updateOrCreate(
                 ['slug' => $slug],

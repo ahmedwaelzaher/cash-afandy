@@ -22,12 +22,13 @@ return (selector, options = {}) => {
             },
 
             icons: {
-                previous: isRtl ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left',
-                next: isRtl ? 'fa-solid fa-chevron-left' : 'fa-solid fa-chevron-right',
+                previous: isRtl ? 'ti ti-chevron-right' : 'ti ti-chevron-left',
+                next: isRtl ? 'ti ti-chevron-left' : 'ti ti-chevron-right',
             },
         },
 
         localization: {
+            locale: document.documentElement.lang || 'en',
             format: 'yyyy-MM-dd',
             hourCycle: 'h12',
         },
@@ -53,6 +54,16 @@ return (selector, options = {}) => {
 
     // Remove the type option because it's not needed anymore
     delete options.type;
+
+    // Locale drives month/weekday names via Intl, but the `T` token uses
+    // dayPeriod (ص/م in Arabic) which Laravel's `date` rule cannot parse.
+    tempusDominus.DateTime.prototype.meridiem = function () {
+        return this.getHours() < 12 ? 'AM' : 'PM';
+    };
+
+    tempusDominus.DateTime.prototype.getLocaleAfternoon = function () {
+        return 'PM';
+    };
 
     // Initialize the picker
     const picker = new tempusDominus.TempusDominus($picker.get(0), options);
