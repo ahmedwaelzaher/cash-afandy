@@ -155,16 +155,16 @@ return [
             'default' => '',
         ],
         'google_client_id' => [
-            'default' => '',
+            'default' => env('GOOGLE_CLIENT_ID', ''),
         ],
         'google_client_secret' => [
-            'default' => '',
+            'default' => env('GOOGLE_CLIENT_SECRET', ''),
         ],
         'facebook_client_id' => [
-            'default' => '',
+            'default' => env('FACEBOOK_CLIENT_ID', ''),
         ],
         'facebook_client_secret' => [
-            'default' => '',
+            'default' => env('FACEBOOK_CLIENT_SECRET', ''),
         ],
         'head_code' => [
             'default' => '',
