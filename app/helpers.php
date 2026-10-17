@@ -6,7 +6,26 @@ use App\Models\User;
 use Faker\Generator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Stevebauman\Location\Facades\Location;
+
+/**
+ * Get local font families from non-empty family directories.
+ */
+function theme_fonts(): array
+{
+    $path = public_path('assets/fonts');
+
+    if (! File::isDirectory($path)) {
+        return [];
+    }
+
+    return collect(File::directories($path))
+        ->filter(fn ($directory) => count(File::files($directory)) > 0)
+        ->mapWithKeys(fn ($directory) => [basename($directory) => Str::headline(basename($directory))])
+        ->sortKeys()->all();
+}
 
 /**
  * Get a static page url by the given slug.
