@@ -91,14 +91,27 @@ function is_dashboard_request(): bool
 }
 
 /**
+ * Get the IP-detected country, independently of the selected shopping market.
+ */
+function website_ip_country(): ?Country
+{
+    $code = Cache::remember('website-country-ip:' . request()->ip(), now()->addDay(), function () {
+        $position = Location::get();
+
+        return $position ? strtolower((string) $position->countryCode) : '';
+    });
+
+    return $code ? Country::code($code) : null;
+}
+
+/**
  * Get the website's currently selected country.
  *
  * Resolution order: an explicit `?country=` query param, the previously
- * selected country in the session, then the visitor's IP-detected country -
- * restricted to the countries the website currently supports.
+ * selected country in the session or cookie, then the IP-detected country,
+ * then the default market. Only supported shopping markets can be selected.
  *
- * Returns null when the countries dropdown is disabled in settings, meaning
- * content should not be filtered by country (all countries by default).
+ * Uses the default market when the countries dropdown is disabled.
  */
 function website_country(): ?Country
 {
@@ -111,29 +124,24 @@ function website_country(): ?Country
 
     $code = request()->query('country');
 
-    if ($code && in_array($code, $codes, true)) {
-        session()->put('website_country', $code);
-    } else {
+    if (! is_string($code) || ! in_array($code, $codes, true)) {
         $code = session('website_country');
     }
 
-    if (! in_array($code, $codes, true)) {
-        $code = Cache::remember(
-            'website-country-ip:' . request()->ip(),
-            now()->addDay(),
-            function () {
-                $position = Location::get();
-
-                return $position ? strtolower((string) $position->countryCode) : '';
-            }
-        );
-
-        if (! in_array($code, $codes, true)) {
-            $code = $default;
-        }
-
-        session()->put('website_country', $code);
+    if (! is_string($code) || ! in_array($code, $codes, true)) {
+        $code = request()->cookie('website_country');
     }
 
-    return Country::code($code) ?? Country::code($default);
+    if (! is_string($code) || ! in_array($code, $codes, true)) {
+        $code = website_ip_country()?->code;
+    }
+
+    $country = Country::code(in_array($code, $codes, true) ? $code : $default) ?? Country::code($default);
+
+    if ($country) {
+        session()->put('website_country', $country->code);
+        cookie()->queue(cookie()->forever('website_country', $country->code));
+    }
+
+    return $country;
 }

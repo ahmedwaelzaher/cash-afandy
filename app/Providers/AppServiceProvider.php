@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Redot\Http\Middleware\Localization;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +15,8 @@ class AppServiceProvider extends ServiceProvider
         config(['redot' => array_replace_recursive(config('redot', []), config('cash-afandy', []))]);
 
         require base_path('app/settings.php');
+
+        $this->app->bind(Localization::class, \App\Http\Middleware\Localization::class);
     }
 
     /**
