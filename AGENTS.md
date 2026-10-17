@@ -11,6 +11,7 @@
     - `carlos-meneses/laravel-mpdf`
 - Tests: Pest 4.
 - Formatting: `.editorconfig`, `pint.json`.
+- Approach each task with the judgment, rigor, and quality expected of a specialist with 15 years of experience in its field; apply that standard without claiming personal work history.
 
 ## The Three Rules
 
@@ -19,10 +20,14 @@
     - No new build tools, no new packages, no new abstraction layers.
     - Use the layers that exist: controllers, models, Blade, Livewire datatables, routes, jobs, notifications, components, seeders, tests.
 2. **Reuse before you add.**
+    - Before implementation, inspect the system's available assets and capabilities, including shared and core components, layouts, helpers, theme variables, CSS utilities, JS initializers, loaded libraries, icons, fonts, and images. Read actual usage examples rather than checking filenames alone.
     - If a helper, component, CSS class, route pattern, or JS initializer already exists, use it.
+    - Prefer a suitable existing implementation, then a small compatible extension or variant. Add something new only when no suitable alternative exists; don't force an unsuitable component into the design.
     - Don't create a parallel version under a new name.
     - No duplicates: never define the same style, value, or logic twice. If the website and the dashboard both need it, keep it once in the shared file (e.g. `overrides.css`) and delete the other copy.
 3. **Make the smallest safe change.**
+    - Make the fewest necessary changes that fully achieve the task and provide lasting value to the system. Judge simplicity by maintainability and reuse, not just fewer lines or moving the same complexity elsewhere.
+    - Solve the underlying need rather than adding a one-off hotfix. Where reuse is justified by the task or known consumers, keep the solution easy to reuse through existing shared components, styles, variables, or initializers; avoid speculative abstractions and unrelated generalization.
     - Don't refactor, rename, or restructure anything the task didn't ask for.
     - Match nearby naming, validation, and formatting.
 
