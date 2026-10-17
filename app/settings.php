@@ -30,7 +30,7 @@ Setting::define('footer_subscribe_description')->array()->default([
     'footer_subscribe_description.*' => ['nullable', 'string'],
 ]);
 
-Setting::define('website_locales')->array()->default(['en', 'ar'])->rules(['required', 'array', 'min:1']);
+Setting::define('website_locales')->array()->default(['ar', 'en'])->rules(['required', 'array', 'min:1']);
 
 Setting::define('website_countries')->array()->default(['eg', 'sa'])->rules(['required', 'array', 'min:1']);
 
@@ -38,7 +38,7 @@ Setting::define('default_website_country')->string()->default('eg')->rules(['req
 
 Setting::define('show_website_countries_dropdown')->boolean()->default(true);
 
-Setting::define('dashboard_locales')->array()->default(['en', 'ar'])->rules(['required', 'array', 'min:1']);
+Setting::define('dashboard_locales')->array()->default(['ar', 'en'])->rules(['required', 'array', 'min:1']);
 
 Setting::define('page_loader_enabled')->boolean()->default(false);
 
