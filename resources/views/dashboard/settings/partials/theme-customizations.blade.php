@@ -29,13 +29,17 @@
 </div>
 
 <div class="mb-3">
-    <x-radios name="theme[font]" :title="__('Font Family')" :value="setting('theme.font')" :inline="true" :options="[
-        'sans-serif' => __('Sans Serif'),
-        'serif' => __('Serif'),
-        'monospace' => __('Monospace'),
-        'comic' => __('Comic'),
-    ]" />
+    <x-select name="default_locale" :title="__('Language') . ' (' . __('Default') . ')'"
+        :value="setting('default_locale')" :options="config('app.locales')" :tom="false" validation="required" />
 </div>
+
+@php($fontOptions = ['' => __('Default')] + theme_fonts())
+@foreach (config('app.locales') as $locale => $language)
+    <div class="mb-3">
+        <x-select name="theme[fonts][{{ $locale }}]" :title="__('Font Family') . ' (' . $language . ')'"
+            :value="setting('theme.fonts.' . $locale, '')" :options="$fontOptions" :tom="false" />
+    </div>
+@endforeach
 
 <div class="mb-3">
     <x-radios name="theme[radius]" :title="__('Corner Radius')" :value="setting('theme.radius')" :inline="true" :options="[
@@ -57,11 +61,22 @@
 
 @push('scripts')
     <script>
-        $('[name^="theme"]').on('change', function () {
+        $('[name^="theme"], [name="default_locale"]').on('change', function () {
             if (this.checked === false) return;
 
-            const key = this.name.replace('theme[', '').replace(']', '');
-            document.documentElement.setAttribute(`data-bs-theme-${key}`, this.value);
+            if (this.name === 'default_locale') {
+                document.documentElement.dataset.defaultLocale = this.value;
+                window.applyThemeFont();
+                return;
+            }
+
+            const [, key, locale] = this.name.match(/^theme\[([^\]]+)\](?:\[([^\]]+)\])?$/);
+            if (key === 'fonts') {
+                window.themeConfig.fonts[locale] = this.value;
+                window.applyThemeFont();
+            } else {
+                document.documentElement.setAttribute(`data-bs-theme-${key}`, this.value);
+            }
         });
 
         $('[name="dashboard_sidebar_theme"]').on('change', function () {
@@ -74,7 +89,7 @@
         });
 
         $('[type="reset"]').on('click', function () {
-            setTimeout(() => $('[name^="theme"], [name="dashboard_sidebar_theme"]').trigger('change'), 0);
+            setTimeout(() => $('[name^="theme"], [name="default_locale"], [name="dashboard_sidebar_theme"]').trigger('change'), 0);
         });
     </script>
 @endpush

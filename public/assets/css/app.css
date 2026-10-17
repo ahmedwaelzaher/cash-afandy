@@ -1,70 +1,94 @@
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 100;
-    src: url('../fonts/IBMPlexSansArabic-Thin.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Thin.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 200;
-    src: url('../fonts/IBMPlexSansArabic-ExtraLight.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-ExtraLight.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 300;
-    src: url('../fonts/IBMPlexSansArabic-Light.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Light.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 400;
-    src: url('../fonts/IBMPlexSansArabic-Regular.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Regular.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 500;
-    src: url('../fonts/IBMPlexSansArabic-Medium.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Medium.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 600;
-    src: url('../fonts/IBMPlexSansArabic-SemiBold.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-SemiBold.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'IBM Plex Sans Arabic';
+    font-family: 'ibm-plex-sans-arabic';
     font-weight: 700;
-    src: url('../fonts/IBMPlexSansArabic-Bold.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Bold.ttf') format('truetype');
 }
 
 @font-face {
     font-display: swap;
     font-style: normal;
-    font-family: 'DM Sans';
-    font-weight: 100 900;
-    src: url('../fonts/DMSans.ttf') format('truetype');
+    font-family: 'dm-sans';
+    font-weight: 100 1000;
+    src: url('../fonts/dm-sans/DMSans.ttf') format('truetype');
+}
+
+@font-face {
+    font-display: swap;
+    font-style: normal;
+    font-family: 'rubik';
+    font-weight: 300 900;
+    src: url('../fonts/rubik/Rubik.ttf') format('truetype');
+}
+
+@font-face {
+    font-display: swap;
+    font-style: italic;
+    font-family: 'rubik';
+    font-weight: 300 900;
+    src: url('../fonts/rubik/Rubik-Italic.ttf') format('truetype');
+}
+
+@font-face {
+    font-display: swap;
+    font-style: normal;
+    font-family: 'marhey';
+    font-weight: 300 700;
+    src: url('../fonts/marhey/Marhey.ttf') format('truetype');
 }
 
 :root,
 :host {
-    --tblr-font-sans-serif: 'DM Sans', 'IBM Plex Sans Arabic', sans-serif !important;
+    --tblr-font-sans-serif: 'dm-sans', 'ibm-plex-sans-arabic', sans-serif !important;
     font-feature-settings: 'cv03', 'cv04', 'cv11';
 }
 

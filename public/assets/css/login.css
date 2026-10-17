@@ -1,5 +1,5 @@
 .login-split {
-    font-family: 'Plus Jakarta Sans', var(--tblr-font-sans-serif, sans-serif);
+    font-family: var(--tblr-body-font-family);
 }
 
 .login-page {

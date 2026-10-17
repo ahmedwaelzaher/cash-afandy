@@ -41,7 +41,7 @@ return [
     'default_font_size' => 12,
     'useOTL' => 0xFF,
     'useKashida' => 75,
-    'custom_font_dir' => public_path('assets/fonts/'),
+    'custom_font_dir' => public_path('assets/fonts/ibm-plex-sans-arabic/'),
     'custom_font_data' => [
         'ibmplexsansarabic' => [
             'R' => 'IBMPlexSansArabic-Regular.ttf',

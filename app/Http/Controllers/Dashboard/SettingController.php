@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Validation\Rule;
 use Redot\Http\Controllers\Controller;
 use Redot\Models\Setting;
 use Redot\Traits\CanUploadFile;
@@ -61,7 +62,11 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         // Check if all validations pass
-        $request->validate(Setting::rules());
+        $request->validate(array_merge(Setting::rules(), [
+            'default_locale' => ['sometimes', 'required', 'string', Rule::in(array_keys(config('app.locales')))],
+            'theme.fonts' => ['sometimes', 'array:' . implode(',', array_keys(config('app.locales')))],
+            'theme.fonts.*' => ['nullable', 'string', Rule::in(array_keys(theme_fonts()))],
+        ]));
 
         foreach (array_keys(Setting::schema()) as $key) {
             $value = match (Setting::type($key)) {
@@ -76,6 +81,11 @@ class SettingController extends Controller
             }
 
             // Update or create the setting
+            if ($key === 'theme') {
+                $value = array_replace(setting('theme', []), $value);
+                unset($value['font']);
+            }
+
             Setting::set($key, $value);
         }
 

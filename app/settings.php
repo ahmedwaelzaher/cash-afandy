@@ -66,10 +66,12 @@ Setting::define('body_code')->string()->default('');
 
 Setting::define('dashboard_sidebar_theme')->string()->default('inherit');
 
+Setting::define('default_locale')->string()->default('ar');
+
 Setting::define('theme')->array()->default([
     'primary' => 'red',
     'base' => 'default',
-    'font' => 'serif',
+    'fonts' => [],
     'radius' => 1,
 ]);
 

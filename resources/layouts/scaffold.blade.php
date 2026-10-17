@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ $direction }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ $direction }}" data-default-locale="{{ setting('default_locale') }}">
 
 <head>
     <base href="{{ url('/') }}" />
