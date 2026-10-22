@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Website;
 use App\Models\Cashback;
 use App\Models\Client;
 use App\Models\Coupon;
-use App\Models\Slider;
 use Illuminate\Contracts\View\View;
 use Redot\Http\Controllers\Controller;
 
@@ -22,15 +21,16 @@ class HomeController extends Controller
             toastify()->success(__('Your email address has been verified.'));
         }
 
-        $sliders = Slider::query()
-            ->where('active', true)
-            ->where('locale', app()->getLocale())
-            ->latest('id')
-            ->get();
-
         $clients = Client::query()
             ->where('active', true)
             ->latest('id')
+            ->get();
+
+        $country = website_country();
+        $heroStores = Client::where('active', true)
+            ->when($country, fn ($query) => $query->whereHas('countries', fn ($query) => $query->whereKey($country->id)))
+            ->latest('id')
+            ->take(3)
             ->get();
 
         // Temporary example data — will be fetched from customer accounts later.
@@ -85,8 +85,8 @@ class HomeController extends Controller
             ->get();
 
         return view('website.index', [
-            'sliders' => $sliders,
             'clients' => $clients,
+            'heroStores' => $heroStores,
             'testimonials' => $testimonials,
             'coupons' => $coupons,
             'cashbackStores' => $cashbackStores,

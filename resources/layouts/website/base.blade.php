@@ -1,6 +1,11 @@
 <x-layouts::scaffold :title="$title" :inline="$inline" {{ $attributes->class(['website-layout', $inline ? 'inline-layout' : 'standard-layout']) }}>
     @themer('website-theme')
 
+    @pushOnce('meta')
+        <meta name="mitgo-verification" content="b4e9bf6b-7c0b-4ca8-96d2-0a15e960a7fb" />
+        <meta name="mitgo-verification" content="1373fcd4-9b3c-4b59-af2a-d4e4b4ebc9f1" />
+    @endPushOnce
+
     {{-- Website styles aren't dark-mode ready yet, so force light regardless of system/localStorage preference --}}
     @push('pre-content')
         <script>document.documentElement.setAttribute('data-bs-theme', 'light');</script>

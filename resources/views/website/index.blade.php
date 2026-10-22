@@ -1,7 +1,5 @@
-<x-layouts::website>
-    @if ($sliders->isNotEmpty())
-        @include('website.home.partials.hero-slider')
-    @endif
+<x-layouts::website class="site-home">
+    @include('website.home.partials.hero')
 
     @if ($coupons->isNotEmpty())
         @include('website.home.partials.latest-coupons')

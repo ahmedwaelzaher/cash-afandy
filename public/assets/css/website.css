@@ -38,7 +38,9 @@ footer .nav .nav-item .nav-link:hover {
 /* ============================================================
 Navbar
 ============================================================ */
-.btn-brand {
+.btn-brand,
+.btn-outline-brand:hover,
+.btn-outline-brand:focus {
     background-color: var(--Green-Dark);
     border-color: var(--Green-Dark);
     color: var(--White);
@@ -96,18 +98,6 @@ Social Buttons
 }
 
 /* ============================================================
-Hero Slider
-============================================================ */
-.site-hero-slider .swiper-slide {
-    height: calc(100dvh - var(--site-navbar-height, 5rem));
-    min-height: 26rem;
-}
-
-.site-hero-slider .swiper-slide>div {
-    height: 100%;
-}
-
-/* ============================================================
 Form Check (Radio)
 ============================================================ */
 .form-check-input[type='radio']:checked {
@@ -118,13 +108,6 @@ Form Check (Radio)
 .form-check-input[type='radio']:focus {
     border-color: var(--Green-Dark);
     box-shadow: 0 0 0 0.25rem rgba(8, 114, 59, 0.25);
-}
-
-.btn-outline-brand:hover,
-.btn-outline-brand:focus {
-    background-color: var(--Green-Dark);
-    border-color: var(--Green-Dark);
-    color: var(--White);
 }
 
 /* Shared design tokens for the navbar and subsequent sections. */
@@ -138,11 +121,14 @@ Form Check (Radio)
     --site-line: #dce3d0;
     --site-radius: 1.25rem;
     --site-shadow: 0 12px 32px #243b1710;
-    --site-section-space: clamp(2rem, 4vw, 3rem);
 }
 
 /* Navbar: shared Tabler controls, desktop navigation and mobile offcanvas. */
-.site-navbar {
+.site-navbar,
+.site-hero {
+    --site-section-space: clamp(2rem, 4vw, 3rem);
+    --site-gutter: clamp(1rem, 2.5vw, 2rem);
+    --site-content-width: 100rem;
     --tblr-primary: var(--site-ink);
     --tblr-primary-fg: var(--site-surface);
     --tblr-primary-darken: #365635;
@@ -153,34 +139,35 @@ Form Check (Radio)
     --tblr-secondary: var(--site-text);
     --tblr-secondary-rgb: 83, 99, 74;
     --tblr-tertiary: var(--site-text);
-    background: var(--site-paper);
-    border-block-end: 1px solid var(--site-line);
     color: var(--site-ink);
+}
+
+.site-navbar {
+    background: var(--site-paper);
+    transition: top 0.25s ease;
+}
+
+.site-navbar.is-hidden {
+    top: calc(-1 * var(--site-navbar-height));
 }
 
 .site-navbar.is-scrolled {
     box-shadow: var(--site-shadow);
 }
 
-.site-navbar .container {
-    max-width: 1920px;
-    padding-inline: 2rem;
+.site-navbar .container,
+.site-container {
+    max-width: var(--site-content-width);
+    padding-inline: var(--site-gutter);
 }
 
 .site-header {
     display: grid;
-    grid-template-columns: minmax(27rem, 1fr) minmax(0, 35rem) minmax(27rem, 1fr);
     align-items: center;
-    column-gap: clamp(1.5rem, 2.8vw, 2.5rem);
 }
 
 .site-navbar .navbar-brand {
     justify-self: start;
-}
-
-.site-navbar .logo {
-    inline-size: 12rem;
-    block-size: 6rem;
 }
 
 .site-header-search,
@@ -193,14 +180,8 @@ Form Check (Radio)
     justify-self: end;
 }
 
-.site-navbar-links,
-.site-navbar-settings {
-    gap: 1.25rem;
-}
-
 .site-navbar-links {
     grid-area: 2 / 1 / auto / -1;
-    min-block-size: 3.125rem;
 }
 
 .site-navbar-settings {
@@ -220,7 +201,9 @@ Form Check (Radio)
 
 .site-navbar .nav-link,
 .site-navbar .btn,
-.site-search .form-control {
+.site-search .form-control,
+.site-hero .btn,
+.site-hero .form-control {
     min-block-size: 2.875rem;
     font-size: 1rem;
 }
@@ -239,10 +222,6 @@ Form Check (Radio)
     background: var(--site-soft);
 }
 
-.site-navbar-links .nav-link.active {
-    box-shadow: inset 0 -3px var(--site-gold);
-}
-
 .site-navbar .dropdown-menu {
     --tblr-dropdown-link-hover-bg: var(--site-soft);
     --tblr-dropdown-link-active-color: var(--site-ink);
@@ -254,11 +233,13 @@ Form Check (Radio)
 }
 
 .site-navbar .dropdown-item {
+    min-inline-size: var(--tblr-dropdown-min-width);
     padding-block: 0.625rem;
     white-space: normal;
 }
 
-.site-navbar :is(a, button):focus-visible {
+.site-navbar :is(a, button):focus-visible,
+.site-hero :is(a, button):focus-visible {
     outline: 3px solid #a77b20;
     outline-offset: 3px;
 }
@@ -293,58 +274,64 @@ Form Check (Radio)
     box-shadow: none;
 }
 
+.site-search > .col {
+    min-inline-size: 0;
+}
+
 .site-search:focus-within {
     border-color: #75985d;
     box-shadow: 0 0 0 4px #92b37822;
 }
 
-@media (min-width: 1200px) {
-    .site-navbar-menu,
-    .site-navbar-menu .offcanvas-body {
-        display: contents;
-    }
-
-    .site-navbar-links {
-        position: relative;
-        border-block-start: 1px solid var(--site-line);
-    }
-
-    .site-navbar-links::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        box-shadow: 0 0 0 100vmax var(--site-soft);
-        background: var(--site-soft);
-        clip-path: inset(0 -100vmax);
-        pointer-events: none;
-    }
-}
-
-@media (min-width: 1200px) and (max-width: 1399.98px) {
-    .site-navbar .logo {
-        inline-size: 10.5rem;
-    }
-}
-
 @media (max-width: 1199.98px) {
-    .site-navbar .container {
-        padding-inline: 1rem;
+    .website-layout {
+        overflow-x: clip;
     }
 
     .site-header {
+        position: relative;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 0 1rem;
-        padding-block-end: 1rem;
+    }
+
+    .site-navbar .navbar-brand {
+        max-inline-size: 100%;
     }
 
     .site-navbar .logo {
         inline-size: clamp(8.5rem, 38vw, 11rem);
+        max-inline-size: 100%;
         block-size: 4.75rem;
     }
 
     .site-header-search {
-        grid-area: 2 / 1 / auto / -1;
+        position: static;
+    }
+
+    .site-navbar .site-header-search-panel {
+        inset-inline: var(--site-gutter);
+        top: 100%;
+        margin: 0.25rem 0 0;
+        padding: 0.75rem;
+        max-inline-size: none;
+        background: var(--site-paper);
+        border: 1px solid var(--site-line);
+        box-shadow: var(--site-shadow);
+    }
+
+    .site-header-search .site-search,
+    .site-header-search .site-search:focus-within {
+        border-color: var(--site-line);
+        background: var(--site-surface);
+        box-shadow: none;
+    }
+
+    .site-header-search .btn {
+        --tblr-btn-color: var(--site-text);
+    }
+
+    .site-header-search > .btn[aria-expanded='true'] {
+        background: var(--site-soft);
     }
 
     .site-navbar-menu {
@@ -366,6 +353,7 @@ Form Check (Radio)
         flex-shrink: 0;
     }
 
+    .site-navbar,
     .site-navbar-menu .offcanvas-header,
     .site-navbar-links .nav-link {
         border-block-end: 1px solid var(--site-line);
@@ -387,6 +375,7 @@ Form Check (Radio)
 
     .site-navbar-links .nav-link.active {
         background: var(--site-soft);
+        box-shadow: inset 0 -3px var(--site-gold);
     }
 
     .site-navbar-menu .dropdown-toggle::after {
@@ -443,10 +432,538 @@ Form Check (Radio)
     }
 }
 
+.site-home {
+    --tblr-body-bg: var(--site-paper);
+    background: var(--site-paper);
+}
+
+.site-home .site-header-search .site-search {
+    border-color: var(--site-line);
+    background: transparent;
+}
+
+/* Hero: saved V3 composition, using the shared search and brand tokens. */
+#how {
+    scroll-margin-block-start: calc(var(--site-navbar-height, 5rem) + 1rem);
+}
+
+.site-hero {
+    padding-block: clamp(2rem, 4vw, 3rem);
+    margin-block-end: var(--site-section-space);
+    background: linear-gradient(110deg, #f1f4e8, var(--site-paper) 65%);
+}
+
+.site-hero-content {
+    display: grid;
+    grid-template-columns: min(34rem, 50%) minmax(0, 1fr);
+    align-items: center;
+    gap: calc(clamp(2rem, 4vw, 4rem) + 6.25rem);
+}
+
+.site-hero-copy {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.site-hero-label {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid #e9d9ad;
+    border-radius: 100px;
+    background: #faf0d4;
+    color: #806424;
+    font-size: 0.875rem;
+}
+
+.site-hero h1 {
+    margin-block: 0.75rem 1.25rem;
+    font-size: min(4rem, 10cqi);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.site-hero h1 span {
+    display: block;
+    inline-size: fit-content;
+    white-space: nowrap;
+}
+
+.site-hero h1 span:last-child {
+    background: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
+}
+
+.site-hero-actions > p {
+    margin-block-end: 1.25rem;
+    color: var(--site-text);
+    font-size: 1.125rem;
+    line-height: 1.85;
+}
+
+.site-hero-popular {
+    color: var(--site-text);
+    font-size: 0.875rem;
+}
+
+.site-hero-popular .btn {
+    min-block-size: 2.75rem;
+    border-color: var(--site-line);
+    background: var(--site-surface);
+    color: var(--site-ink);
+    font-size: inherit;
+    white-space: normal;
+}
+
+.site-hero-guide {
+    color: var(--site-ink);
+    font-weight: 500;
+}
+
+.site-hero-copy,
+.site-hero-cta {
+    container-type: inline-size;
+}
+
+.site-hero-art {
+    position: relative;
+    min-inline-size: 0;
+    inline-size: min(100%, 34rem);
+    justify-self: center;
+    aspect-ratio: 34 / 31;
+    min-block-size: 22rem;
+    isolation: isolate;
+}
+
+.site-art-arch,
+.site-hero-figure {
+    position: absolute;
+}
+
+.site-art-arch {
+    inset: 0.5rem 12% 1rem;
+    border-radius: 48% 48% 12% 12%;
+    background: linear-gradient(145deg, #dce7cc, #eaf0dc);
+    z-index: -1;
+}
+
+.site-hero-figure {
+    inset: 1.5rem 18% 1rem;
+}
+
+.site-hero-figure img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 6px #34482513);
+}
+
+.site-hero-hello {
+    position: absolute;
+    inset-inline-start: 8%;
+    inset-block-start: 0;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--site-line);
+    border-radius: 0.65rem;
+    background: var(--site-surface);
+    box-shadow: 3px 4px 0 #d8e0c6;
+    transform: rotate(4deg);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.site-art-star {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: 26%;
+    color: #a17a26;
+    font-size: 2rem;
+}
+
+.site-hero-note {
+    position: absolute;
+    inline-size: 100%;
+    max-inline-size: min(12rem, 44%);
+    padding: 0.75rem;
+    border: 1px solid var(--site-line);
+    border-radius: 0.8rem;
+    background: var(--site-surface);
+    box-shadow: var(--site-shadow);
+    line-height: 1.6;
+}
+
+.site-hero-note:first-child {
+    inset-inline-end: 0;
+    inset-block-start: 55%;
+}
+
+.site-hero-note:last-child {
+    inset-inline-start: 0;
+    inset-block-end: 16%;
+}
+
+.site-hero-note small {
+    color: var(--site-text);
+    font-size: 0.875rem;
+}
+
+.site-hero-note:lang(en) {
+    max-inline-size: min(12rem, 50%);
+    font-size: clamp(0.625rem, 2.8vw, 0.6875rem);
+}
+
+.site-hero-note:lang(en) small {
+    font-size: inherit;
+}
+
+.site-hero-note-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    inline-size: 2rem;
+    block-size: 2.3rem;
+    border-radius: 0.6rem;
+    background: var(--site-soft);
+}
+
+.site-hero-note:first-child .site-hero-note-icon {
+    background: #fbefcc;
+    color: #805d1b;
+}
+
+@media (max-width: 1199.98px) {
+    .site-hero-cta > a {
+        font-size: min(1rem, 3.4cqi);
+    }
+
+    .site-hero-note {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .site-hero-note:first-child {
+        inset-block-start: 50%;
+    }
+
+    .site-hero-note:last-child {
+        inset-block-end: 24%;
+    }
+
+    .site-hero-note-icon {
+        inline-size: 1.5rem;
+        block-size: 1.875rem;
+    }
+}
+
+@media (max-width: 959.98px) {
+    .site-hero-content {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.5rem;
+    }
+
+    .site-hero-copy {
+        display: contents;
+    }
+
+    .site-hero-heading {
+        container-type: inline-size;
+        order: -2;
+        margin-block-end: 1.5rem;
+        text-align: center;
+    }
+
+    .site-hero h1 {
+        margin-block-end: 0;
+    }
+
+    .site-hero h1 span {
+        margin-inline: auto;
+    }
+
+    .site-hero-actions {
+        min-inline-size: 0;
+    }
+
+    .site-hero-actions > p {
+        display: none;
+    }
+
+    .site-hero-art {
+        inline-size: min(100%, 30rem);
+        order: -1;
+    }
+}
+
+/* Explicit desktop dimensions for the navbar and hero. */
+@media (min-width: 1200px) {
+    .site-header-actions.d-flex,
+    .site-navbar .site-header-search-panel {
+        display: contents !important;
+    }
+
+    .site-navbar-menu,
+    .site-navbar-menu .offcanvas-body {
+        display: contents;
+    }
+
+    .site-navbar-links {
+        position: relative;
+        min-block-size: 2.34375rem;
+        gap: 0.375rem;
+        margin-block-start: 0.375rem;
+        padding-block: 0.375rem;
+    }
+
+    .site-navbar-links::before,
+    .site-navbar-links::after {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        block-size: 1px;
+        background: var(--site-line);
+        /* Extend the lines without widening the page or clipping dropdowns. */
+        box-shadow: 0 0 0 100vmax var(--site-line);
+        clip-path: inset(0 -100vmax);
+        pointer-events: none;
+    }
+
+    .site-navbar-links::before {
+        inset-block-start: 0;
+    }
+
+    .site-navbar-links::after {
+        inset-block-end: 0;
+    }
+
+    .site-hero-copy {
+        padding-inline-start: var(--site-nav-link-padding);
+    }
+
+    .site-navbar-links .nav-link.active {
+        background: var(--site-soft);
+    }
+
+    .site-navbar-links .nav-link.active::before {
+        content: '';
+        position: absolute;
+        inset-inline: 2.25rem 0.75rem;
+        inset-block-end: 0.1875rem;
+        block-size: 3px;
+        border-radius: 50%;
+        background: var(--site-gold);
+        transform: rotate(-2deg);
+        pointer-events: none;
+    }
+
+    .site-navbar,
+    .site-hero {
+        --site-section-space: clamp(1.5rem, 4vw, 2.25rem);
+        --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
+        --site-content-width: 75rem;
+        --site-nav-link-padding: 0.75rem;
+        --tblr-border-radius: 0.5625rem;
+        font-size: 0.65625rem;
+    }
+
+    :is(.site-navbar, .site-hero) .btn {
+        --tblr-btn-padding-x: 0.5625rem;
+        --tblr-btn-padding-y: 0.28125rem;
+        --tblr-btn-line-height: 0.9375rem;
+        --tblr-btn-icon-size: 0.9375rem;
+    }
+
+    .site-hero .btn-sm {
+        --tblr-btn-padding-x: 0.375rem;
+        --tblr-btn-padding-y: 0.1875rem;
+        --tblr-btn-icon-size: 0.75rem;
+    }
+
+    :is(.site-navbar, .site-hero) :is(.ti, .icon) {
+        --tblr-icon-size: 0.9375rem;
+    }
+
+    .site-navbar .gap-1 {
+        gap: 0.1875rem !important;
+    }
+
+    :is(.site-navbar, .site-hero) .gap-2 {
+        gap: 0.375rem !important;
+    }
+
+    .site-hero .mt-3 {
+        margin-block-start: 0.75rem !important;
+    }
+
+    .site-search.p-1 {
+        padding: 0.1875rem !important;
+    }
+
+    .site-search .m-1 {
+        margin: 0.1875rem !important;
+    }
+
+    .site-search .ms-3 {
+        margin-inline-start: 0.75rem !important;
+    }
+
+    .site-search .input-icon-addon {
+        min-inline-size: 1.875rem;
+    }
+
+    .site-header {
+        grid-template-columns: minmax(20.25rem, 1fr) minmax(0, 26.25rem) minmax(20.25rem, 1fr);
+        column-gap: clamp(1.125rem, 2.8vw, 1.875rem);
+    }
+
+    .site-navbar .logo {
+        inline-size: 9rem;
+        block-size: 4.5rem;
+    }
+
+    .site-navbar-settings {
+        gap: 0.9375rem;
+    }
+
+    .site-navbar-settings .flag {
+        inline-size: 1.3125rem;
+        block-size: 0.984375rem;
+    }
+
+    .site-navbar .nav-link,
+    .site-navbar .btn {
+        gap: 0.375rem;
+    }
+
+    .site-navbar .nav-link,
+    .site-navbar .btn,
+    .site-search .form-control,
+    .site-hero .btn,
+    .site-hero .form-control {
+        min-block-size: 2.15625rem;
+        font-size: 0.75rem;
+    }
+
+    .site-navbar .nav-link {
+        padding: 0.375rem;
+    }
+
+    .site-navbar-links .nav-link {
+        position: relative;
+        padding-inline: var(--site-nav-link-padding);
+        border-radius: 100px;
+    }
+
+    .site-navbar .dropdown-menu {
+        --tblr-dropdown-min-width: 8.25rem;
+        --tblr-dropdown-padding-y: 0.1875rem;
+        --tblr-dropdown-font-size: 0.65625rem;
+        --tblr-dropdown-item-padding-x: 0.5625rem;
+        --tblr-dropdown-header-padding-x: 0.5625rem;
+        --tblr-dropdown-header-padding-y: 0.1875rem;
+        max-inline-size: calc(100vw - 1.5rem);
+    }
+
+    .site-navbar .dropdown-item {
+        gap: 0.375rem;
+        padding-block: 0.46875rem;
+    }
+
+    .site-navbar .btn-icon {
+        inline-size: 2.15625rem;
+    }
+
+    .site-account-button.btn-primary {
+        min-inline-size: 6.375rem;
+    }
+
+    .site-search {
+        border-radius: 0.75rem;
+    }
+
+    .site-search .form-control {
+        padding-block: 0.28125rem;
+        line-height: 0.9375rem;
+        padding-inline: 2.4375rem 0.5625rem;
+    }
+
+    .site-hero {
+        padding-block: clamp(1.5rem, 4vw, 2.25rem);
+    }
+
+    .site-hero-content {
+        grid-template-columns: min(25.5rem, 50%) minmax(0, 1fr);
+        gap: calc(clamp(1.5rem, 4vw, 3rem) + 4.6875rem);
+    }
+
+    .site-hero-label {
+        padding: 0.225rem 0.6rem;
+        font-size: 0.65625rem;
+    }
+
+    .site-hero h1 {
+        margin-block: 0.5625rem 0.9375rem;
+        font-size: min(3rem, 10cqi);
+    }
+
+    .site-hero-actions > p {
+        margin-block-end: 0.9375rem;
+        font-size: 0.84375rem;
+    }
+
+    .site-hero-popular {
+        font-size: 0.65625rem;
+    }
+
+    .site-hero-popular .btn {
+        min-block-size: 2.0625rem;
+    }
+
+    .site-hero-art {
+        inline-size: min(100%, 25.5rem);
+        min-block-size: 16.5rem;
+    }
+
+    .site-art-arch {
+        inset: 0.375rem 12% 0.75rem;
+    }
+
+    .site-hero-figure {
+        inset: 1.125rem 18% 0.75rem;
+    }
+
+    .site-hero-hello {
+        padding: 0.3rem 0.5625rem;
+        border-radius: 0.4875rem;
+        font-size: 0.703125rem;
+    }
+
+    .site-art-star {
+        font-size: 1.5rem;
+    }
+
+    .site-hero-note {
+        max-inline-size: min(9rem, 44%);
+        padding: 0.5625rem;
+        border-radius: 0.6rem;
+    }
+
+    .site-hero-note small {
+        font-size: 0.65625rem;
+    }
+
+    .site-hero-note:lang(en) {
+        max-inline-size: min(9rem, 50%);
+        font-size: clamp(0.46875rem, 2.8vw, 0.515625rem);
+    }
+
+    .site-hero-note-icon {
+        inline-size: 1.5rem;
+        block-size: 1.725rem;
+        border-radius: 0.45rem;
+    }
+}
+
 .site-deals-card .brand-btn {
     min-height: 25px;
     max-height: 25px;
-    padding-block: 0rem;
+    padding-block: 0;
     padding-inline: 1.25rem;
     font-size: 0.875rem;
     font-weight: bold;
@@ -490,6 +1007,10 @@ Footer
     margin-inline-start: 0.75rem;
     border-radius: 50%;
     transform-style: preserve-3d;
+}
+
+.site-footer-social-item,
+.site-footer-social {
     transition: all 0.5s ease-in-out;
 }
 
@@ -509,13 +1030,10 @@ Footer
     background-color: transparent;
     border-radius: 50%;
     color: var(--Black);
-    text-decoration: none;
-    transition: all 0.5s ease-in-out;
 }
 
 .site-footer-social-item:hover .site-footer-social {
     color: inherit;
-    text-decoration: none;
     transform: translate3d(0, 0, 15px) perspective(180px) rotateX(-85deg) translateY(2px);
 }
 
@@ -526,14 +1044,15 @@ Testimonials
     padding-block: 0.75rem;
 }
 
-.site-testimonials-card {
-    height: 100%;
+.site-testimonials-card,
+.site-deals-card {
     border-radius: 1rem;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.site-testimonials-card:hover {
+.site-testimonials-card:hover,
+.site-deals-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
 }
@@ -561,23 +1080,28 @@ Testimonials
     font-size: 0.9375rem;
 }
 
-.site-testimonials-pagination .swiper-pagination-bullet-active {
+.site-testimonials-pagination .swiper-pagination-bullet-active,
+.site-deals-pagination .swiper-pagination-bullet-active {
     background-color: var(--Green-Dark);
 }
 
-[dir='rtl'] .site-testimonials-nav i {
+[dir='rtl'] .site-testimonials-nav i,
+[dir='rtl'] .site-deals-nav i {
     transform: scaleX(-1);
 }
 
-.site-testimonials-nav .swiper-button-lock {
+.site-testimonials-nav .swiper-button-lock,
+.site-deals-nav .swiper-button-lock {
     display: inline-flex !important;
 }
 
-.site-testimonials-nav .swiper-button-disabled {
+.site-testimonials-nav .swiper-button-disabled,
+.site-deals-nav .swiper-button-disabled {
     opacity: 1;
 }
 
-.site-testimonials-pagination.swiper-pagination-lock {
+.site-testimonials-pagination.swiper-pagination-lock,
+.site-deals-pagination.swiper-pagination-lock {
     display: block !important;
 }
 
@@ -632,27 +1156,20 @@ Our Partners
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .site-marquee {
-        overflow-x: auto;
-        mask-image: none;
-    }
-
-    .site-marquee-track {
-        animation: none;
-    }
-}
-
-.site-partners-logo {
+.site-partners-logo,
+.site-deals-logo {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 6rem;
-    height: 6rem;
     overflow: hidden;
     background-color: var(--White);
     border: 1px solid var(--Light-Gray);
     border-radius: 50%;
+}
+
+.site-partners-logo {
+    width: 6rem;
+    height: 6rem;
     box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
     transition: box-shadow 0.4s ease;
 }
@@ -661,7 +1178,8 @@ Our Partners
     box-shadow: 0 0.375rem 0.875rem rgba(0, 0, 0, 0.08);
 }
 
-.site-partners-logo img {
+.site-partners-logo img,
+.site-deals-logo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -736,6 +1254,16 @@ How To Get Cashback
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .site-navbar {
+        transition: none;
+    }
+
+    .site-marquee {
+        overflow-x: auto;
+        mask-image: none;
+    }
+
+    .site-marquee-track,
     .site-cashback-orbit,
     .site-cashback-circle {
         animation: none;
@@ -749,38 +1277,8 @@ Deals (Coupons / Cashback Stores)
     font-size: 0.875rem;
 }
 
-[dir='rtl'] .site-deals-nav i {
-    transform: scaleX(-1);
-}
-
-.site-deals-nav .swiper-button-lock {
-    display: inline-flex !important;
-}
-
-.site-deals-nav .swiper-button-disabled {
-    opacity: 1;
-}
-
-.site-deals-pagination.swiper-pagination-lock {
-    display: block !important;
-}
-
 .site-deals-swiper {
     padding-block: 1.75rem 0.75rem;
-}
-
-.site-deals-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.site-deals-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
 }
 
 .site-deals-card .card-body {
@@ -827,41 +1325,29 @@ Deals (Coupons / Cashback Stores)
 .site-deals-logo {
     position: relative;
     z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     flex: 0 0 auto;
     width: 3.75rem;
     height: 3.75rem;
     margin: -1.875rem auto 0;
-    background-color: var(--White);
-    border: 1px solid var(--Light-Gray);
-    border-radius: 50%;
-    overflow: hidden;
     box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
 }
 
-.site-deals-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.site-deals-title,
+.site-deals-content {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
 }
 
 .site-deals-title {
-    display: -webkit-box;
     height: 2.75rem;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
 
 .site-deals-content {
-    display: -webkit-box;
     flex: 1 1 auto;
     height: 3.75rem;
-    overflow: hidden;
     font-size: 0.875rem;
-    -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
 }
 
@@ -873,15 +1359,10 @@ Deals (Coupons / Cashback Stores)
 .site-deals-view-all {
     color: var(--Black);
     font-weight: 600;
-    text-decoration: none;
 }
 
 .site-deals-view-all:hover {
     color: var(--Green-Dark);
-}
-
-.site-deals-pagination .swiper-pagination-bullet-active {
-    background-color: var(--Green-Dark);
 }
 
 /* ============================================================

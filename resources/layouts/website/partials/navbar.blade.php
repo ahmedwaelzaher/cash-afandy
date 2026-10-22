@@ -11,13 +11,21 @@
             <x-logo class="logo object-fit-contain" variant="horizontal" :lazy="false" />
         </a>
 
-        <div class="site-header-search" id="site-header-search">
-            @include('website.partials.search-form', ['id' => 'navbar-search'])
-        </div>
+        <div class="site-header-actions d-flex gap-2">
+            <div class="dropdown site-header-search">
+                <button type="button" class="btn btn-icon btn-ghost-secondary d-xl-none" data-bs-toggle="dropdown" data-bs-display="static"
+                    data-bs-auto-close="outside" aria-expanded="false" aria-controls="site-header-search" aria-label="{{ __('Search') }}">
+                    <x-icon icon="ti ti-search" />
+                </button>
+                <div class="dropdown-menu site-header-search-panel" id="site-header-search">
+                    @include('website.partials.search-form', ['id' => 'navbar-search'])
+                </div>
+            </div>
 
-        <div class="site-header-actions d-flex d-xl-none gap-2">
-            @include('layouts.website.partials.account-menu', ['compact' => true])
-            <button type="button" class="btn btn-icon btn-ghost-secondary" data-bs-toggle="offcanvas" data-bs-target="#site-navbar-menu"
+            <div class="d-xl-none">
+                @include('layouts.website.partials.account-menu', ['compact' => true])
+            </div>
+            <button type="button" class="btn btn-icon btn-ghost-secondary d-xl-none" data-bs-toggle="offcanvas" data-bs-target="#site-navbar-menu"
                 aria-controls="site-navbar-menu" aria-expanded="false" aria-label="{{ __('Menu') }}">
                 <x-icon icon="ti ti-menu-2" />
             </button>
@@ -37,7 +45,7 @@
                         <a href="{{ route('website.' . $resource . '.index') }}"
                             @class(['nav-link', 'active' => request()->routeIs('website.' . $resource . '.*')])
                             @if (request()->routeIs('website.' . $resource . '.*')) aria-current="page" @endif>
-                            <x-icon :icon="$resource === 'coupons' ? 'ti ti-ticket' : 'ti ti-percentage'" class="d-xl-none" />
+                            <x-icon :icon="$resource === 'coupons' ? 'ti ti-ticket' : 'ti ti-percentage'" />
                             {{ $label }}
                             <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
                         </a>
@@ -47,7 +55,7 @@
                         <div class="dropdown">
                             <button type="button" data-bs-toggle="dropdown" aria-expanded="false"
                                 @class(['nav-link dropdown-toggle', 'active' => request()->routeIs('website.categories.*')])>
-                                <x-icon icon="ti ti-layout-grid" class="d-xl-none" />
+                                <x-icon icon="ti ti-layout-grid" />
                                 {{ __('Categories') }}
                                 <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
                             </button>
