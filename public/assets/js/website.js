@@ -66,3 +66,34 @@ $(() => {
     // Set the initial state, including restored scroll positions.
     updateScroll();
 });
+
+$(() => {
+    const $marquees = $('.site-marquee');
+    if (!$marquees.length) return;
+
+    // Repeated logos remain clickable without duplicating keyboard or screen-reader stops.
+    $marquees.find('[aria-hidden="true"]').removeAttr('inert').find('a').attr('tabindex', '-1');
+
+    const updateMarquees = () => {
+        $marquees.each((_, element) => {
+            const visible = !window.IntersectionObserver || element.dataset.marqueeVisible === 'true';
+            const paused = document.hidden || !visible;
+            element.style.setProperty('--marquee-play-state', paused ? 'paused' : 'running');
+        });
+    };
+
+    // Pause off-screen marquees and background tabs without restarting the animation.
+    if (window.IntersectionObserver) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(({ target, isIntersecting }) => {
+                target.dataset.marqueeVisible = String(isIntersecting);
+            });
+            updateMarquees();
+        });
+
+        $marquees.each((_, element) => observer.observe(element));
+    }
+
+    $(document).on('visibilitychange.marquee', updateMarquees);
+    updateMarquees();
+});

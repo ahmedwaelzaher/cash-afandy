@@ -121,11 +121,13 @@ Form Check (Radio)
     --site-line: #dce3d0;
     --site-radius: 1.25rem;
     --site-shadow: 0 12px 32px #243b1710;
+    --site-highlight: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
 }
 
 /* Navbar: shared Tabler controls, desktop navigation and mobile offcanvas. */
 .site-navbar,
-.site-hero {
+.site-hero,
+.site-store-strip {
     --site-section-space: clamp(2rem, 4vw, 3rem);
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
     --site-content-width: 100rem;
@@ -283,6 +285,10 @@ Form Check (Radio)
     box-shadow: 0 0 0 4px #92b37822;
 }
 
+[dir='ltr'] .site-menu-arrow {
+    transform: rotate(180deg);
+}
+
 @media (max-width: 1199.98px) {
     .website-layout {
         overflow-x: clip;
@@ -386,10 +392,6 @@ Form Check (Radio)
         margin-inline-start: auto;
     }
 
-    [dir='ltr'] .site-menu-arrow {
-        transform: rotate(180deg);
-    }
-
     .site-navbar-settings {
         margin-block-start: auto;
         gap: 0.75rem;
@@ -443,13 +445,8 @@ Form Check (Radio)
 }
 
 /* Hero: saved V3 composition, using the shared search and brand tokens. */
-#how {
-    scroll-margin-block-start: calc(var(--site-navbar-height, 5rem) + 1rem);
-}
-
 .site-hero {
     padding-block: clamp(2rem, 4vw, 3rem);
-    margin-block-end: var(--site-section-space);
     background: linear-gradient(110deg, #f1f4e8, var(--site-paper) 65%);
 }
 
@@ -488,7 +485,7 @@ Form Check (Radio)
 }
 
 .site-hero h1 span:last-child {
-    background: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
+    background: var(--site-highlight);
 }
 
 .site-hero-actions > p {
@@ -753,7 +750,8 @@ Form Check (Radio)
     }
 
     .site-navbar,
-    .site-hero {
+    .site-hero,
+    .site-store-strip {
         --site-section-space: clamp(1.5rem, 4vw, 2.25rem);
         --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
         --site-content-width: 75rem;
@@ -1038,80 +1036,81 @@ Footer
 }
 
 /* ============================================================
-Testimonials
+Store strip and shared marquee
 ============================================================ */
-.site-testimonials-swiper {
-    padding-block: 0.75rem;
-}
-
-.site-testimonials-card,
-.site-deals-card {
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.site-testimonials-card:hover,
-.site-deals-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
-}
-
-.site-testimonials-avatar {
-    width: 5rem;
-    height: 5rem;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-inline: auto;
-    margin-bottom: 0.75rem;
-}
-
-.site-testimonials-stars {
-    color: var(--Yellow);
+.site-store-strip {
+    border-block: 1px solid var(--site-line);
+    background: var(--site-soft);
     font-size: 0.875rem;
-    margin-bottom: 0.75rem;
 }
 
-.site-testimonials-stars i:not(.fa-solid) {
-    color: var(--Meduim-Gray);
+.site-store-strip-content {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2rem);
+    padding-block: 1.25rem;
 }
 
-.site-testimonials-content {
-    font-size: 0.9375rem;
+.site-store-strip h2 {
+    margin: 0;
+    color: var(--site-text);
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
-.site-testimonials-pagination .swiper-pagination-bullet-active,
-.site-deals-pagination .swiper-pagination-bullet-active {
-    background-color: var(--Green-Dark);
+.site-store-strip strong {
+    color: var(--site-ink);
+    inline-size: fit-content;
+    background: var(--site-highlight);
 }
 
-[dir='rtl'] .site-testimonials-nav i,
-[dir='rtl'] .site-deals-nav i {
-    transform: scaleX(-1);
+.site-store-logo {
+    flex: 0 0 7.5rem;
 }
 
-.site-testimonials-nav .swiper-button-lock,
-.site-deals-nav .swiper-button-lock {
-    display: inline-flex !important;
+.site-store-logo img {
+    inline-size: 7.5rem;
+    block-size: 2.5rem;
+    object-fit: contain;
 }
 
-.site-testimonials-nav .swiper-button-disabled,
-.site-deals-nav .swiper-button-disabled {
-    opacity: 1;
+@media (max-width: 767.98px) {
+    .site-store-strip-content {
+        grid-template-columns: minmax(0, 1fr);
+        container-type: inline-size;
+        gap: 0.75rem;
+        padding-block: 1rem;
+    }
+
+    .site-store-strip h2 {
+        font-size: min(0.875rem, 4cqi);
+        white-space: nowrap;
+    }
+
+    .site-store-strip-content > [aria-disabled] {
+        justify-self: end;
+    }
+
+    .site-store-logo {
+        flex-basis: 5.5rem;
+    }
+
+    .site-store-logo img {
+        inline-size: 5.5rem;
+        block-size: 2rem;
+    }
 }
 
-.site-testimonials-pagination.swiper-pagination-lock,
-.site-deals-pagination.swiper-pagination-lock {
-    display: block !important;
-}
-
-/* ============================================================
-Our Partners
-============================================================ */
 .site-marquee {
     --marquee-gap: 1.5rem;
     container-type: inline-size;
+    contain: paint;
+    min-inline-size: 0;
     overflow: hidden;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
     padding-block: 0.75rem;
     mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
 }
@@ -1120,9 +1119,10 @@ Our Partners
     display: flex;
     width: max-content;
     animation: site-marquee-scroll var(--marquee-duration, 40s) linear infinite;
+    animation-play-state: var(--marquee-play-state, paused);
 }
 
-.site-marquee:hover .site-marquee-track {
+.site-marquee:is(:hover, :focus-within, :active) .site-marquee-track {
     animation-play-state: paused;
 }
 
@@ -1185,74 +1185,6 @@ Our Partners
     object-fit: cover;
 }
 
-/* ============================================================
-How To Get Cashback
-============================================================ */
-.site-cashback-orbit {
-    position: relative;
-    width: 9rem;
-    height: 9rem;
-    max-width: 100%;
-    border: 2px solid var(--step-color);
-    border-radius: 50%;
-    animation: site-cashback-orbit-spin 8s linear infinite;
-}
-
-.site-cashback-orbit-reverse {
-    animation-direction: reverse;
-}
-
-.site-cashback-node {
-    position: absolute;
-    top: 50%;
-    width: 0.75rem;
-    height: 0.75rem;
-    background-color: var(--White);
-    border: 2px solid var(--step-color);
-    border-radius: 50%;
-    transform: translateY(-50%);
-}
-
-.site-cashback-node-start {
-    inset-inline-start: -0.4375rem;
-}
-
-.site-cashback-node-end {
-    inset-inline-end: -0.4375rem;
-}
-
-.site-cashback-circle {
-    position: absolute;
-    inset: 0.6rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--White);
-    border: 1rem solid var(--step-color);
-    border-radius: 50%;
-    animation: site-cashback-orbit-spin 8s linear infinite reverse;
-}
-
-.site-cashback-orbit-reverse .site-cashback-circle {
-    animation-direction: normal;
-}
-
-.site-cashback-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--Black);
-}
-
-@keyframes site-cashback-orbit-spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
     .site-navbar {
         transition: none;
@@ -1263,22 +1195,27 @@ How To Get Cashback
         mask-image: none;
     }
 
-    .site-marquee-track,
-    .site-cashback-orbit,
-    .site-cashback-circle {
+    .site-marquee-track {
         animation: none;
+    }
+
+    .site-marquee-group[aria-hidden='true'] {
+        display: none;
     }
 }
 
 /* ============================================================
 Deals (Coupons / Cashback Stores)
 ============================================================ */
-.site-deals-nav i {
-    font-size: 0.875rem;
+.site-deals-card {
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.site-deals-swiper {
-    padding-block: 1.75rem 0.75rem;
+.site-deals-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
 }
 
 .site-deals-card .card-body {
