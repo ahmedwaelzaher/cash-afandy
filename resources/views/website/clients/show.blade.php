@@ -50,9 +50,9 @@
                 <div id="store-coupons" role="tabpanel"
                     class="tab-pane @if ($coupons->isNotEmpty() || $cashbacks->isEmpty()) active show @endif">
                     @if ($coupons->isNotEmpty())
-                        <div class="row row-cards">
+                        <div class="site-offers-grid">
                             @foreach ($coupons as $coupon)
-                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <div>
                                     @include('website.partials.coupon-card')
                                 </div>
                             @endforeach

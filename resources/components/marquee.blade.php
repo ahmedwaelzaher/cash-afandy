@@ -4,12 +4,12 @@
 ])
 
 <div {{ $attributes->class(['site-marquee', 'site-marquee-reverse' => $reverse])->merge(['style' => "--marquee-duration: {$duration}s"]) }}>
-    <div class="site-marquee-track">
-        <div class="site-marquee-group">
+    <div class="site-marquee-track d-flex">
+        <div class="site-marquee-group flex-center justify-content-around">
             {{ $slot }}
         </div>
 
-        <div class="site-marquee-group" aria-hidden="true" inert>
+        <div class="site-marquee-group flex-center justify-content-around" aria-hidden="true" inert>
             {{ $slot }}
         </div>
     </div>

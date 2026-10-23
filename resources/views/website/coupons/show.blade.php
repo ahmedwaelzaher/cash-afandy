@@ -39,13 +39,8 @@
                         <div class="card-body">
                             <h3 class="card-title">{{ __('Coupon code') }}</h3>
 
-                            <div class="site-coupon-code d-flex align-items-center justify-content-between gap-2 mb-3">
-                                <span class="fw-bold fs-3 text-break">{{ $coupon->code }}</span>
-
-                                <button type="button" class="btn btn-brand flex-shrink-0" data-coupon-code="{{ $coupon->code }}">
-                                    <i class="fa fa-copy me-2"></i>
-                                    {{ __('Copy') }}
-                                </button>
+                            <div class="mb-3">
+                                @include('website.partials.coupon-code')
                             </div>
 
                             <a href="{{ $coupon->client->url }}" target="_blank" rel="noopener noreferrer"
@@ -106,9 +101,9 @@
                     <h2 class="mb-1">{{ __('More from :store', ['store' => $coupon->client->title]) }}</h2>
                 </div>
 
-                <div class="row row-cards">
+                <div class="site-offers-grid">
                     @foreach ($relatedCoupons as $coupon)
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div>
                             @include('website.partials.coupon-card')
                         </div>
                     @endforeach
@@ -117,14 +112,4 @@
         </section>
     @endif
 
-    @push('scripts')
-        <script>
-            $(document).ready(() => {
-                $('[data-coupon-code]').on('click', function () {
-                    copyToClipboard($(this).attr('data-coupon-code'))
-                        .then(() => toastify().success(@json(__('Coupon code copied'))));
-                });
-            });
-        </script>
-    @endpush
 </x-layouts::website>

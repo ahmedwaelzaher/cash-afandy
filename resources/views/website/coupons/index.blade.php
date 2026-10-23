@@ -11,9 +11,9 @@
             @include('website.partials.deals-filters', ['action' => route('website.coupons.index')])
 
             @if ($coupons->isNotEmpty())
-                <div class="row row-cards">
+                <div class="site-offers-grid">
                     @foreach ($coupons as $coupon)
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div>
                             @include('website.partials.coupon-card')
                         </div>
                     @endforeach

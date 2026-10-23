@@ -1,21 +1,86 @@
-<div class="site-deals-card card h-100">
-    <div class="site-deals-image">
-        <span class="site-deals-badge">
-            {{ $coupon->fixed_discount ? $coupon->discount . ' ' . __('EGP') : $coupon->discount . '%' }}
-        </span>
+@php
+    $detailsId = 'coupon-details-' . ($coupon->getKey() ?? \Illuminate\Support\Str::uuid());
+@endphp
+<article class="site-offer-card card h-100">
+    <div class="site-offer-discount d-flex flex-row-reverse flex-sm-column align-items-center justify-content-center gap-2 text-center">
+        <strong dir="ltr">{{ $coupon->discount }}{{ $coupon->fixed_discount ? ' ' . __('EGP') : '%' }}</strong>
+        <span>{{ __('Discount') }}</span>
     </div>
+    <div class="card-body d-flex flex-column p-3">
+        <div class="d-flex align-items-center justify-content-between gap-2">
+            <div class="site-offer-store d-flex align-items-center gap-2 fw-semibold">
+                <span class="site-offer-icon flex-center flex-shrink-0">
+                    @if ($coupon->client->logo)
+                        <img class="object-fit-contain" src="{{ $coupon->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                    @else
+                        <x-icon :icon="$icon ?? 'ti ti-shopping-bag'" />
+                    @endif
+                </span>
+                {{ $coupon->client->title }}
+            </div>
+            <div class="d-flex align-items-center flex-shrink-0">
+                <button type="button" class="btn btn-icon btn-link text-secondary text-decoration-none" data-share-url="{{ route('website.index') }}"
+                    data-share-title="{{ __('Cash Afandy') }}" data-share-success="{{ __('Link copied') }}"
+                    data-share-error="{{ __('Unable to share or copy the link. Please try again.') }}" aria-label="{{ __('Share') }}">
+                    <x-icon icon="ti ti-share" />
+                </button>
+                <button type="button" class="site-offer-favorite btn btn-icon btn-link text-decoration-none" data-coupon-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
+                    <x-icon icon="ti ti-heart" />
+                </button>
+            </div>
+        </div>
 
-    <span class="site-deals-logo">
-        <img src="{{ $coupon->client->logo }}" alt="{{ $coupon->client->title }}" loading="lazy">
-    </span>
+        <div class="site-offer-summary">
+            <h3 class="mb-0">{{ $coupon->title }}</h3>
+        </div>
 
-    <div class="card-body text-center pt-3">
-        <h4 class="site-deals-title mb-2">{{ $coupon->title }}</h4>
-        <p class="site-deals-content text-body-secondary mb-3">
-            {{ strip_tags($coupon->description) }}
-        </p>
-        <a href="{{ route('website.coupons.show', $coupon) }}" class="btn btn-outline-brand brand-btn">
-            {{ __('Get it now') }}
-        </a>
+        <div class="site-offer-actions d-flex flex-wrap flex-sm-column align-items-center align-items-sm-stretch justify-content-between gap-2">
+            @isset($categoryLabel)
+                <span class="site-offer-label align-self-sm-start">{{ $categoryLabel }}</span>
+            @endisset
+
+            <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">
+                @if (filled($coupon->code))
+                    @include('website.partials.coupon-code')
+                @elseif ($offerUrl ?? null)
+                    <a href="{{ $offerUrl }}" class="site-offer-link btn btn-outline-primary gap-2" target="_blank" rel="sponsored noopener noreferrer">
+                        {{ __('View offer') }} <x-icon icon="ti ti-external-link" />
+                    </a>
+                @endif
+                <button type="button" class="site-offer-details btn btn-link d-inline-flex align-items-center gap-2 text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#{{ $detailsId }}">{{ __('Details') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" /></button>
+            </div>
+        </div>
+    </div>
+</article>
+
+<div class="modal fade" id="{{ $detailsId }}" tabindex="-1" aria-labelledby="{{ $detailsId }}-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 p-4 pb-3">
+                <div class="d-flex align-items-center gap-2 text-secondary fw-semibold">
+                    @if ($coupon->client->logo)
+                        <span class="site-offer-icon flex-center flex-shrink-0">
+                            <img class="object-fit-contain" src="{{ $coupon->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                        </span>
+                    @endif
+                    {{ $coupon->client->title }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <h3 class="h2 mb-3" id="{{ $detailsId }}-title">{{ $coupon->title }}</h3>
+                <ul class="text-secondary lh-lg mb-0">
+                    @if ($coupon->description)
+                        <li>{{ strip_tags($coupon->description) }}</li>
+                    @endif
+                    @foreach (preg_split('/\R/u', strip_tags($coupon->tips ?? ''), flags: PREG_SPLIT_NO_EMPTY) as $tip)
+                        <li>{{ $tip }}</li>
+                    @endforeach
+                </ul>
+                @unless ($coupon->exists)
+                    <p class="text-secondary small mt-3 mb-0">{{ __('This offer is for design preview only.') }}</p>
+                @endunless
+            </div>
+        </div>
     </div>
 </div>

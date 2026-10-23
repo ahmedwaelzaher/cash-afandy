@@ -145,3 +145,16 @@ function website_country(): ?Country
 
     return $country;
 }
+
+/** Encode a coupon for browser reveal; the shared key is not a secrecy boundary. */
+function encode_coupon_code(string $code): string
+{
+    $iv = random_bytes(12);
+    $encrypted = openssl_encrypt($code, 'aes-256-gcm', hash('sha256', 'cashafandy', true), OPENSSL_RAW_DATA, $iv, $tag);
+
+    if ($encrypted === false) {
+        throw new RuntimeException('Unable to encode the coupon code.');
+    }
+
+    return base64_encode($iv . $encrypted . $tag);
+}

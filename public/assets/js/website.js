@@ -1,3 +1,139 @@
+// ==================================================
+// Coupon code decoding
+// ==================================================
+/**
+ * Decode a coupon code that was encoded with AES-GCM and base64.
+ *
+ * @param {string} encoded - The base64-encoded coupon code.
+ * @returns {Promise<string>} - The decoded coupon code.
+ */
+async function decodeCouponCode(encoded) {
+    let bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+    let keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cashafandy'));
+    let key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+    let decoded = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, key, bytes.slice(12));
+
+    return new TextDecoder().decode(decoded);
+}
+
+// ==================================================
+// Website interactions
+// ==================================================
+$(() => {
+    // ==================================================
+    // Sharing
+    // ==================================================
+    $('[data-share-url]').on('click', async function () {
+        const $button = $(this);
+        const url = $button.attr('data-share-url');
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: $button.attr('data-share-title'), url });
+                return;
+            } catch (error) {
+                if (error.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            await copyToClipboard(url);
+            toastify().success($button.attr('data-share-success'));
+        } catch {
+            toastify().error($button.attr('data-share-error'));
+        }
+    });
+
+    // ==================================================
+    // Favorites
+    // ==================================================
+    // Preview only; favorites are not persisted until backend integration.
+    $('[data-coupon-favorite]').on('click', function () {
+        const $button = $(this);
+        $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+
+    // ==================================================
+    // Shared coupon reveal and clipboard feedback
+    // ==================================================
+    const $modal = $('#site-coupon-reveal');
+    const $code = $modal.find('[data-revealed-code]');
+    const $copy = $modal.find('[data-copy-revealed]');
+    const $status = $modal.find('[data-copy-status]');
+    let reveal;
+
+    const copy = async () => {
+        const currentReveal = reveal;
+        $copy.find('[data-copy-label]').text($status.attr('data-copy-label'));
+        $copy.find('.ti').removeClass('ti-check').addClass('ti-copy');
+        try {
+            await copyToClipboard($code.text());
+            if (reveal !== currentReveal || !$modal.hasClass('show')) return;
+
+            $copy.find('[data-copy-label]').text($status.attr('data-copied-label'));
+            $copy.find('.ti').removeClass('ti-copy').addClass('ti-check');
+            $status.text($status.attr('data-copy-success'));
+        } catch {
+            if (reveal !== currentReveal || !$modal.hasClass('show')) return;
+            $status.text($status.attr('data-copy-error'));
+        }
+    };
+
+    $modal.on('show.bs.modal', (event) => {
+        const $button = $(event.relatedTarget);
+        const logo = $button.attr('data-store-logo');
+        const url = $button.attr('data-store-url');
+
+        $modal.find('#site-coupon-reveal-title').text($button.attr('data-coupon-title'));
+        $modal.find('[data-reveal-store]').text($button.attr('data-store-name'));
+        $modal.find('[data-reveal-logo]').prop('hidden', !logo).find('img').attr('src', logo || null);
+        $modal.find('[data-reveal-link]').prop('hidden', !url).find('a').attr('href', url || null);
+
+        $code.text('');
+        $copy.prop('disabled', true).find('[data-copy-label]').text($status.attr('data-copy-label'));
+        $copy.find('.ti').removeClass('ti-check').addClass('ti-copy');
+        $status.text($status.attr('data-copy-pending'));
+        reveal = decodeCouponCode($button.attr('data-coupon-code'));
+        reveal.catch(() => {});
+    }).on('shown.bs.modal', async () => {
+        const currentReveal = reveal;
+        try {
+            const code = await currentReveal;
+            if (reveal !== currentReveal || !$modal.hasClass('show')) return;
+
+            $code.text(code);
+            $copy.prop('disabled', false);
+            await copy();
+        } catch {
+            if (reveal !== currentReveal || !$modal.hasClass('show')) return;
+            $status.text($status.attr('data-reveal-error'));
+        }
+    }).on('hidden.bs.modal', () => {
+        reveal = null;
+        $code.text('');
+        $copy.prop('disabled', true);
+    });
+
+    $copy.on('click', copy);
+
+    // ==================================================
+    // Offer category filters
+    // ==================================================
+    $('.site-offers').on('click', '[data-offer-filter]', function () {
+        const $section = $(this).closest('.site-offers');
+        const filter = $(this).attr('data-offer-filter');
+
+        $section.find('[data-offer-filter]').removeClass('btn-primary').attr('aria-pressed', 'false');
+        $(this).addClass('btn-primary').attr('aria-pressed', 'true');
+        $section.find('[data-offer-category]').each((_, element) => {
+            element.hidden = filter !== 'all' && element.dataset.offerCategory !== filter;
+        });
+    });
+});
+
+// ==================================================
+// Navbar sizing, menus and scroll behavior
+// ==================================================
 $(() => {
     // Initialize the navbar once per page.
     const $header = $('.site-navbar');
@@ -67,6 +203,9 @@ $(() => {
     updateScroll();
 });
 
+// ==================================================
+// Store marquee visibility and playback
+// ==================================================
 $(() => {
     const $marquees = $('.site-marquee');
     if (!$marquees.length) return;

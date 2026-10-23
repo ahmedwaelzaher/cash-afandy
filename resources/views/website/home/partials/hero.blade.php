@@ -33,7 +33,7 @@
             <div class="site-art-arch" aria-hidden="true"></div>
             <span class="site-hero-hello">{{ __('Welcome, Afandy!') }} <span aria-hidden="true">✦</span></span>
             <figure class="site-hero-figure m-0">
-                <img src="{{ hashed_asset('assets/images/' . (app()->getLocale() === 'ar' ? 'afandy-hero-coupon-rtl.webp' : 'afandy-hero-coupon-ltr.webp')) }}" width="1024" height="1536"
+                <img class="w-100 h-100 object-fit-contain" src="{{ hashed_asset('assets/images/' . (app()->getLocale() === 'ar' ? 'afandy-hero-coupon-rtl.webp' : 'afandy-hero-coupon-ltr.webp')) }}" width="1024" height="1536"
                     alt="{{ __('Afandy presents a coupon and holds a wallet') }}" fetchpriority="high" loading="eager">
             </figure>
             <span class="site-art-star" aria-hidden="true">✦</span>
