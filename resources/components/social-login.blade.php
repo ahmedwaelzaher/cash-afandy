@@ -18,7 +18,7 @@
     @endif
 
     @foreach ($providers as $provider => $label)
-        <a href="{{ route('website.socialite.redirect', $provider) }}" class="btn btn-social btn-social-{{ $provider }}">
+        <a href="{{ route('website.socialite.redirect', $provider) }}" class="btn btn-social flex-center btn-social-{{ $provider }}">
             <x-social-icon :social="$provider" size="sm" />
             {{ $label }}
         </a>

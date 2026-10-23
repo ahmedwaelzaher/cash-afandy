@@ -42,7 +42,7 @@
                     <div class="hr-text mb-4">{{ __('OR') }}</div>
 
                     <div class="d-flex flex-column gap-3 mb-4">
-                        <a href="{{ route('website.magic-link.create') }}" class="btn btn-social btn-social-magic-link">
+                        <a href="{{ route('website.magic-link.create') }}" class="btn btn-social flex-center btn-social-magic-link">
                             {{ __('Login with Magic Link') }}
                         </a>
 

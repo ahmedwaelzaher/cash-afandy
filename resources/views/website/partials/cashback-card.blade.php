@@ -7,7 +7,7 @@
         <img src="{{ $cashback->client->logo }}" alt="{{ $cashback->client->title }}" loading="lazy">
     </span>
 
-    <div class="card-body text-center pt-3">
+    <div class="card-body d-flex flex-column flex-fill text-center pt-3">
         <h4 class="site-deals-title mb-2">{{ $cashback->client->title }}</h4>
         <p class="site-deals-content text-body-secondary mb-3">
             {{ strip_tags($cashback->client->description) }}

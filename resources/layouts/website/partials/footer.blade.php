@@ -96,8 +96,8 @@
                 @foreach ($socialLinks as $key => $icon)
                     @continue(! setting($key))
 
-                    <li class="site-footer-social-item">
-                        <a class="site-footer-social" href="{{ setting($key) }}" target="_blank" rel="noopener noreferrer">
+                    <li class="site-footer-social-item flex-center rounded-circle">
+                        <a class="site-footer-social d-inline-flex align-items-center justify-content-center rounded-circle border-0 bg-transparent" href="{{ setting($key) }}" target="_blank" rel="noopener noreferrer">
                             <i class="fab {{ $icon }}"></i>
                         </a>
                     </li>
