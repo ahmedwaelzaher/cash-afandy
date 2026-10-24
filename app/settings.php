@@ -15,22 +15,16 @@ Setting::define('app_name')->array()->default([
 ]);
 
 Setting::define('footer_about_description')->array()->default([
-    'en' => "
-        Your smart friend in saving.
-        Coupons, discounts, and offers... the right way.
-    ",
-    'ar' => "
-        صاحبك الشاطر في التوفير.
-        كوبونات، خصومات، وعروض… بأصول.
-    ",
+    'en' => "<div>\r\n<div><span>Your smart friend in saving.</span></div>\r\n<div><span>Coupons, discounts, and offers... the right way</span></div>\r\n</div>",
+    'ar' => "<p>صاحبك الشاطر في التوفير.</p>\r\n<p>كوبونات، خصومات، وعروض&hellip; بأصول.</p>",
 ])->rules([
     'footer_about_description' => ['nullable', 'array'],
     'footer_about_description.*' => ['nullable', 'string'],
 ]);
 
 Setting::define('footer_subscribe_description')->array()->default([
-    'en' => 'Subscribe to our newsletter and be the first to know about the latest coupons, cashback offers, and deals.',
-    'ar' => 'اشترك في نشرتنا الإخبارية وكن أول من يعلم بأحدث الكوبونات وعروض الكاش باك والصفقات.',
+    'en' => "<p>Subscribe to our newsletter and be the first to know about the latest coupons, offers, and deals.</p>",
+    'ar' => "<p>اشترك في نشرتنا الإخبارية وكن أول من يعلم بأحدث الكوبونات والعروض والصفقات.</p>",
 ])->rules([
     'footer_subscribe_description' => ['nullable', 'array'],
     'footer_subscribe_description.*' => ['nullable', 'string'],
