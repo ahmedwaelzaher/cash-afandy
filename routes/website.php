@@ -12,7 +12,6 @@ use App\Http\Controllers\Website\ShortenedUrlController;
 use App\Http\Controllers\Website\SocialiteController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\StoreSubscriberController;
-use App\Http\Middleware\EnsureProfileIsComplete;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
 
@@ -49,14 +48,9 @@ Route::middleware('guest:users')->group(function () {
 });
 
 Route::middleware('auth:users')->group(function () {
-    Route::get('profile/complete', [ProfileController::class, 'complete'])->name('profile.complete');
-    Route::put('profile/complete', [ProfileController::class, 'storeCompletion'])->name('profile.complete.store');
-
-    Route::middleware(EnsureProfileIsComplete::class)->group(function () {
-        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences.update');
-    });
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences.update');
 });
 
 /*

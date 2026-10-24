@@ -7,7 +7,6 @@ use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -37,8 +36,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'birthdate',
         'gender',
-        'country_id',
-        'state_id',
         'password',
         'last_login_at',
     ];
@@ -51,6 +48,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'country_id',
+        'state_id',
     ];
 
     /**
@@ -138,43 +137,16 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the validation rules for the user's personal details.
      *
-     * Shared by registration, profile completion and profile update.
+     * Shared by registration and profile update.
      */
-    public static function personalDetailsRules(mixed $countryId): array
+    public static function personalDetailsRules(bool $requireGender = false): array
     {
         return [
             // Stored in international format (+201001234567), the format the phone input reads back.
             'phone' => ['nullable', 'string', 'max:20', 'starts_with:+', 'phone'],
-            'birthdate' => ['required', 'date', 'before:today'],
-            'gender' => ['required', Rule::enum(Gender::class)],
-            'country_id' => ['required', 'exists:countries,id'],
-            'state_id' => ['required', Rule::exists('states', 'id')->where('country_id', $countryId)],
+            'birthdate' => ['nullable', 'date', 'before:today'],
+            'gender' => [$requireGender ? 'required' : 'nullable', Rule::enum(Gender::class)],
         ];
-    }
-
-    /**
-     * Determine whether the user has filled in all the required personal details.
-     */
-    public function hasCompletedProfile(): bool
-    {
-        return filled($this->first_name) && filled($this->last_name)
-            && $this->birthdate && $this->gender && $this->country_id && $this->state_id;
-    }
-
-    /**
-     * Get the user's country of residence.
-     */
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class);
-    }
-
-    /**
-     * Get the user's state (governorate) of residence.
-     */
-    public function state(): BelongsTo
-    {
-        return $this->belongsTo(State::class);
     }
 
     /**

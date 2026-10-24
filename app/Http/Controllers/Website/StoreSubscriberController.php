@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Website;
 
-use App\Enums\Gender;
 use App\Models\Subscriber;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Enum;
 use Redot\Http\Controllers\Controller;
 
 class StoreSubscriberController extends Controller
@@ -17,18 +15,11 @@ class StoreSubscriberController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email|max:255',
-            'gender' => ['required', new Enum(Gender::class)],
         ]);
 
-        $subscriber = Subscriber::updateOrCreate(
-            ['email' => $validated['email']],
-            ['gender' => $validated['gender']],
-        );
+        Subscriber::firstOrCreate(['email' => $validated['email']]);
 
-        $message = $subscriber->wasRecentlyCreated
-            ? __('You have successfully subscribed to our newsletter 🎉')
-            : __('You subscription information has been updated successfully 🎉');
-        toastify()->success($message);
+        toastify()->success(__('You have successfully subscribed to our newsletter 🎉'));
 
         return redirect()->back();
     }

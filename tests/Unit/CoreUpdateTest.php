@@ -23,10 +23,9 @@ test('the settings registry retains the original field types and validation', fu
 });
 
 test('personal details validation survives the authentication upgrade', function () {
-    $rules = User::personalDetailsRules(1);
+    $rules = User::personalDetailsRules();
 
-    expect($rules['birthdate'])->toBe(['required', 'date', 'before:today'])
-        ->and($rules['country_id'])->toBe(['required', 'exists:countries,id'])
+    expect($rules['birthdate'])->toBe(['nullable', 'date', 'before:today'])
         ->and($rules['phone'])->toContain('phone', 'starts_with:+')
-        ->and($rules['state_id'][0])->toBe('required');
+        ->and($rules)->not->toHaveKeys(['country_id', 'state_id', 'referral_code']);
 });

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Event;
 test('register screen can be rendered', function () {
     $response = $this->get(route('website.register'));
 
-    $response->assertOk();
+    $response->assertOk()->assertDontSee('name="birthdate"', false);
 });
 
 test('user can register', function () {
@@ -18,10 +18,12 @@ test('user can register', function () {
         'email' => fake()->unique()->safeEmail,
         'password' => 'password',
         'password_confirmation' => 'password',
+        'gender' => 'male',
     ]);
 
     Event::assertDispatched(Registered::class);
 
     $this->assertAuthenticated('users');
+    expect(auth('users')->user()->birthdate)->toBeNull();
     $response->assertRedirect(route('website.index'));
 });

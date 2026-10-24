@@ -1,74 +1,31 @@
 {{--
-    Personal details fields shared by registration, profile completion and profile update.
+    Personal details fields shared by registration and profile update.
 
-    @param array $details     Current values: phone, birthdate (Y-m-d), birth_day, birth_month, birth_year, gender, country_id, state_id.
-    @param bool  $splitBirthdate  Show the birthdate as day / month / year selects, so a partial date can be prefilled.
-    @param bool  $withReferral    Show the invite code switch next to the gender, and its field below (registration only).
+    @param array $details     Current values: phone, birthdate (Y-m-d), gender.
+    @param bool  $showPhone  Show the optional phone field (hidden during registration).
+    @param bool  $showBirthdate  Show the optional birthdate field (hidden during registration).
+    @param bool  $requireGender  Require a gender selection during registration.
 --}}
 @php
     $details ??= [];
-    $splitBirthdate ??= false;
-    $withReferral ??= false;
+    $showPhone ??= true;
+    $showBirthdate ??= true;
+    $requireGender ??= false;
     $value = fn (string $key) => old($key, $details[$key] ?? null);
 @endphp
 
-<div class="mb-3">
-    <x-phone name="phone" :title="__('Phone Number')" :value="$value('phone')" />
-</div>
-
-@if ($splitBirthdate)
-    <x-label :title="__('Birthdate')" for="birth-day" required />
-
-    <div class="row g-2 mb-3">
-        <div class="col-4">
-            <x-select id="birth-day" name="birth_day" :tom="false" :options="['' => __('Day')] + array_combine(range(1, 31), range(1, 31))"
-                :value="$value('birth_day')" validation="required" />
-        </div>
-
-        <div class="col-4">
-            <x-select id="birth-month" name="birth_month" :tom="false"
-                :options="['' => __('Month')] + collect(range(1, 12))->mapWithKeys(fn ($month) => [$month => now()->startOfYear()->month($month)->translatedFormat('F')])->all()"
-                :value="$value('birth_month')" validation="required" />
-        </div>
-
-        <div class="col-4">
-            <x-select id="birth-year" name="birth_year" :tom="false" :options="['' => __('Year')] + array_combine(range(now()->year, now()->year - 100), range(now()->year, now()->year - 100))"
-                :value="$value('birth_year')" validation="required" />
-        </div>
-    </div>
-@else
+@if ($showPhone)
     <div class="mb-3">
-        <x-input type="date" name="birthdate" :title="__('Birthdate')" :value="$value('birthdate')" validation="required" />
+        <x-phone name="phone" :title="__('Phone Number')" :value="$value('phone')" />
     </div>
 @endif
 
-<div class="row">
-    <div class="col-12 col-md-6 mb-3">
-        <x-countries id="country-id" name="country_id" :title="__('Country')" :value="$value('country_id')" validation="required" />
-    </div>
-
-    <div class="col-12 col-md-6 mb-3">
-        <x-select-remote id="state-id" name="state_id" :title="__('State')" :value="$value('state_id')" validation="required"
-            :query="\App\Models\State::query()->where('country_id', '{country}')"
-            :text="app()->getLocale() === 'ar' ? 'native' : 'name'" bind-country.selector="#country-id" />
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12 col-md-6 mb-3">
-        <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender') ?? \App\Enums\Gender::Male->value" validation="required" inline />
-    </div>
-
-    @if ($withReferral)
-        <div class="col-12 col-md-6 mb-3">
-            <x-label :title="__('Do you have a code?')" for="has-referral-code" />
-            <x-toggle id="has-referral-code" :on="__('Yes, I have an invite code')" :off="__('No, I don\'t have an invite code')" />
-        </div>
-    @endif
-</div>
-
-@if ($withReferral)
-    <div class="mb-3" visible-when="$has-referral-code">
-        <x-input type="text" name="referral_code" :title="__('Invite Code')" :value="old('referral_code')" :placeholder="__('Invite Code')" />
+@if ($showBirthdate)
+    <div class="mb-3">
+        <x-input type="date" name="birthdate" :title="__('Birthdate')" :value="$value('birthdate')" />
     </div>
 @endif
+
+<div class="mb-3">
+    <x-radios name="gender" :title="__('Gender')" :options="\App\Enums\Gender::values()" :value="$value('gender') ?? \App\Enums\Gender::Male->value" :validation="$requireGender ? 'required' : null" inline />
+</div>

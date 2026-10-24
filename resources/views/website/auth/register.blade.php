@@ -39,7 +39,7 @@
                         </div>
                     </div>
 
-                    @include('website.profile.partials.personal-details', ['withReferral' => true])
+                    @include('website.profile.partials.personal-details', ['showPhone' => false, 'showBirthdate' => false, 'requireGender' => true])
 
                     @if (setting('cloudflare_turnstile_site_key'))
                         <x-captcha :title="__('Captcha')" name="captcha" />

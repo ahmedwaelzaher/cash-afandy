@@ -21,8 +21,12 @@ class UserPreference extends Model
         'user_id',
         'theme',
         'language',
-        'country_id',
     ];
+
+    /**
+     * Legacy location data is no longer part of user preferences.
+     */
+    protected $hidden = ['country_id'];
 
     /**
      * Get the user that owns the preferences.
@@ -30,13 +34,5 @@ class UserPreference extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the country of the user's preferences.
-     */
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class);
     }
 }

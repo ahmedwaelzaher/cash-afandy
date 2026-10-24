@@ -22,7 +22,6 @@ class UserPreferenceFactory extends Factory
             'user_id' => User::factory(),
             'theme' => $this->faker->randomElement(['light', 'dark']),
             'language' => $this->faker->randomElement(['en', 'ar']),
-            'country_id' => null,
         ];
     }
 }
