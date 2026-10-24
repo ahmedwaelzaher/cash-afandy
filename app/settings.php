@@ -15,8 +15,14 @@ Setting::define('app_name')->array()->default([
 ]);
 
 Setting::define('footer_about_description')->array()->default([
-    'en' => "Who doesn't like getting the best deal when buying a product? Cash Afandy is here to help you get the highest cashback with coupons on the best stores, in addition to a service that continuously tracks offers from trusted merchants only. You can also follow Cash Afandy on social media and be part of the Cash Afandy family.",
-    'ar' => 'من لا يحب الحصول على أفضل صفقة عند شراء منتج؟ كاش أفندى هنا لمساعدتك في الحصول على أعلى كاش باك مع كوبونات من أفضل المتاجر، بالإضافة إلى خدمة تتابع العروض باستمرار من تجار موثوقين فقط. يمكنك أيضًا متابعة كاش أفندى على مواقع التواصل الاجتماعي والانضمام إلى عائلة كاش أفندى.',
+    'en' => "
+        Your smart friend in saving.
+        Coupons, discounts, and offers... the right way.
+    ",
+    'ar' => "
+        صاحبك الشاطر في التوفير.
+        كوبونات، خصومات، وعروض… بأصول.
+    ",
 ])->rules([
     'footer_about_description' => ['nullable', 'array'],
     'footer_about_description.*' => ['nullable', 'string'],
