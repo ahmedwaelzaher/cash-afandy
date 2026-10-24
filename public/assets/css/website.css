@@ -65,7 +65,6 @@ Social Buttons
 .btn-social {
     gap: 0.6rem;
     border-radius: 0.625rem;
-    padding-block: 0.9rem;
     font-weight: 500;
 }
 
@@ -110,6 +109,7 @@ Form Check (Radio)
 /* Shared design tokens for the navbar and subsequent sections. */
 .website-layout {
     --site-paper: #fcfaf5;
+    --site-background: linear-gradient(110deg, #f1f4e8, var(--site-paper) 65%);
     --site-surface: #fffefa;
     --site-soft: #e9efdf;
     --site-gold: #eab642;
@@ -119,6 +119,14 @@ Form Check (Radio)
     --site-radius: 1.25rem;
     --site-shadow: 0 12px 32px #243b1710;
     --site-highlight: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
+    --tblr-body-bg: var(--site-paper);
+}
+
+.website-layout,
+.site-hero,
+.site-offers,
+.site-categories {
+    background: var(--site-background);
 }
 
 /* Navbar: shared Tabler controls, desktop navigation and mobile offcanvas. */
@@ -126,6 +134,7 @@ Form Check (Radio)
 .site-hero,
 .site-store-strip,
 .site-offers,
+.site-categories,
 .site-offers-grid,
 .site-coupon-reveal {
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
@@ -432,11 +441,6 @@ Form Check (Radio)
     }
 }
 
-.site-home {
-    --tblr-body-bg: var(--site-paper);
-    background: var(--site-paper);
-}
-
 .site-home .site-header-search .site-search {
     border-color: var(--site-line);
     background: transparent;
@@ -445,7 +449,6 @@ Form Check (Radio)
 /* Hero: saved V3 composition, using the shared search and brand tokens. */
 .site-hero {
     padding-block: clamp(2rem, 4vw, 3rem);
-    background: linear-gradient(110deg, #f1f4e8, var(--site-paper) 65%);
 }
 
 .site-hero-content {
@@ -751,7 +754,8 @@ Form Check (Radio)
     .site-navbar,
     .site-hero,
     .site-store-strip,
-    .site-offers {
+    .site-offers,
+    .site-categories {
         --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
         --site-content-width: 75rem;
         --site-nav-link-padding: 0.75rem;
@@ -969,10 +973,10 @@ Form Check (Radio)
 /* ============================================================
 Footer
 ============================================================ */
-.site-footer-mascot {
-    width: auto;
-    max-width: 100%;
-    height: 8rem;
+.site-footer-logo {
+    inline-size: 16rem;
+    max-inline-size: 100%;
+    block-size: auto;
 }
 
 .site-footer-subscribe .form-control {
@@ -1189,12 +1193,13 @@ Store strip and shared marquee
 }
 
 /* Shared coupon and offer cards. */
-.site-offers {
-    background: var(--site-paper);
+.site-offers,
+.site-categories {
     font-size: 1rem;
 }
 
-.site-offers h2 {
+.site-offers h2,
+.site-categories h2 {
     font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
@@ -1476,4 +1481,29 @@ Coupon Code
 
 .site-coupon-reveal .modal-content {
     background: var(--site-surface);
+}
+
+/* Category discovery uses the same surface and colors as the offer cards. */
+.site-category-card {
+    border-color: var(--site-line);
+    border-radius: var(--site-radius);
+    background: var(--site-surface);
+    color: var(--site-ink);
+}
+
+.site-category-card:hover,
+.site-category-card:focus-visible {
+    border-color: var(--tblr-primary-darken);
+    background: var(--site-soft);
+    color: var(--site-ink);
+}
+
+.site-category-icon {
+    inline-size: 4rem;
+    block-size: 4rem;
+    background: var(--site-soft);
+}
+
+.site-category-icon .ti {
+    --tblr-icon-size: 2rem;
 }

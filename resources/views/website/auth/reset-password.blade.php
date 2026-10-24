@@ -1,7 +1,11 @@
-<x-layouts::website.auth :title="__('Reset password')">
+<x-layouts::website.auth class="login-page" :title="__('Reset password')">
+    @pushOnce('styles')
+        <link rel="stylesheet" href="{{ hashed_asset('assets/css/login.css') }}" />
+    @endPushOnce
+
     <x-status />
 
-    <x-form class="card card-md" :action="route('website.password.store')" method="POST">
+    <x-form class="card card-md login-split" :action="route('website.password.store')" method="POST">
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
         <div class="card-body">
@@ -30,7 +34,7 @@
                     placeholder="{{ __('Confirm Password') }}" validation="required" />
             </div>
 
-            <div class="form-footer">
+            <div class="form-footer mt-3">
                 <button type="submit" class="btn btn-brand w-100">{{ __('Reset password') }}</button>
             </div>
         </div>

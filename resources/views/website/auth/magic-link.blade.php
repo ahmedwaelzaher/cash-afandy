@@ -1,11 +1,11 @@
-<x-layouts::website.auth :title="__('Login with Magic Link')">
+<x-layouts::website.auth :title="__('Log in without a password')">
     <x-status />
 
     <x-form class="card card-md" :action="route('website.magic-link.store')" method="POST">
         <div class="card-body">
             <div class="text-center mb-4">
                 <h2 class="h2 mb-2">
-                    {{ __('Login with Magic Link') }}
+                    {{ __('Log in without a password') }}
                 </h2>
 
                 <p class="text-muted">

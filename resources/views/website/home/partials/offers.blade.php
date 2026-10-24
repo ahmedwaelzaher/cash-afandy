@@ -1,13 +1,5 @@
 @php
-    $categories = [
-        'fashion' => __('Fashion'),
-        'electronics' => __('Electronics'),
-        'beauty' => __('Beauty and care'),
-        'sports' => __('Sports'),
-        'home-living' => __('Home and living'),
-        'health' => __('Health'),
-        'groceries' => __('Groceries'),
-    ];
+    $categories = array_map(fn ($category) => $category['title'], $previewCategories);
     $storeCategories = [
         'noon' => ['fashion', 'electronics', 'home-living', 'groceries'],
         'Amazon' => ['electronics', 'home-living', 'health'],

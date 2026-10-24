@@ -1,48 +1,21 @@
 <div class="border-top site-footer" style="background: var(--tblr-bg-surface)">
     <footer class="container py-5">
         <div class="row">
-            <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                <div class="d-flex align-items-center gap-3">
-                    <img src="{{ hashed_asset('assets/images/mascot.svg') }}" alt="{{ app_name() }}"
-                        class="site-footer-mascot flex-shrink-0" loading="lazy" />
+            <div class="col-12 col-lg-4 mb-4 mb-lg-0">
+                <a href="{{ route('website.index') }}" class="d-inline-block mb-3">
+                    <x-logo variant="horizontal" class="site-footer-logo object-fit-contain" />
+                </a>
 
-                    <div>
-                        <h3>{{ __('About :app', ['app' => app_name()]) }}</h2>
-
-                        <p class="text-body-secondary mb-0">
-                            {{  Arr::get(setting('footer_about_description'), app()->getLocale()) }}
-                        </p>
-                    </div>
-                </div>
+                <p class="text-body-secondary mb-0">
+                    {{ Arr::get(setting('footer_about_description'), app()->getLocale()) }}
+                </p>
             </div>
 
-            <div class="col-6 col-lg-2 mb-4 mb-lg-0">
-                <h3>{{ __('Our Services') }}</h2>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 mb-lg-0">
+                <h3>{{ __('Quick Links') }}</h3>
 
                 <ul class="nav flex-column">
-                    <li class="nav-item mb-2">
-                        <a href="#" class="nav-link p-0 text-body-secondary">{{ __('All Categories') }}</a>
-                    </li>
-
-                    <li class="nav-item mb-2">
-                        <a href="#" class="nav-link p-0 text-body-secondary">{{ __('Coupons') }}</a>
-                    </li>
-
-                    <li class="nav-item mb-2">
-                        <a href="#" class="nav-link p-0 text-body-secondary">{{ __('Cashback') }}</a>
-                    </li>
-
-                    <li class="nav-item mb-2">
-                        <a href="#" class="nav-link p-0 text-body-secondary">{{ __('About Us') }}</a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="col-6 col-lg-2 mb-4 mb-lg-0">
-                <h3>{{ __('Important Links') }}</h2>
-
-                <ul class="nav flex-column">
-                    @foreach (\App\Models\StaticPage::select('title', 'slug')->get() as $page)
+                    @foreach (\App\Models\StaticPage::whereIn('slug', ['privacy-policy', 'terms-and-conditions'])->select('title', 'slug')->orderBy('id')->get() as $page)
                         <li class="nav-item mb-2">
                             <a href="{{ route('website.static-pages.show', $page->slug) }}"
                                 class="nav-link p-0 text-body-secondary">
@@ -50,10 +23,13 @@
                             </a>
                         </li>
                     @endforeach
+                    <li class="nav-item mb-2">
+                        <a href="mailto:support@cashafady.com" class="nav-link p-0 text-body-secondary">{{ __('Reach Out') }}</a>
+                    </li>
                 </ul>
             </div>
 
-            <div class="col-12 col-lg-4">
+            <div class="col-12 col-sm-6 col-lg-4">
                 <x-form route="website.subscribers.store" method="POST" toast-errors>
                     <h3>{{ __('Subscribe Now') }}</h2>
 

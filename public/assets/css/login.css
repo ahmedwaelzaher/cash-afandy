@@ -2,10 +2,6 @@
     font-family: var(--tblr-body-font-family);
 }
 
-.login-page {
-    background-color: var(--White);
-}
-
 .login-split__illustration {
     padding: 2rem;
 }
@@ -16,29 +12,12 @@
     height: auto;
 }
 
-.login-split__dots {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    gap: 0.4rem;
-    margin-block-start: 2rem;
-}
-
-.login-split__dots span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--Meduim-Gray);
-}
-
-.login-split__dots span.is-active {
-    width: 20px;
-    border-radius: 4px;
-    background-color: var(--Green-Dark);
+[dir='ltr'] .login-split__illustration-img {
+    transform: scaleX(-1);
 }
 
 .login-split__form-col {
-    padding-block: 3rem;
+    padding-block: 0 1.5rem;
 }
 
 .login-split__form-wrap {
@@ -60,7 +39,16 @@
     background-color: var(--White);
     border: 1px solid var(--Light-Gray);
     border-radius: 0.625rem;
-    padding-block: 0.9rem;
+}
+
+/* Keep enhanced selects at the same Tabler size as the other form fields. */
+.login-split .ts-wrapper {
+    min-height: 0;
+}
+
+.login-split .ts-control {
+    font-size: inherit;
+    line-height: inherit;
 }
 
 .login-split .form-control:focus {
@@ -79,7 +67,6 @@
     border-color: var(--Green-Dark);
     color: var(--White);
     font-weight: 600;
-    padding-block: 0.9rem;
     border-radius: 0.625rem;
 }
 

@@ -7,10 +7,21 @@
         ['name' => 'adidas', 'url' => 'https://www.adidas.com.eg/', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg'],
         ['name' => 'Nice One', 'url' => 'https://niceonesa.com/', 'logo' => 'https://cdn.niceonesa.com/web/assets_v2/images/ltr_logo.svg?v=2.8.0'],
     ];
+
+    $previewCategories = [
+        'fashion' => ['title' => __('Fashion'), 'icon' => 'ti ti-shirt'],
+        'electronics' => ['title' => __('Electronics'), 'icon' => 'ti ti-devices'],
+        'beauty' => ['title' => __('Beauty and care'), 'icon' => 'ti ti-sparkles'],
+        'sports' => ['title' => __('Sports'), 'icon' => 'ti ti-barbell'],
+        'home-living' => ['title' => __('Home and living'), 'icon' => 'ti ti-home'],
+        'health' => ['title' => __('Health'), 'icon' => 'ti ti-heartbeat'],
+        'groceries' => ['title' => __('Groceries'), 'icon' => 'ti ti-basket'],
+    ];
 @endphp
 
 <x-layouts::website class="site-home">
     @include('website.home.partials.hero')
     @include('website.home.partials.store-strip')
     @include('website.home.partials.offers')
+    @include('website.home.partials.categories')
 </x-layouts::website>
