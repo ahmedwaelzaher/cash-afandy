@@ -130,6 +130,15 @@ Form Check (Radio)
     background: var(--site-background);
 }
 
+/* Center short auth forms below the measured header; long forms grow naturally. */
+.site-auth {
+    min-block-size: calc(100svh - var(--site-navbar-height, 0px));
+}
+
+.auth-page .page-body {
+    margin-block-end: 0;
+}
+
 /* Navbar: shared Tabler controls, desktop navigation and mobile offcanvas. */
 .site-navbar,
 .site-hero,
@@ -986,6 +995,10 @@ Footer
 .site-footer-subscribe .form-control:focus {
     background-color: var(--White);
     box-shadow: none;
+}
+
+[dir='rtl'] .site-footer-subscribe .form-control::placeholder {
+    text-align: right;
 }
 
 .site-footer-subscribe .btn {

@@ -172,6 +172,7 @@ $(() => {
     });
 
     // Track scroll direction to hide on the way down and reveal on the way up.
+    const hideOnScroll = !$('body').hasClass('auth-page');
     let framePending = false;
     let previousScroll = window.scrollY;
 
@@ -184,7 +185,7 @@ $(() => {
 
         if (scroll !== previousScroll) {
             // Keep open menus and focused controls visible.
-            $header.toggleClass('is-hidden', scroll > headerHeight && scroll > previousScroll
+            $header.toggleClass('is-hidden', hideOnScroll && scroll > headerHeight && scroll > previousScroll
                 && !$header.find('.show, .showing, :focus-visible, input:focus').length);
         }
 

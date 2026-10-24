@@ -1,5 +1,5 @@
-<x-layouts::website {{ $attributes }}>
-    <div class="container container-tight pt-2 pb-4 my-auto">
+<x-layouts::website {{ $attributes->class(['auth-page']) }}>
+    <div class="site-auth container container-tight d-flex flex-column justify-content-center py-3">
         {{ $slot }}
     </div>
 </x-layouts::website>
