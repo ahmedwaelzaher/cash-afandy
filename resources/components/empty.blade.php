@@ -21,5 +21,9 @@
                 {{ $subtitle }}
             </p>
         @endif
+
+        @if ($slot->isNotEmpty())
+            <div class="empty-action">{{ $slot }}</div>
+        @endif
     </div>
 </div>

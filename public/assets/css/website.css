@@ -124,6 +124,7 @@ Form Check (Radio)
 
 .website-layout,
 .site-hero,
+.site-store,
 .site-offers,
 .site-categories {
     background: var(--site-background);
@@ -133,6 +134,7 @@ Form Check (Radio)
 .site-navbar,
 .site-hero,
 .site-store-strip,
+.site-store,
 .site-offers,
 .site-categories,
 .site-offers-grid,
@@ -754,6 +756,7 @@ Form Check (Radio)
     .site-navbar,
     .site-hero,
     .site-store-strip,
+    .site-store,
     .site-offers,
     .site-categories {
         --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
@@ -1194,7 +1197,8 @@ Store strip and shared marquee
 
 /* Shared coupon and offer cards. */
 .site-offers,
-.site-categories {
+.site-categories,
+.site-store {
     font-size: 1rem;
 }
 
@@ -1506,4 +1510,18 @@ Coupon Code
 
 .site-category-icon .ti {
     --tblr-icon-size: 2rem;
+}
+
+/* Store empty states reuse the shared empty component and brand colors. */
+.site-store .empty-icon {
+    inline-size: fit-content;
+    margin-inline: auto;
+    padding: 1rem;
+    border-radius: var(--site-radius);
+    background: var(--site-soft);
+    color: var(--site-ink);
+}
+
+.site-store .empty-icon .ti {
+    --tblr-icon-size: 3rem;
 }
