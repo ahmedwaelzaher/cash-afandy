@@ -130,6 +130,27 @@ Form Check (Radio)
     background: var(--site-background);
 }
 
+/* Illustrated 404 and 500 pages. */
+.site-error-content {
+    max-inline-size: 64rem;
+    margin-inline: auto;
+}
+
+.site-error-illustration {
+    inline-size: 100%;
+    max-inline-size: 24rem;
+    block-size: min(55svh, 32rem);
+}
+
+[dir='ltr'] .site-error-illustration {
+    transform: scaleX(-1);
+}
+
+.site-error-code {
+    color: var(--site-ink);
+    font-size: clamp(4rem, 12vw, 8rem);
+}
+
 /* Center short auth forms below the measured header; long forms grow naturally. */
 .site-auth {
     min-block-size: calc(100svh - var(--site-navbar-height, 0px));
@@ -147,6 +168,7 @@ Form Check (Radio)
 .site-offers,
 .site-categories,
 .site-offers-grid,
+.site-error-content,
 .site-coupon-reveal {
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
     --site-content-width: 100rem;
