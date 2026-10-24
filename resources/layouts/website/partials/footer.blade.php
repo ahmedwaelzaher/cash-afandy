@@ -2,13 +2,11 @@
     <footer class="container py-5">
         <div class="row">
             <div class="col-12 col-lg-4 mb-4 mb-lg-0">
-                <a href="{{ route('website.index') }}" class="d-inline-block mb-3">
-                    <x-logo variant="horizontal" class="site-footer-logo object-fit-contain" />
-                </a>
+                <h3>{{ __('About :app', ['app' => app()->isLocale('ar') ? 'الأفندي' : 'Afandy']) }}</h3>
 
-                <p class="text-body-secondary mb-0">
-                    {{ Arr::get(setting('footer_about_description'), app()->getLocale()) }}
-                </p>
+                <div class="text-body-secondary mb-0">
+                    {!! Arr::get(setting('footer_about_description'), app()->getLocale()) !!}
+                </div>
             </div>
 
             <div class="col-12 col-sm-6 col-lg-4 mb-4 mb-lg-0">
@@ -31,7 +29,7 @@
 
             <div class="col-12 col-sm-6 col-lg-4">
                 <x-form route="website.subscribers.store" method="POST" toast-errors>
-                    <h3>{{ __('Subscribe Now') }}</h2>
+                    <h3>{{ __('Subscribe Now') }}</h3>
 
                     <div class="site-footer-subscribe input-group mb-3">
                         <x-input type="email" name="email" :placeholder="__('Email Address')" validation="required" />
@@ -43,9 +41,9 @@
                     <x-radios name="gender" :options="\App\Enums\Gender::values()"
                         :value="\App\Enums\Gender::Male->value" inline />
 
-                    <p class="text-body-secondary small mt-3 mb-0">
-                        {{ Arr::get(setting('footer_subscribe_description'), app()->getLocale()) }}
-                    </p>
+                    <div class="text-body-secondary small mt-3 mb-0">
+                        {!! Arr::get(setting('footer_subscribe_description'), app()->getLocale()) !!}
+                    </div>
                 </x-form>
             </div>
         </div>

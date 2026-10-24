@@ -28,12 +28,12 @@
 </div>
 
 <div class="mb-3">
-    <x-translatable component="textarea" name="footer_about_description" :title="__('Footer about description')"
+    <x-translatable component="rich-editor" name="footer_about_description" :title="__('Footer about description')"
         :value="setting('footer_about_description')" />
 </div>
 
 <div class="mb-3">
-    <x-translatable component="textarea" name="footer_subscribe_description" :title="__('Footer subscribe description')"
+    <x-translatable component="rich-editor" name="footer_subscribe_description" :title="__('Footer subscribe description')"
         :value="setting('footer_subscribe_description')" />
 </div>
 

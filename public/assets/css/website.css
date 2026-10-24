@@ -976,12 +976,6 @@ Form Check (Radio)
 /* ============================================================
 Footer
 ============================================================ */
-.site-footer-logo {
-    inline-size: 16rem;
-    max-inline-size: 100%;
-    block-size: auto;
-}
-
 .site-footer-subscribe .form-control {
     height: 100%;
     background-color: var(--White);
