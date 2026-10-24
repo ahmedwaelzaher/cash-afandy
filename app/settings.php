@@ -75,7 +75,7 @@ Setting::define('theme')->array()->default([
     'radius' => 1,
 ]);
 
-Setting::define('social_facebook')->string()->default('');
+Setting::define('social_facebook')->string()->default('https://www.facebook.com/cashafandy');
 
 Setting::define('social_instagram')->string()->default('');
 
@@ -83,7 +83,7 @@ Setting::define('social_whatsapp')->string()->default('');
 
 Setting::define('social_x')->string()->default('');
 
-Setting::define('social_telegram')->string()->default('');
+Setting::define('social_telegram')->string()->default('https://t.me/cashafandy');
 
 Setting::define('social_tiktok')->string()->default('');
 
