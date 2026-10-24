@@ -2,13 +2,11 @@
 
 namespace App\Livewire\Datatables;
 
-use App\Enums\Gender;
 use App\Models\Subscriber;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
-use Redot\Datatables\Filters\SelectFilter;
 
 class Subscribers extends Datatable
 {
@@ -34,10 +32,6 @@ class Subscribers extends Datatable
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('gender', __('Gender'))
-                ->getter(fn ($value) => $value->label())
-                ->sortable(),
-
             TextColumn::make('created_at', __('Subscribed At'))
                 ->getter(fn ($value) => $value->format('Y-m-d H:i'))
                 ->sortable(),
@@ -51,17 +45,6 @@ class Subscribers extends Datatable
     {
         return [
             Action::delete('dashboard.subscribers.destroy')->visible(route_allowed('dashboard.subscribers.destroy')),
-        ];
-    }
-
-    /**
-     * Get the filters for the datatable.
-     */
-    public function filters(): array
-    {
-        return [
-            SelectFilter::make('gender', __('Gender'))
-                ->options(Gender::values()),
         ];
     }
 }

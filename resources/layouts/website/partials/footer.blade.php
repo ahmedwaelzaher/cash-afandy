@@ -38,9 +38,6 @@
                         </button>
                     </div>
 
-                    <x-radios name="gender" :options="\App\Enums\Gender::values()"
-                        :value="\App\Enums\Gender::Male->value" inline />
-
                     <div class="text-body-secondary small mt-3 mb-0">
                         {!! Arr::get(setting('footer_subscribe_description'), app()->getLocale()) !!}
                     </div>
