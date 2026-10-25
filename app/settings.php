@@ -48,9 +48,9 @@ Setting::define('facebook_pixel_id')->string()->default('');
 
 Setting::define('google_analytics_property_id')->string()->default('');
 
-Setting::define('cloudflare_turnstile_site_key')->string()->default('');
+Setting::define('cloudflare_turnstile_site_key')->string()->default(env('CLOUDFLARE_TURNSTILE_SITE_KEY', ''));
 
-Setting::define('cloudflare_turnstile_secret_key')->string()->default('');
+Setting::define('cloudflare_turnstile_secret_key')->string()->default(env('CLOUDFLARE_TURNSTILE_SECRET_KEY', ''));
 
 Setting::define('google_client_id')->string()->default(env('GOOGLE_CLIENT_ID', ''));
 
