@@ -74,7 +74,7 @@ QUEUE_CONNECTION=database
 LOG_LEVEL=warning
 ```
 
-Use the actual database connection details from hPanel, including the host and port. Configure mail and OAuth credentials as needed. Keep `APP_KEY` blank until the preparation step below generates it once. Never upload a local `.env` or commit the production file.
+Use the actual database connection details from hPanel, including the host and port. Configure mail and OAuth credentials as needed. The current server already has a permanent `APP_KEY`; preserve it. For a fresh installation only, leave the key blank until generating it once during preparation. Never upload a local `.env` or commit the production file.
 
 ```bash
 chmod 600 /home/u554309232/domains/cashafandy.com/cash-afandy/shared/.env
@@ -143,10 +143,9 @@ The run prints the prepared release's full path. Connect over SSH and enter that
 
 ```bash
 cd /home/u554309232/domains/cashafandy.com/cash-afandy/releases/RELEASE_ID_FROM_ACTIONS
-/opt/alt/php83/usr/bin/php artisan key:generate --force
 ```
 
-Use the same PHP executable as `HOSTINGER_PHP_BIN` for all manual Artisan commands. Generate `APP_KEY` once only; future releases reuse `shared/.env`.
+Use the same PHP executable as `HOSTINGER_PHP_BIN` for all manual Artisan commands. On a fresh server without an application key, run `/opt/alt/php83/usr/bin/php artisan key:generate --force` once. The current server's key has already been generated, so do not run that command again. Future releases reuse `shared/.env`.
 
 Before publication, review and explicitly approve the existing migrations and the production initialization plan. The migrations live in `database/migrations`; essential reference data comes from the existing language, country, state, settings, role, and static-page seeders. Run only the approved initialization commands from this prepared directory. No database command is part of this workflow or this guide's executable setup steps.
 
