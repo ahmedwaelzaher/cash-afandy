@@ -5,6 +5,26 @@ use Database\Seeders\StaticPageSeeder;
 
 dataset('website static pages', ['privacy-policy', 'terms-and-conditions', 'contact-us', 'faq']);
 
+test('footer displays any active static page with its localized title and slug', function (string $locale) {
+    $activePage = StaticPage::factory()->create([
+        'slug' => 'help-centre',
+        'title' => ['ar' => 'مركز المساعدة', 'en' => 'Help Centre'],
+        'active' => true,
+    ]);
+    $inactivePage = StaticPage::factory()->create([
+        'slug' => 'hidden-page',
+        'title' => ['ar' => 'صفحة مخفية', 'en' => 'Hidden Page'],
+        'active' => false,
+    ]);
+
+    $this->get(route('website.index', ['locale' => $locale]))
+        ->assertOk()
+        ->assertSee('href="' . route('website.static-pages.show', ['locale' => $locale, 'staticPage' => $activePage->slug]) . '"', false)
+        ->assertSeeText($activePage->getTranslation('title', $locale))
+        ->assertDontSee('href="' . route('website.static-pages.show', ['locale' => $locale, 'staticPage' => $inactivePage->slug]) . '"', false)
+        ->assertDontSeeText($inactivePage->getTranslation('title', $locale));
+})->with(['ar', 'en']);
+
 test('static page can be displayed', function () {
     $staticPage = StaticPage::factory()->create();
 
