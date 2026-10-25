@@ -22,7 +22,7 @@
             'tips' => ($isDirectOffer ? __('The offer is applied automatically through the store link.') : __('Use the coupon code at checkout.'))
                 . "\n" . __('Cannot be combined with other offers or discount codes.'),
         ]);
-        $coupon->setRelation('client', new \App\Models\Client(['title' => $store['name'], 'logo' => $store['logo'], 'url' => $store['url']]));
+        $coupon->setRelation('client', new \App\Models\Client(['title' => $store['name'], 'slug' => $store['slug'], 'logo' => $store['logo'], 'url' => $store['url']]));
 
         return [
             'coupon' => $coupon,

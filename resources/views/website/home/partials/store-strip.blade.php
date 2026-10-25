@@ -7,7 +7,7 @@
 
         <x-marquee :duration="50" :reverse="true">
             @foreach ($stores as $store)
-                <a class="site-store-logo flex-center" href="{{ $store['url'] }}" target="_blank" rel="noopener noreferrer">
+                <a class="site-store-logo flex-center" href="{{ route('website.clients.show', $store['slug']) }}">
                     <img src="{{ $store['logo'] }}" alt="{{ $store['name'] }}" width="120" height="40" loading="lazy" referrerpolicy="no-referrer">
                 </a>
             @endforeach

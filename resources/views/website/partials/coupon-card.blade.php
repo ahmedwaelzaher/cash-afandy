@@ -8,7 +8,7 @@
     </div>
     <div class="card-body d-flex flex-column p-3">
         <div class="d-flex align-items-center justify-content-between gap-2">
-            <div class="site-offer-store d-flex align-items-center gap-2 fw-semibold">
+            <a href="{{ route('website.clients.show', $coupon->client) }}" class="site-offer-store d-flex align-items-center gap-2 fw-semibold text-reset text-decoration-none">
                 <span class="site-offer-icon flex-center flex-shrink-0">
                     @if ($coupon->client->logo)
                         <img class="object-fit-contain" src="{{ $coupon->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
@@ -17,7 +17,7 @@
                     @endif
                 </span>
                 {{ $coupon->client->title }}
-            </div>
+            </a>
             <div class="d-flex align-items-center flex-shrink-0">
                 <button type="button" class="btn btn-icon btn-link text-secondary text-decoration-none" data-share-url="{{ route('website.index') }}"
                     data-share-title="{{ __('Cash Afandy') }}" data-share-success="{{ __('Link copied') }}"
