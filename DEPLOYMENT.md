@@ -6,7 +6,9 @@ Pull requests targeting `main` run the build and tests without deploying or acce
 
 ## Current setup
 
-The production GitHub environment has been configured with the SSH secrets and deployment variables, restricted to `main`. SSH key access, the PHP 8.3 executable/extensions, and private filesystem symlink switching have been verified on Hostinger. `shared/.env` exists with production mode, a permanent application key, and configured database credentials. Database connectivity has been verified using read-only queries; the database is empty. No migrations, seeders, document-root changes, scheduler changes, or production deployment have been performed.
+The production GitHub environment has been configured with the SSH secrets and deployment variables, restricted to `main`. SSH key access, PHP 8.3 with the required CLI/web extensions, and filesystem symlink switching have been verified on Hostinger. `shared/.env` contains production settings, a permanent application key, and working database credentials. The 34 existing migrations and the five approved reference-data seeders (languages, countries, states, settings, roles) have been applied. No default administrator, users, or demonstration content were seeded.
+
+The initial release is live at `https://cashafandy.com`; homepage, localized health, and stylesheet requests returned HTTP 200. `public_html` points to `cash-afandy/current/public`, and the original Hostinger placeholder files are preserved in `public_html.before-cash-afandy`. The existing application scheduler still needs a separate hPanel cron setup if background jobs are required.
 
 To edit database credentials privately from PowerShell when needed:
 
@@ -151,7 +153,7 @@ Use the same PHP executable as `HOSTINGER_PHP_BIN` for all manual Artisan comman
 
 Before publication, review and explicitly approve the existing migrations and the production initialization plan. The migrations live in `database/migrations`; essential reference data comes from the existing language, country, state, settings, role, and static-page seeders. Run only the approved initialization commands from this prepared directory. No database command is part of this workflow or this guide's executable setup steps.
 
-Do not blindly run `DatabaseSeeder` in production: `AdminSeeder` creates a publicly known default administrator password. Administrator provisioning needs a separate, approved setup with a unique credential. Do not publish until that setup is complete.
+Do not blindly run `DatabaseSeeder` in production: `AdminSeeder` creates a publicly known default administrator password. Provisioning the first administrator needs a separate, approved setup with a unique credential before dashboard administration can be used.
 
 For this new, unpublished website, preserve the existing `public_html` directory as a backup before replacing it. Inspect it first and choose an unused backup name. Do not overwrite an existing backup:
 
