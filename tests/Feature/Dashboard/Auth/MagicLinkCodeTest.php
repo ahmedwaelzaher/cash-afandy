@@ -19,17 +19,19 @@ test('code entry screen redirects without email', function () {
     $response->assertRedirect(route('dashboard.magic-link.create'));
 });
 
-test('code entry screen redirects without valid token', function () {
+test('code entry screen does not reveal whether an email has a valid token', function () {
     $response = $this->get(route('dashboard.magic-link-code.create', ['email' => base64_encode('nonexistent@example.com')]));
 
-    $response->assertRedirect(route('dashboard.magic-link.create'));
+    $response->assertOk();
+    $response->assertSee('nonexistent@example.com');
+    $this->assertGuest('admins');
 });
 
 test('admin can authenticate via magic link token', function () {
     $admin = Admin::factory()->create();
     $loginToken = LoginToken::generate($admin->email, 'admins');
 
-    $response = $this->get(route('dashboard.magic-link-code.show', ['token' => $loginToken->token]));
+    $response = $this->get(route('dashboard.magic-link.verify', ['token' => $loginToken->token]));
 
     $this->assertAuthenticated('admins');
     $response->assertRedirect(route('dashboard.index'));
@@ -57,7 +59,7 @@ test('admin can authenticate via OTP code', function () {
 });
 
 test('authentication fails with invalid token', function () {
-    $response = $this->get(route('dashboard.magic-link-code.show', ['token' => 'invalid-token']));
+    $response = $this->get(route('dashboard.magic-link.verify', ['token' => 'invalid-token']));
 
     $this->assertGuest('admins');
     $response->assertRedirect(route('dashboard.magic-link.create'));
@@ -84,7 +86,7 @@ test('authentication fails with expired token', function () {
     // Expire the token
     $loginToken->update(['expires_at' => now()->subMinutes(1)]);
 
-    $response = $this->get(route('dashboard.magic-link-code.show', ['token' => $loginToken->token]));
+    $response = $this->get(route('dashboard.magic-link.verify', ['token' => $loginToken->token]));
 
     $this->assertGuest('admins');
     $response->assertRedirect(route('dashboard.magic-link.create'));
@@ -110,7 +112,7 @@ test('authentication fails for inactive admin via token', function () {
     $admin = Admin::factory()->create(['active' => false]);
     $loginToken = LoginToken::generate($admin->email, 'admins');
 
-    $response = $this->get(route('dashboard.magic-link-code.show', ['token' => $loginToken->token]));
+    $response = $this->get(route('dashboard.magic-link.verify', ['token' => $loginToken->token]));
 
     $this->assertGuest('admins');
     $response->assertRedirect(route('dashboard.magic-link.create'));
@@ -121,7 +123,7 @@ test('last login timestamp is updated on magic link authentication', function ()
     $admin = Admin::factory()->create(['last_login_at' => null]);
     $loginToken = LoginToken::generate($admin->email, 'admins');
 
-    $this->get(route('dashboard.magic-link-code.show', ['token' => $loginToken->token]));
+    $this->get(route('dashboard.magic-link.verify', ['token' => $loginToken->token]));
 
     $admin->refresh();
     expect($admin->last_login_at)->not->toBeNull();
