@@ -1,0 +1,138 @@
+name: Production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      prepare_only:
+        description: Prepare a release for initial database setup without publishing it
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      DB_URL: ''
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, exif, fileinfo, gd, gmp, intl, mbstring, pdo_mysql, pdo_sqlite, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install locked dependencies
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: |
+          cp .env.example .env
+          composer validate --no-check-publish
+          composer install --prefer-dist --no-interaction --no-progress
+          php artisan key:generate --force
+
+      - name: Test
+        run: |
+          php -r 'if (version_compare(SQLite3::version()["versionString"], "3.44.0", "<")) { fwrite(STDERR, "Tests require SQLite 3.44+ for CONCAT.\n"); exit(1); }'
+          php artisan dependencies:build
+          composer test
+
+      - name: Package production release
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --optimize-autoloader
+          mkdir "$RUNNER_TEMP/release"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/release"
+          cp -a vendor "$RUNNER_TEMP/release/vendor"
+          tar -czf "$RUNNER_TEMP/release.tar.gz" -C "$RUNNER_TEMP/release" .
+          cp .github/scripts/deploy.sh "$RUNNER_TEMP/deploy.sh"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-release
+          path: |
+            ${{ runner.temp }}/release.tar.gz
+            ${{ runner.temp }}/deploy.sh
+          if-no-files-found: error
+          retention-days: 3
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-release
+
+      - name: Deploy to Hostinger
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_HOST }}
+          SSH_PORT: ${{ secrets.HOSTINGER_PORT }}
+          SSH_USER: ${{ secrets.HOSTINGER_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_KNOWN_HOSTS }}
+          DEPLOY_PATH: ${{ vars.HOSTINGER_DEPLOY_PATH }}
+          PHP_BIN: ${{ vars.HOSTINGER_PHP_BIN }}
+          HEALTH_URL: ${{ vars.HOSTINGER_HEALTH_URL }}
+          PREPARE_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.prepare_only || false }}
+        run: |
+          set -euo pipefail
+          : "${SSH_HOST:?Set HOSTINGER_HOST}"
+          : "${SSH_PORT:?Set HOSTINGER_PORT}"
+          : "${SSH_USER:?Set HOSTINGER_USER}"
+          : "${SSH_PRIVATE_KEY:?Set HOSTINGER_SSH_KEY}"
+          : "${SSH_KNOWN_HOSTS:?Set HOSTINGER_KNOWN_HOSTS}"
+          : "${DEPLOY_PATH:?Set HOSTINGER_DEPLOY_PATH}"
+          PHP_BIN="${PHP_BIN:-php}"
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9.-]+$ ]]
+          [[ "$SSH_USER" =~ ^[a-zA-Z0-9_]+$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/home/[a-zA-Z0-9_./-]+$ ]]
+          [[ "$PHP_BIN" =~ ^[a-zA-Z0-9_./-]+$ ]]
+          [[ "/$DEPLOY_PATH/" != *'/../'* && "/$DEPLOY_PATH/" != *'/./'* ]]
+
+          ssh_dir="$(mktemp -d)"
+          trap 'rm -f "$ssh_dir/key" "$ssh_dir/known_hosts"; rmdir "$ssh_dir"' EXIT
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$ssh_dir/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          chmod 700 "$ssh_dir"
+          chmod 600 "$ssh_dir/key" "$ssh_dir/known_hosts"
+          ssh_options=(-i "$ssh_dir/key" -p "$SSH_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts" -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
+          target="$SSH_USER@$SSH_HOST"
+          release_id="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA}"
+
+          # Remote paths are deliberately expanded locally after validation above.
+          # shellcheck disable=SC2029
+          ssh "${ssh_options[@]}" "$target" "test -f '$DEPLOY_PATH/shared/.env' && mkdir -p '$DEPLOY_PATH/incoming'"
+          # shellcheck disable=SC2029
+          ssh "${ssh_options[@]}" "$target" "cat > '$DEPLOY_PATH/incoming/$release_id.tar.gz'" < release.tar.gz
+          printf -v command 'bash -s -- %q %q %q %q %q' "$DEPLOY_PATH" "$release_id" "$PHP_BIN" "$HEALTH_URL" "$PREPARE_ONLY"
+          # shellcheck disable=SC2029
+          ssh "${ssh_options[@]}" "$target" "$command" < deploy.sh
