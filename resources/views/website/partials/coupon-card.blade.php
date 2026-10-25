@@ -36,7 +36,7 @@
 
         <div class="site-offer-actions d-flex flex-wrap flex-sm-column align-items-center align-items-sm-stretch justify-content-between gap-2">
             @isset($categoryLabel)
-                <span class="site-offer-label align-self-sm-start">{{ $categoryLabel }}</span>
+                <a href="{{ route('website.clients.index', ['category' => $categorySlug ?? null]) }}" class="site-offer-label align-self-sm-start text-decoration-none">{{ $categoryLabel }}</a>
             @endisset
 
             <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">

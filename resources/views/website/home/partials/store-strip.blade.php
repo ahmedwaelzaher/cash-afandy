@@ -13,9 +13,8 @@
             @endforeach
         </x-marquee>
 
-        {{-- The store directory will be linked during backend integration. --}}
-        <span class="d-inline-flex align-items-center gap-2 text-nowrap" aria-disabled="true">
+        <a href="{{ route('website.clients.index') }}" class="d-inline-flex align-items-center gap-2 text-nowrap">
             {{ __('All stores') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
-        </span>
+        </a>
     </div>
 </section>

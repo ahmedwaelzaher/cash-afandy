@@ -55,7 +55,7 @@
         <div class="site-offers-grid">
             @foreach ($previewOffers as $preview)
                 <div data-offer-category="{{ $preview['category'] }}">
-                    @include('website.partials.coupon-card', ['coupon' => $preview['coupon'], 'categoryLabel' => $categories[$preview['category']], 'offerUrl' => $preview['url']])
+                    @include('website.partials.coupon-card', ['coupon' => $preview['coupon'], 'categoryLabel' => $categories[$preview['category']], 'categorySlug' => $preview['category'], 'offerUrl' => $preview['url']])
                 </div>
             @endforeach
         </div>

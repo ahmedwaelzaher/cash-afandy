@@ -36,6 +36,7 @@ Route::get('coupons/{coupon}', [CouponController::class, 'show'])->name('coupons
 Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.index');
 Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');
 
+Route::get('stores', [ClientController::class, 'index'])->name('clients.index');
 Route::get('stores/{client}', [ClientController::class, 'show'])->name('clients.show');
 
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');

@@ -9,7 +9,7 @@
             <nav aria-label="{{ __('Breadcrumb') }}" class="mb-3">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('website.index') }}">{{ __('Home') }}</a></li>
-                    <li class="breadcrumb-item">{{ __('Stores') }}</li>
+                    <li class="breadcrumb-item"><a href="{{ route('website.clients.index') }}">{{ __('Stores') }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ $client->title }}</li>
                 </ol>
             </nav>
@@ -32,7 +32,7 @@
                             @if ($client->categories->isNotEmpty())
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach ($client->categories as $category)
-                                        <a href="{{ route('website.coupons.index', ['category' => $category->slug]) }}" class="site-offer-label text-decoration-none">{{ $category->title }}</a>
+                                        <a href="{{ route('website.clients.index', ['category' => $category->slug]) }}" class="site-offer-label text-decoration-none">{{ $category->title }}</a>
                                     @endforeach
                                 </div>
                             @endif
@@ -75,6 +75,7 @@
                                     <div data-offer-type="{{ filled($coupon->code) ? 'coupon' : 'offer' }}">
                                         @include('website.partials.coupon-card', [
                                             'categoryLabel' => $client->categories->count() === 1 ? $client->categories->first()->title : null,
+                                            'categorySlug' => $client->categories->count() === 1 ? $client->categories->first()->slug : null,
                                             'offerUrl' => $client->url,
                                         ])
                                     </div>

@@ -125,6 +125,7 @@ Form Check (Radio)
 .website-layout,
 .site-hero,
 .site-store,
+.site-stores,
 .site-offers,
 .site-categories {
     background: var(--site-background);
@@ -165,6 +166,7 @@ Form Check (Radio)
 .site-hero,
 .site-store-strip,
 .site-store,
+.site-stores,
 .site-offers,
 .site-categories,
 .site-offers-grid,
@@ -788,6 +790,7 @@ Form Check (Radio)
     .site-hero,
     .site-store-strip,
     .site-store,
+    .site-stores,
     .site-offers,
     .site-categories {
         --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
@@ -1113,7 +1116,7 @@ Store strip and shared marquee
         white-space: nowrap;
     }
 
-    .site-store-strip-content > [aria-disabled] {
+    .site-store-strip-content > a {
         justify-self: end;
     }
 
@@ -1227,7 +1230,8 @@ Store strip and shared marquee
 /* Shared coupon and offer cards. */
 .site-offers,
 .site-categories,
-.site-store {
+.site-store,
+.site-stores {
     font-size: 1rem;
 }
 
@@ -1553,4 +1557,42 @@ Coupon Code
 
 .site-store .empty-icon .ti {
     --tblr-icon-size: 3rem;
+}
+
+/* Store directory: compact horizontal cards and category navigation. */
+.site-stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+}
+
+.site-directory-logo {
+    inline-size: 6rem;
+    block-size: 4.5rem;
+}
+
+.site-store-card:hover,
+.site-store-card:focus-visible {
+    border-color: var(--site-ink);
+    background: var(--site-soft);
+}
+
+.site-store-filter {
+    border-block: 2px solid transparent;
+    border-radius: var(--site-radius);
+    color: var(--site-text);
+}
+
+.site-store-filter.active {
+    border-color: var(--site-ink);
+    background: var(--site-soft);
+    color: var(--site-ink);
+    font-weight: 600;
+}
+
+@media (min-width: 992px) {
+    .site-stores-sidebar {
+        position: sticky;
+        inset-block-start: calc(var(--site-navbar-height, 0px) + 1rem);
+    }
 }
