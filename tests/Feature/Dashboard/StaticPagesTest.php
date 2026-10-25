@@ -107,3 +107,48 @@ test('static pages can be deleted', function () {
         'id' => $staticPage->id,
     ]);
 });
+
+test('static page forms expose the activation toggle with the current state', function (bool $active) {
+    $admin = Admin::factory()->create();
+    $staticPage = StaticPage::factory()->create(['active' => $active]);
+
+    $response = $this->actingAs($admin, 'admins')
+        ->get(route('dashboard.static-pages.edit', $staticPage))
+        ->assertOk();
+
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
+    $toggle = (new DOMXPath($document))->query('//input[@name="active" and @type="checkbox"]')->item(0);
+
+    expect($toggle)->not->toBeNull()
+        ->and($toggle->hasAttribute('checked'))->toBe($active);
+
+    $this->get(route('dashboard.static-pages.create'))
+        ->assertOk()
+        ->assertSee('name="active"', false);
+})->with([true, false]);
+
+test('dashboard activation controls static page access and footer visibility', function (bool $active) {
+    $admin = Admin::factory()->create();
+    $staticPage = StaticPage::where('slug', 'faq')->firstOrFail();
+    $staticPage->update(['active' => ! $active]);
+    $data = ['title' => $staticPage->getTranslations('title'), 'content' => $staticPage->getTranslations('content')];
+
+    if ($active) $data['active'] = 'on';
+
+    $this->actingAs($admin, 'admins')
+        ->put(route('dashboard.static-pages.update', $staticPage), $data)
+        ->assertSessionHasNoErrors();
+
+    expect($staticPage->refresh()->active)->toBe($active);
+
+    $url = route('website.static-pages.show', $staticPage);
+    $this->get($url)->assertStatus($active ? 200 : 404);
+    $response = $this->get(route('website.index'))->assertOk();
+
+    if ($active) {
+        $response->assertSee('href="' . $url . '"', false);
+    } else {
+        $response->assertDontSee('href="' . $url . '"', false);
+    }
+})->with([true, false]);
