@@ -13,7 +13,7 @@
                 <h3>{{ __('Quick Links') }}</h3>
 
                 <ul class="nav flex-column">
-                    @foreach (\App\Models\StaticPage::whereIn('slug', ['privacy-policy', 'terms-and-conditions'])->select('title', 'slug')->orderBy('id')->get() as $page)
+                    @foreach (\App\Models\StaticPage::active()->select('title', 'slug')->orderBy('id')->get() as $page)
                         <li class="nav-item mb-2">
                             <a href="{{ route('website.static-pages.show', $page->slug) }}"
                                 class="nav-link p-0 text-body-secondary">
@@ -21,9 +21,6 @@
                             </a>
                         </li>
                     @endforeach
-                    <li class="nav-item mb-2">
-                        <a href="mailto:support@cashafady.com" class="nav-link p-0 text-body-secondary">{{ __('Reach Out') }}</a>
-                    </li>
                 </ul>
             </div>
 
