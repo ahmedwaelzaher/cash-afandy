@@ -28,6 +28,8 @@ Each deployment gets its own release directory. `.env`, storage, and uploads are
 - Working filesystem symlinks, including serving the website through a `public_html` symlink. Enable the PHP `symlink` function for application features too. Verify this on the actual plan before enabling automatic publishing. If Hostinger will not serve this layout, stop and adapt deployment to the supported document root.
 - Enough disk space for the uploaded archive and multiple complete releases. Releases are retained for recovery and are not automatically deleted; monitor disk usage and remove old, inactive releases separately.
 
+The website's default PHP runtime was verified as 8.2. Deployment prepends Hostinger's `SetHandler application/x-lsphp83` rule to each release's public `.htaccess`, using the selected CLI PHP version. This scopes the runtime change to this site. It also sets the deployment root/releases to mode 755 and shared to mode 711 so the web server can traverse public asset symlinks; `.env` stays mode 600. See [Hostinger's per-directory PHP handler guidance](https://www.hostinger.com/support/4047803-how-to-change-the-php-version-for-subfolders-or-subdomains-in-hostinger/).
+
 Hostinger references: [SSH access](https://www.hostinger.com/support/1583245-how-to-connect-to-a-hosting-plan-via-ssh-in-hostinger/) and [symlinks](https://www.hostinger.com/support/1583694-how-to-create-a-symlink-at-hostinger/).
 
 ## 2. Server layout
@@ -54,7 +56,7 @@ Connect using the SSH command shown by hPanel, then create the private applicati
 ```bash
 ssh -p 65002 u554309232@89.116.133.246
 mkdir -p /home/u554309232/domains/cashafandy.com/cash-afandy/shared
-chmod 700 /home/u554309232/domains/cashafandy.com/cash-afandy/shared
+chmod 711 /home/u554309232/domains/cashafandy.com/cash-afandy/shared
 ```
 
 Using the file manager or SFTP, create `cash-afandy/shared/.env` from the repository's `.env.example`. Set at least:

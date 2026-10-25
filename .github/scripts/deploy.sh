@@ -29,6 +29,8 @@ exec 9> "$root/.deploy.lock"
 flock -n 9 || fail 'Another deployment is running.'
 
 mkdir -p "$root/releases"
+chmod 755 "$root" "$root/releases"
+chmod 711 "$shared"
 mkdir "$release"
 tar -xzf "$archive" -C "$release" --no-same-owner
 rm "$archive"
@@ -47,6 +49,12 @@ ln -s "$shared/.env" "$release/.env"
 
 cd "$release"
 "$php_bin" vendor/composer/platform_check.php
+php_version="$("$php_bin" -r 'echo PHP_MAJOR_VERSION, PHP_MINOR_VERSION;')"
+{
+    printf '<FilesMatch "\\.php$">\n    SetHandler application/x-lsphp%s\n</FilesMatch>\n\n' "$php_version"
+    cat public/.htaccess
+} > public/.htaccess.hostinger
+mv public/.htaccess.hostinger public/.htaccess
 # PHP expressions must not be expanded by the shell.
 # shellcheck disable=SC2016
 "$php_bin" -r '
