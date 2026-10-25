@@ -11,7 +11,7 @@ test('the settings registry preserves Cash Afandy identity and supported markets
     expect(Setting::default('app_name.en'))->toBe('Cash Afandy')
         ->and(Setting::default('website_countries'))->toBe(['eg', 'sa'])
         ->and(Setting::default('default_website_country'))->toBe('eg')
-        ->and(Setting::default('website_locales'))->toBe(['en', 'ar']);
+        ->and(Setting::default('website_locales'))->toBe(['ar', 'en']);
 });
 
 test('the settings registry retains the original field types and validation', function () {

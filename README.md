@@ -37,3 +37,7 @@ First-time bootstrap without seeding: `composer setup` (runs install, env/key, `
 | `composer test`  | `php artisan test` (parallel)                                       |
 | `composer lint`  | `php artisan lint --with-js`                                        |
 | `composer setup` | Install, env/key, migrations                                        |
+
+## Production deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Hostinger SSH setup and the GitHub Actions pipeline that tests and deploys pushes to `main`.
