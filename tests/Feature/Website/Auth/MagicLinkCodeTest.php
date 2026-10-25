@@ -19,17 +19,19 @@ test('code entry screen redirects without email', function () {
     $response->assertRedirect(route('website.magic-link.create'));
 });
 
-test('code entry screen redirects without valid token', function () {
+test('code entry screen does not reveal whether an email has a valid token', function () {
     $response = $this->get(route('website.magic-link-code.create', ['email' => base64_encode('nonexistent@example.com')]));
 
-    $response->assertRedirect(route('website.magic-link.create'));
+    $response->assertOk();
+    $response->assertSee('nonexistent@example.com');
+    $this->assertGuest('users');
 });
 
 test('user can authenticate via magic link token', function () {
     $user = User::factory()->create();
     $loginToken = LoginToken::generate($user->email, 'users');
 
-    $response = $this->get(route('website.magic-link-code.show', ['token' => $loginToken->token]));
+    $response = $this->get(route('website.magic-link.verify', ['token' => $loginToken->token]));
 
     $this->assertAuthenticated('users');
     $response->assertRedirect(route('website.index'));
@@ -57,7 +59,7 @@ test('user can authenticate via OTP code', function () {
 });
 
 test('authentication fails with invalid token', function () {
-    $response = $this->get(route('website.magic-link-code.show', ['token' => 'invalid-token']));
+    $response = $this->get(route('website.magic-link.verify', ['token' => 'invalid-token']));
 
     $this->assertGuest('users');
     $response->assertRedirect(route('website.magic-link.create'));
@@ -84,7 +86,7 @@ test('authentication fails with expired token', function () {
     // Expire the token
     $loginToken->update(['expires_at' => now()->subMinutes(1)]);
 
-    $response = $this->get(route('website.magic-link-code.show', ['token' => $loginToken->token]));
+    $response = $this->get(route('website.magic-link.verify', ['token' => $loginToken->token]));
 
     $this->assertGuest('users');
     $response->assertRedirect(route('website.magic-link.create'));
@@ -110,7 +112,7 @@ test('last login timestamp is updated on magic link authentication', function ()
     $user = User::factory()->create(['last_login_at' => null]);
     $loginToken = LoginToken::generate($user->email, 'users');
 
-    $this->get(route('website.magic-link-code.show', ['token' => $loginToken->token]));
+    $this->get(route('website.magic-link.verify', ['token' => $loginToken->token]));
 
     $user->refresh();
     expect($user->last_login_at)->not->toBeNull();

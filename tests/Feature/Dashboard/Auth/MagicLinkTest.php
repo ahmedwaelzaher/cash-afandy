@@ -29,7 +29,7 @@ test('admin can request magic link', function () {
     ]);
 });
 
-test('magic link request fails for non-existent email', function () {
+test('magic link request does not reveal a non-existent email', function () {
     Notification::fake();
 
     $response = $this->post(route('dashboard.magic-link.store'), [
@@ -38,10 +38,13 @@ test('magic link request fails for non-existent email', function () {
 
     Notification::assertNothingSent();
 
-    $response->assertSessionHasErrors('email');
+    $response->assertRedirect(route('dashboard.magic-link-code.create', ['email' => base64_encode('nonexistent@example.com')]));
+    $response->assertSessionHasNoErrors();
+    $this->assertGuest('admins');
+    $this->assertDatabaseMissing('login_tokens', ['email' => 'nonexistent@example.com', 'guard' => 'admins']);
 });
 
-test('magic link request fails for inactive admin', function () {
+test('magic link request does not reveal an inactive admin', function () {
     Notification::fake();
 
     $admin = Admin::factory()->create(['active' => false]);
@@ -52,7 +55,10 @@ test('magic link request fails for inactive admin', function () {
 
     Notification::assertNothingSent();
 
-    $response->assertSessionHasErrors('email');
+    $response->assertRedirect(route('dashboard.magic-link-code.create', ['email' => base64_encode($admin->email)]));
+    $response->assertSessionHasNoErrors();
+    $this->assertGuest('admins');
+    $this->assertDatabaseMissing('login_tokens', ['email' => $admin->email, 'guard' => 'admins']);
 });
 
 test('login page shows magic link option', function () {

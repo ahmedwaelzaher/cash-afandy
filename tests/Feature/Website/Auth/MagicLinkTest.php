@@ -29,7 +29,7 @@ test('user can request magic link', function () {
     ]);
 });
 
-test('magic link request fails for non-existent email', function () {
+test('magic link request does not reveal a non-existent email', function () {
     Notification::fake();
 
     $response = $this->post(route('website.magic-link.store'), [
@@ -38,7 +38,10 @@ test('magic link request fails for non-existent email', function () {
 
     Notification::assertNothingSent();
 
-    $response->assertSessionHasErrors('email');
+    $response->assertRedirect(route('website.magic-link-code.create', ['email' => base64_encode('nonexistent@example.com')]));
+    $response->assertSessionHasNoErrors();
+    $this->assertGuest('users');
+    $this->assertDatabaseMissing('login_tokens', ['email' => 'nonexistent@example.com', 'guard' => 'users']);
 });
 
 test('login page shows magic link option', function () {

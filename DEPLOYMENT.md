@@ -6,9 +6,9 @@ Pull requests targeting `main` run the build and tests without deploying or acce
 
 ## Current setup
 
-The production GitHub environment has been configured with the SSH secrets and deployment variables, restricted to `main`. SSH key access, the PHP 8.3 executable/extensions, and private filesystem symlink switching have been verified on Hostinger. `shared/.env` exists with production mode, a permanent application key, and the database name and username. Its database password still needs to be entered directly on the server. No migrations, seeders, document-root changes, scheduler changes, or production deployment have been performed.
+The production GitHub environment has been configured with the SSH secrets and deployment variables, restricted to `main`. SSH key access, the PHP 8.3 executable/extensions, and private filesystem symlink switching have been verified on Hostinger. `shared/.env` exists with production mode, a permanent application key, and configured database credentials. Database connectivity has been verified using read-only queries; the database is empty. No migrations, seeders, document-root changes, scheduler changes, or production deployment have been performed.
 
-To enter the database password privately from PowerShell:
+To edit database credentials privately from PowerShell when needed:
 
 ```powershell
 ssh -t -i "$env:USERPROFILE\.ssh\cash-afandy-deploy" -p 65002 u554309232@89.116.133.246 'nano /home/u554309232/domains/cashafandy.com/cash-afandy/shared/.env'

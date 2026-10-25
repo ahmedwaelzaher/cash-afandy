@@ -27,6 +27,8 @@ test('admins can update the settings', function () {
         'app_name' => $names,
         'website_locales' => ['en'],
         'dashboard_locales' => ['en'],
+        'website_countries' => ['eg'],
+        'default_website_country' => 'eg',
     ]);
 
     $response->assertRedirect();
