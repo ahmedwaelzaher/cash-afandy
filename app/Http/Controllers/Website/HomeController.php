@@ -30,6 +30,7 @@ class HomeController extends Controller
         return view('website.index', [
             'stores' => $stores,
             'heroStores' => $stores->take(3),
+            'categoryStoreCounts' => $stores->flatMap->categories->countBy('slug'),
             'offerCategories' => Category::orderBy('id')->get(),
         ]);
     }

@@ -13,16 +13,19 @@
 
         <div class="row g-3">
             @foreach (['fashion', 'electronics', 'beauty', 'home-living', 'sports', 'groceries'] as $slug)
-                @php($category = $previewCategories[$slug])
+                @php
+                    $category = $previewCategories[$slug];
+                    $storeCount = $categoryStoreCounts->get($slug, 0);
+                @endphp
                 <div class="col-12 col-sm-6 col-lg-4">
                     <a href="{{ route('website.clients.index', ['category' => $slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
+                        <div class="card-body d-flex align-items-center gap-3 p-3">
                             <span class="site-category-icon flex-center flex-shrink-0 rounded-4" aria-hidden="true">
                                 <x-icon :icon="$category['icon']" />
                             </span>
                             <div class="flex-fill">
-                                <h3 class="h2 mb-1">{{ $category['title'] }}</h3>
-                                <p class="text-secondary mb-0">{{ __('Offers and coupons') }}</p>
+                                <h3 class="h3 mb-1">{{ $category['title'] }}</h3>
+                                <p class="text-secondary small mb-0">{{ number_format($storeCount) }} {{ $storeCount === 1 ? __('Store') : __('Stores') }}</p>
                             </div>
                             <x-icon icon="ti ti-arrow-left" class="site-menu-arrow text-secondary flex-shrink-0" />
                         </div>
