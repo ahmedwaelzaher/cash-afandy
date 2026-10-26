@@ -1538,14 +1538,18 @@ Coupon Code
 .site-store .empty-icon {
     inline-size: fit-content;
     margin-inline: auto;
-    padding: 1rem;
+    padding: 0;
     border-radius: var(--site-radius);
-    background: var(--site-soft);
+    background: transparent;
     color: var(--site-ink);
 }
 
 .site-store .empty-icon .ti {
     --tblr-icon-size: 3rem;
+}
+
+.site-store .empty-subtitle {
+    margin-block-end: 0;
 }
 
 /* Store directory: compact horizontal cards and category navigation. */
