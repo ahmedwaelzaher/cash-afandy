@@ -12,19 +12,20 @@
         </div>
 
         <div class="row g-3">
-            @foreach (['fashion', 'electronics', 'beauty', 'home-living', 'sports', 'groceries'] as $slug)
-                @php
-                    $category = $previewCategories[$slug];
-                    $storeCount = $categoryStoreCounts->get($slug, 0);
-                @endphp
+            @foreach ($offerCategories as $category)
+                @php($storeCount = $categoryStoreCounts->get($category->slug, 0))
                 <div class="col-12 col-sm-6 col-lg-4">
-                    <a href="{{ route('website.clients.index', ['category' => $slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
+                    <a href="{{ route('website.clients.index', ['category' => $category->slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
                         <div class="card-body d-flex align-items-center gap-3 p-3">
                             <span class="site-category-icon flex-center flex-shrink-0 rounded-4" aria-hidden="true">
-                                <x-icon :icon="config('cash-afandy.category_icons.' . $slug, 'ti ti-category')" />
+                                @if ($category->image)
+                                    <img src="{{ $category->image }}" alt="" width="24" height="24" class="object-fit-contain" loading="lazy" referrerpolicy="no-referrer">
+                                @else
+                                    <x-icon icon="ti ti-category" />
+                                @endif
                             </span>
                             <div class="flex-fill">
-                                <h3 class="h3 mb-1">{{ $category['title'] }}</h3>
+                                <h3 class="h3 mb-1">{{ $category->title }}</h3>
                                 <p class="text-secondary small mb-0">{{ trans_choice('Store count', $storeCount, ['count' => number_format($storeCount)]) }}</p>
                             </div>
                             <x-icon icon="ti ti-arrow-left" class="site-menu-arrow text-secondary flex-shrink-0" />
