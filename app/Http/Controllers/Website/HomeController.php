@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Models\Category;
 use App\Models\Client;
 use Illuminate\Contracts\View\View;
 use Redot\Http\Controllers\Controller;
@@ -20,14 +21,16 @@ class HomeController extends Controller
         }
 
         $country = website_country();
-        $heroStores = Client::where('active', true)
+        $stores = Client::where('active', true)
+            ->with('categories')
             ->when($country, fn ($query) => $query->whereHas('countries', fn ($query) => $query->whereKey($country->id)))
-            ->latest('id')
-            ->take(3)
+            ->orderBy('id')
             ->get();
 
         return view('website.index', [
-            'heroStores' => $heroStores,
+            'stores' => $stores,
+            'heroStores' => $stores->take(3),
+            'offerCategories' => Category::orderBy('id')->get(),
         ]);
     }
 }
