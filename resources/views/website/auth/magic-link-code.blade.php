@@ -1,9 +1,5 @@
 <x-layouts::website.auth-split :title="__('Enter Code')">
-    @pushOnce('styles')
-        <link rel="stylesheet" href="{{ hashed_asset('assets/css/login.css') }}" />
-    @endPushOnce
-
-    <x-status class="login-split__status mb-3" />
+    <x-status class="mb-3" />
 
     <div class="row g-0 align-items-center login-split">
         <div class="col-12 col-lg-6 login-split__form-col">
@@ -21,7 +17,7 @@
                     </div>
 
                     <div class="form-footer mt-3 mb-4">
-                        <button type="submit" class="btn btn-login-primary w-100">{{ __('Verify Code') }}</button>
+                        <button type="submit" class="btn btn-brand w-100">{{ __('Verify Code') }}</button>
                     </div>
 
                     <p class="text-center mb-0">

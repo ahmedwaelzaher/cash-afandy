@@ -1,24 +1,14 @@
 :root {
-    --Green-Lightest: #8CC3A2FF;
-    --Green-Light: #4F9A72FF;
     --Green-Dark: var(--tblr-primary);
     --Green-Darkest: #11402BFF;
-    --Red: #B12529FF;
     --White: #FFFFFFFF;
     --Lightest-Gray: #FAF8F0FF;
     --Light-Gray: #F2EED9FF;
     --Meduim-Gray: #D0D0D0FF;
     --Dark-Gray: #00000080;
     --Black: #102317FF;
-    --Yellow: #ECB534FF;
-    --Transparent: #FFFFFF00;
-    --Disabled: #6C757D80;
     --Links: var(--tblr-link-color);
-    --Light-Grayish-Blue: #D3DAE3FF;
-    --Light-Grayish-Blue-transparent: #D3DAE380;
     --Blue: #0B99FFFF;
-    --Light-Green: #70E116FF;
-    --Light-Orange: #EDB015FF;
 }
 
 /* ============================================================
@@ -460,14 +450,6 @@ Form Check (Radio)
         inline-size: 100%;
     }
 
-    .site-navbar-menu .dropdown:not(.site-preference-dropdown) > .dropdown-menu {
-        position: static !important;
-        transform: none !important;
-        min-inline-size: 0;
-        max-block-size: 35dvh;
-        box-shadow: none;
-    }
-
     .site-preference-dropdown .dropdown-menu {
         inline-size: calc(100% - 1rem);
         min-inline-size: 0;
@@ -484,7 +466,7 @@ Form Check (Radio)
     background: transparent;
 }
 
-/* Hero: saved V3 composition, using the shared search and brand tokens. */
+/* Hero */
 .site-hero {
     padding-block: clamp(2rem, 4vw, 3rem);
 }
@@ -1003,15 +985,6 @@ Form Check (Radio)
     }
 }
 
-.site-deals-card .brand-btn {
-    min-height: 25px;
-    max-height: 25px;
-    padding-block: 0;
-    padding-inline: 1.25rem;
-    font-size: 0.875rem;
-    font-weight: bold;
-}
-
 /* ============================================================
 Footer
 ============================================================ */
@@ -1329,15 +1302,6 @@ Store strip and shared marquee
     overflow-wrap: anywhere;
 }
 
-.site-offer-favorite {
-    color: var(--site-text);
-}
-
-.site-offer-favorite[aria-pressed='true'] {
-    color: var(--site-gold);
-    background: var(--site-soft);
-}
-
 .site-offer-summary {
     flex: 1;
     padding-block: 0 0.75rem;
@@ -1428,6 +1392,15 @@ Cashback cards and shared listing headings
 .site-deals-card .btn {
     margin-top: auto;
     align-self: center;
+}
+
+.site-deals-card .brand-btn {
+    min-height: 25px;
+    max-height: 25px;
+    padding-block: 0;
+    padding-inline: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: bold;
 }
 
 .site-deals-image {

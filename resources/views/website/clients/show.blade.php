@@ -46,9 +46,6 @@
                                 data-share-error="{{ __('Unable to share or copy the link. Please try again.') }}" aria-label="{{ __('Share') }}">
                                 <x-icon icon="ti ti-share" />
                             </button>
-                            <button type="button" class="site-offer-favorite btn btn-icon btn-outline-secondary" data-coupon-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
-                                <x-icon icon="ti ti-heart" />
-                            </button>
                         </div>
                         @if ($client->url)
                             <a href="{{ $client->url }}" class="btn btn-primary gap-2 px-4" target="_blank" rel="noopener noreferrer">

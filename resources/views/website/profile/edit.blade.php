@@ -33,13 +33,13 @@
             @include('website.profile.partials.personal-details')
 
             <div class="mb-3">
-                <x-input type="password" name="password" :title="__('Password')" type="password"
+                <x-input type="password" name="password" :title="__('Password')"
                     placeholder="{{ __('Leave blank if you don\'t want to change it') }}"
                     validation="nullable|confirmed" />
             </div>
 
             <div class="mb-3">
-                <x-input type="password" name="password_confirmation" :title="__('Confirm Password')" type="password"
+                <x-input type="password" name="password_confirmation" :title="__('Confirm Password')"
                     placeholder="{{ __('Leave blank if you don\'t want to change it') }}" />
             </div>
 

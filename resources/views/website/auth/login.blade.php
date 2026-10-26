@@ -1,14 +1,5 @@
 <x-layouts::website.auth-split :title="__('Login')">
-    @pushOnce('styles')
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-            rel="stylesheet" />
-
-        <link rel="stylesheet" href="{{ hashed_asset('assets/css/login.css') }}" />
-    @endPushOnce
-
-    <x-status class="login-split__status mb-3" />
+    <x-status class="mb-3" />
 
     <div class="row g-0 align-items-center login-split">
         <div class="col-12 col-lg-6 login-split__form-col">
@@ -34,7 +25,7 @@
                     </div>
 
                     <div class="form-footer mt-3">
-                        <button type="submit" class="btn btn-login-primary w-100">
+                        <button type="submit" class="btn btn-brand w-100">
                             {{ __('Continue') }}
                         </button>
                     </div>

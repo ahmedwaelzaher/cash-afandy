@@ -17,12 +17,9 @@ async function decodeCouponCode(encoded) {
 }
 
 // ==================================================
-// Website interactions
+// Directory search and pagination
 // ==================================================
 $(() => {
-    // ==================================================
-    // Directory search
-    // ==================================================
     $('[data-directory-search]').each((index, element) => {
         const $input = $(element).find('[name="search"]');
         const $clear = $(element).find('[data-clear-directory-search]');
@@ -109,9 +106,12 @@ $(() => {
         });
     });
 
-    // ==================================================
-    // Sharing
-    // ==================================================
+});
+
+// ==================================================
+// Sharing
+// ==================================================
+$(() => {
     $(document).on('click', '[data-share-url]', async function () {
         const $button = $(this);
         const url = $button.attr('data-share-url');
@@ -133,19 +133,15 @@ $(() => {
         }
     });
 
-    // ==================================================
-    // Favorites
-    // ==================================================
-    // Preview only; favorites are not persisted until backend integration.
-    $(document).on('click', '[data-coupon-favorite]', function () {
-        const $button = $(this);
-        $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
-    });
+});
 
-    // ==================================================
-    // Shared coupon reveal and clipboard feedback
-    // ==================================================
+// ==================================================
+// Shared coupon reveal and clipboard feedback
+// ==================================================
+$(() => {
     const $modal = $('#site-coupon-reveal');
+    if (!$modal.length) return;
+
     const $code = $modal.find('[data-revealed-code]');
     const $copy = $modal.find('[data-copy-revealed]');
     const $status = $modal.find('[data-copy-status]');
@@ -205,17 +201,21 @@ $(() => {
 
     $copy.on('click', copy);
 
-    // ==================================================
-    // Offer category filters
-    // ==================================================
+});
+
+// ==================================================
+// Offer filters
+// ==================================================
+$(() => {
     $('.site-offers').on('click', '[data-offer-filter]', function () {
         const $section = $(this).closest('.site-offers');
         const filter = $(this).attr('data-offer-filter');
+        const attribute = $section.attr('data-offer-filter-attribute') || 'data-offer-category';
 
         $section.find('[data-offer-filter]').removeClass('btn-primary').attr('aria-pressed', 'false');
         $(this).addClass('btn-primary').attr('aria-pressed', 'true');
-        $section.find('[data-offer-category]').each((_, element) => {
-            element.hidden = filter !== 'all' && !element.dataset.offerCategory.split(' ').includes(filter);
+        $section.find(`[${attribute}]`).each((_, element) => {
+            element.hidden = filter !== 'all' && !element.getAttribute(attribute).split(' ').includes(filter);
         });
     });
 });

@@ -1,4 +1,4 @@
-<x-layouts::website.auth class="login-page" :title="__('Reset password')">
+<x-layouts::website.auth :title="__('Reset password')">
     @pushOnce('styles')
         <link rel="stylesheet" href="{{ hashed_asset('assets/css/login.css') }}" />
     @endPushOnce
