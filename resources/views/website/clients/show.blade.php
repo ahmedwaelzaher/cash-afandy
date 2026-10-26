@@ -51,12 +51,17 @@
                 </div>
             </div>
 
+            <header class="site-offers bg-transparent mb-3">
+                <h2 class="site-heading mb-0" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Coupons and offers from :store', ['store' => $client->title]) }}</h2>
+                @if ($coupons->isNotEmpty())
+                    <p class="text-secondary mt-2 mb-0">{{ __('Choose an offer and review its terms before shopping.') }}</p>
+                @endif
+            </header>
+
             <div class="row g-4 align-items-start">
                 <div class="col-12 col-lg-8">
                     <section class="site-offers bg-transparent" aria-labelledby="store-offers-title" data-offer-filter-attribute="data-offer-type">
-                        <h2 class="site-heading mb-2" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Coupons and offers from :store', ['store' => $client->title]) }}</h2>
                         @if ($coupons->isNotEmpty())
-                            <p class="text-secondary mb-3">{{ __('Choose an offer and review its terms before shopping.') }}</p>
                             <div class="site-offers-filters d-flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('Filter offers') }}">
                                 <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All') }}</button>
                                 <button type="button" class="btn" data-offer-filter="coupon" aria-pressed="false" @disabled(! $hasCoupons)>{{ __('Coupons') }}</button>
