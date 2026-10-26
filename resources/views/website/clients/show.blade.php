@@ -7,8 +7,8 @@
     <section class="site-store py-4" aria-labelledby="store-title">
         <div class="container site-container">
             <div class="card rounded-4 mb-4">
-                <div class="card-body d-flex flex-column flex-md-row align-items-md-start gap-4 p-4">
-                    <div class="d-flex align-items-start gap-3 flex-fill text-break">
+                <div class="card-body d-flex flex-column flex-md-row align-items-md-stretch gap-4 p-4">
+                    <div class="d-flex align-items-stretch gap-3 flex-fill text-break">
                         <span class="avatar avatar-xl rounded-4 flex-shrink-0 bg-transparent">
                             @if ($client->logo)
                                 <img src="{{ $client->logo }}" alt="" class="w-100 h-100 object-fit-contain p-2" loading="eager" referrerpolicy="no-referrer">
@@ -16,13 +16,13 @@
                                 <x-icon icon="ti ti-building-store" />
                             @endif
                         </span>
-                        <div>
+                        <div class="d-flex flex-column align-items-start">
                             <h1 class="h2 mb-2" id="store-title">{{ __('Coupons and offers from :store', ['store' => $client->title]) }}</h1>
                             @if ($client->description)
                                 <p class="text-secondary mb-2">{{ \Illuminate\Support\Str::limit(strip_tags($client->description), 160) }}</p>
                             @endif
                             @if ($client->categories->isNotEmpty())
-                                <div class="d-flex flex-wrap gap-2">
+                                <div class="d-flex flex-wrap gap-2 mt-auto">
                                     @foreach ($client->categories as $category)
                                         <a href="{{ route('website.clients.index', ['category' => $category->slug]) }}" class="site-offer-label text-decoration-none">{{ $category->title }}</a>
                                     @endforeach
@@ -31,7 +31,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex flex-column gap-3 flex-shrink-0">
+                    <div class="d-flex flex-column justify-content-between gap-3 flex-shrink-0">
                         <div class="d-flex justify-content-md-end gap-2">
                             <button type="button" class="btn btn-icon btn-outline-secondary" data-share-url="{{ route('website.clients.show', $client) }}"
                                 data-share-title="{{ $client->title }}" data-share-success="{{ __('Link copied') }}"
