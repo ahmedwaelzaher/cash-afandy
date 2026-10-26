@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <header class="site-offers bg-transparent mb-3">
+            <header class="site-offers bg-transparent mb-4">
                 <h2 class="site-heading mb-0" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Coupons and offers from :store', ['store' => $client->title]) }}</h2>
                 @if ($coupons->isNotEmpty())
                     <p class="text-secondary mt-2 mb-0">{{ __('Choose an offer and review its terms before shopping.') }}</p>
@@ -68,11 +68,12 @@
                                 <button type="button" class="btn" data-offer-filter="offer" aria-pressed="false" @disabled(! $hasOffers)>{{ __('Offers') }}</button>
                             </div>
                             <div class="site-offers-grid">
+                                @php($category = $client->categories->first())
                                 @foreach ($coupons as $coupon)
                                     <div data-offer-type="{{ filled($coupon->code) ? 'coupon' : 'offer' }}">
                                         @include('website.partials.coupon-card', [
-                                            'categoryLabel' => $client->categories->count() === 1 ? $client->categories->first()->title : null,
-                                            'categorySlug' => $client->categories->count() === 1 ? $client->categories->first()->slug : null,
+                                            'categoryLabel' => $category?->title,
+                                            'categorySlug' => $category?->slug,
                                         ])
                                     </div>
                                 @endforeach
@@ -101,7 +102,7 @@
                             @if ($hasCoupons)
                                 <hr>
                                 <h3 class="h3 mb-3">{{ __('How to use a coupon?') }}</h3>
-                                <ol class="list-unstyled d-flex flex-column gap-3 mb-4">
+                                <ol class="list-unstyled d-flex flex-column gap-3 mb-0">
                                     @foreach ([__('Copy code'), __('Go to store'), __('Paste the code at checkout')] as $step)
                                         <li class="d-flex align-items-center gap-3">
                                             <span class="avatar avatar-sm rounded-circle bg-primary-lt flex-shrink-0" aria-hidden="true">{{ $loop->iteration }}</span>
@@ -109,13 +110,7 @@
                                         </li>
                                     @endforeach
                                 </ol>
-                            @else
-                                <hr>
                             @endif
-
-                            <x-alert type="warning" icon="ti ti-info-circle" class="mb-0 rounded-3">
-                                {{ __('Check the offer terms before completing your purchase.') }}
-                            </x-alert>
                         </div>
                     </div>
                 </aside>
