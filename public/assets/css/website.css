@@ -306,13 +306,15 @@ Form Check (Radio)
     min-inline-size: 8.5rem;
 }
 
-.site-search {
+.site-search,
+.site-store-search .input-icon {
     border: 1px solid #cfd9c1;
     border-radius: 1rem;
     background: var(--site-surface);
 }
 
-.site-search .form-control {
+.site-search .form-control,
+.site-store-search .form-control {
     padding-inline: 3.25rem 0.75rem;
     border: 0;
     background: transparent;
@@ -323,7 +325,8 @@ Form Check (Radio)
     min-inline-size: 0;
 }
 
-.site-search:focus-within {
+.site-search:focus-within,
+.site-store-search .input-icon:focus-within {
     border-color: #75985d;
     box-shadow: 0 0 0 4px #92b37822;
 }
@@ -913,13 +916,18 @@ Form Check (Radio)
         min-inline-size: 6.375rem;
     }
 
-    .site-search {
+    .site-search,
+    .site-store-search .input-icon {
         border-radius: 0.75rem;
     }
 
     .site-search .form-control {
         padding-block: 0.28125rem;
         line-height: 0.9375rem;
+    }
+
+    .site-search .form-control,
+    .site-store-search .form-control {
         padding-inline: 2.4375rem 0.5625rem;
     }
 
@@ -1550,6 +1558,23 @@ Coupon Code
 }
 
 /* Store directory: compact horizontal cards and category navigation. */
+.site-store-empty {
+    min-block-size: min(16rem, 40svh);
+}
+
+.site-store-search {
+    inline-size: 20rem;
+    max-inline-size: 100%;
+}
+
+.site-store-search .form-control {
+    min-block-size: 2.5rem;
+}
+
+.site-store-search input::-webkit-search-cancel-button {
+    display: none;
+}
+
 .site-stores-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
@@ -1557,8 +1582,22 @@ Coupon Code
 }
 
 .site-directory-logo {
-    inline-size: 6rem;
-    block-size: 4.5rem;
+    inline-size: 5rem;
+    block-size: 5rem;
+    background: var(--site-surface);
+    border: 1px solid var(--site-line);
+}
+
+.site-store-card {
+    border-color: var(--site-line);
+    background: var(--site-surface);
+}
+
+.site-store-arrow {
+    inline-size: 2rem;
+    block-size: 2rem;
+    background: var(--site-soft);
+    color: var(--site-ink);
 }
 
 .site-store-card:hover,
@@ -1568,19 +1607,29 @@ Coupon Code
 }
 
 .site-store-filter {
-    border-block: 2px solid transparent;
-    border-radius: var(--site-radius);
+    border-inline-start: 3px solid transparent;
+    border-radius: var(--tblr-border-radius);
     color: var(--site-text);
 }
 
 .site-store-filter.active {
     border-color: var(--site-ink);
-    background: var(--site-soft);
-    color: var(--site-ink);
     font-weight: 600;
 }
 
+.site-store-filter.active,
+[data-store-result-count] {
+    background: var(--site-soft);
+    color: var(--site-ink);
+}
+
 @media (min-width: 992px) {
+    .site-store-filters {
+        border: 1px solid var(--site-line);
+        border-radius: var(--site-radius);
+        background: var(--site-surface) !important;
+    }
+
     .site-stores-sidebar {
         position: sticky;
         inset-block-start: calc(var(--site-navbar-height, 0px) + 1rem);

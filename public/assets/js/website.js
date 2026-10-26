@@ -21,6 +21,95 @@ async function decodeCouponCode(encoded) {
 // ==================================================
 $(() => {
     // ==================================================
+    // Store directory search
+    // ==================================================
+    $('[data-store-search]').each((index, element) => {
+        const $input = $(element).find('[name="search"]');
+        const $clear = $(element).find('[data-clear-store-search]');
+        const $section = $(element).closest('.site-stores');
+        const $results = $section.find('[data-store-results]');
+        const $count = $section.find('[data-store-result-count]');
+        let currentSearch = $input.val().trim();
+        let request;
+        let revision = 0;
+        let composing = false;
+
+        const cancelRequest = () => {
+            revision++;
+            if (request) request.abort();
+            $results.attr('aria-busy', 'false');
+        };
+
+        const load = (url) => {
+            cancelRequest();
+            const currentRevision = revision;
+            window.history.replaceState(window.history.state, '', url.href);
+            $results.attr('aria-busy', 'true');
+            request = $.ajax({ url: url.href, dataType: 'json' })
+                .done((response) => {
+                    if (currentRevision !== revision) return;
+                    $results.html(response.html);
+                    $count.text(response.countLabel);
+                    currentSearch = url.searchParams.get('search') || '';
+                    $section.find('.site-store-filter').each((index, link) => {
+                        const filterUrl = new URL(link.href);
+                        if (currentSearch) filterUrl.searchParams.set('search', currentSearch);
+                        else filterUrl.searchParams.delete('search');
+                        link.href = filterUrl.href;
+                    });
+                })
+                .fail((xhr, status) => {
+                    if (status !== 'abort' && currentRevision === revision) toastify().error(__('Error'));
+                })
+                .always(() => {
+                    if (currentRevision === revision) $results.attr('aria-busy', 'false');
+                });
+        };
+
+        const searchStores = () => {
+            const url = new URL(window.location.href);
+            const search = $input.val().trim();
+            url.searchParams.delete('page');
+            if (search) url.searchParams.set('search', search);
+            else url.searchParams.delete('search');
+            load(url);
+        };
+
+        const searchDebounced = _.debounce(() => {
+            if (!composing && $input.val().trim() !== currentSearch) searchStores();
+        }, 500);
+
+        $input.on('input', () => {
+            cancelRequest();
+            $clear.toggleClass('d-none', !$input.val().length);
+            searchDebounced();
+        }).on('compositionstart', () => {
+            composing = true;
+            cancelRequest();
+            searchDebounced.cancel();
+        }).on('compositionend', () => {
+            composing = false;
+            searchDebounced();
+        });
+
+        $results.on('click', '[data-store-pagination] a', (event) => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+            event.preventDefault();
+            searchDebounced.cancel();
+            const url = new URL(event.currentTarget.href);
+            // Pagination must not discard a search that is still being debounced.
+            if ($input.val().trim() !== currentSearch) searchStores();
+            else load(url);
+        });
+        $clear.on('click', () => {
+            searchDebounced.cancel();
+            $input.val('');
+            $clear.addClass('d-none');
+            searchStores();
+        });
+    });
+
+    // ==================================================
     // Sharing
     // ==================================================
     $('[data-share-url]').on('click', async function () {

@@ -21,11 +21,11 @@
                     <a href="{{ route('website.clients.index', ['category' => $slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
                         <div class="card-body d-flex align-items-center gap-3 p-3">
                             <span class="site-category-icon flex-center flex-shrink-0 rounded-4" aria-hidden="true">
-                                <x-icon :icon="$category['icon']" />
+                                <x-icon :icon="config('cash-afandy.category_icons.' . $slug, 'ti ti-category')" />
                             </span>
                             <div class="flex-fill">
                                 <h3 class="h3 mb-1">{{ $category['title'] }}</h3>
-                                <p class="text-secondary small mb-0">{{ number_format($storeCount) }} {{ $storeCount === 1 ? __('Store') : __('Stores') }}</p>
+                                <p class="text-secondary small mb-0">{{ trans_choice('Store count', $storeCount, ['count' => number_format($storeCount)]) }}</p>
                             </div>
                             <x-icon icon="ti ti-arrow-left" class="site-menu-arrow text-secondary flex-shrink-0" />
                         </div>

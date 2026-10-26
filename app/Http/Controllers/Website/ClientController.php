@@ -24,23 +24,41 @@ class ClientController extends Controller
         $categorySlug = $filters['category'] ?? '';
         $country = website_country();
         $locale = app()->getLocale();
-        $categories = Category::orderBy("title->{$locale}")->orderBy('id')->get();
-
-        $stores = Client::where('active', true)
+        $availableStores = fn (Builder $query) => $query->where('active', true)
+            ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)));
+        $stores = $availableStores(Client::query())
             ->with('categories')
-            ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)))
             ->when($categorySlug !== '', fn (Builder $query) => $query->whereHas('categories', fn (Builder $query) => $query->where('slug', $categorySlug)))
-            ->when($search !== '', fn (Builder $query) => $query->where("title->{$locale}", 'like', "%{$search}%"))
+            ->when($search !== '', function (Builder $query) use ($search, $locale) {
+                $title = $query->getQuery()->getGrammar()->wrap("title->{$locale}");
+
+                return $query->whereRaw("LOWER({$title}) LIKE ?", ['%' . mb_strtolower($search) . '%']);
+            })
             ->orderBy("title->{$locale}")->orderBy('id')
             ->paginate(12)->withQueryString();
 
-        return view('website.clients.index', [
+        $data = [
             'stores' => $stores,
-            'categories' => $categories,
-            'selectedCategory' => $categories->firstWhere('slug', $categorySlug),
             'categorySlug' => $categorySlug,
             'search' => $search,
-        ]);
+            'countLabel' => trans_choice('Store count', $stores->total(), ['count' => number_format($stores->total())]),
+        ];
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('website.clients.partials.results', $data)->render(),
+                'countLabel' => $data['countLabel'],
+            ]);
+        }
+
+        $categories = Category::withCount(['clients' => $availableStores])
+            ->orderBy("title->{$locale}")->orderBy('id')->get();
+
+        return view('website.clients.index', array_merge($data, [
+            'categories' => $categories,
+            'allStoresCount' => $availableStores(Client::query())->count(),
+            'selectedCategory' => $categories->firstWhere('slug', $categorySlug),
+        ]));
     }
 
     /**
