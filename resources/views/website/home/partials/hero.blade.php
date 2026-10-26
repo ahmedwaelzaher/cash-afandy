@@ -14,13 +14,14 @@
 
                 @include('website.partials.search-form', ['id' => 'hero-search', 'submitLabel' => __('Search and save')])
 
-                {{-- Temporary sample stores for reviewing the suggestions layout. --}}
-                <div class="site-hero-popular d-flex align-items-center flex-wrap gap-2 mt-3">
-                    <span>{{ __('Try') }}:</span>
-                    @foreach (['Amazon', 'Noon', 'Jumia'] as $store)
-                        <a class="btn btn-sm" href="{{ route('website.search', ['search' => $store]) }}">{{ $store }}</a>
-                    @endforeach
-                </div>
+                @if ($heroStores->isNotEmpty())
+                    <div class="site-hero-popular d-flex align-items-center flex-wrap gap-2 mt-3">
+                        <span>{{ __('Try') }}:</span>
+                        @foreach ($heroStores as $store)
+                            <a class="btn btn-sm" href="{{ route('website.clients.show', $store) }}">{{ $store->title }}</a>
+                        @endforeach
+                    </div>
+                @endif
 
                 <div class="site-hero-cta d-flex align-items-center text-nowrap gap-2 mt-3">
                     <a href="{{ route('website.coupons.index') }}" class="btn btn-outline-primary gap-2"><x-icon icon="ti ti-ticket" /> {{ __('Find a coupon') }}</a>
