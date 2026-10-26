@@ -117,7 +117,8 @@ Form Check (Radio)
 .site-store,
 .site-stores,
 .site-offers,
-.site-categories {
+.site-categories,
+.site-static-page {
     background: var(--site-background);
 }
 
@@ -143,8 +144,53 @@ Form Check (Radio)
 }
 
 /* Static content pages */
-.site-static-page {
-    max-inline-size: 50rem;
+.site-static-article {
+    border-radius: var(--site-radius);
+}
+
+.site-static-body {
+    color: var(--site-text);
+    font-size: 1rem;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+}
+
+.site-static-body :is(h1, h2, h3, h4, h5, h6) {
+    margin-block: 1.5rem 0.75rem;
+    color: var(--site-ink);
+    line-height: 1.5;
+}
+
+.site-static-body h2 {
+    font-size: 1.5rem;
+}
+
+.site-static-body :is(p, ul, ol, blockquote, table) {
+    margin-block-end: 1rem;
+}
+
+.site-static-body > :first-child {
+    margin-block-start: 0;
+}
+
+.site-static-body > :last-child {
+    margin-block-end: 0;
+}
+
+.site-static-body :is(img, video, iframe, table, pre) {
+    max-inline-size: 100%;
+}
+
+.site-static-body :is(img, video) {
+    block-size: auto;
+}
+
+.site-static-body :is(table, pre) {
+    overflow-x: auto;
+}
+
+.site-static-body table {
+    display: block;
 }
 
 /* Center short auth forms below the measured header; long forms grow naturally. */
@@ -166,7 +212,8 @@ Form Check (Radio)
 .site-categories,
 .site-offers-grid,
 .site-error-content,
-.site-coupon-reveal {
+.site-coupon-reveal,
+.site-static-page {
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
     --site-content-width: 100rem;
     --tblr-primary: var(--site-ink);
@@ -784,7 +831,8 @@ Form Check (Radio)
     .site-store,
     .site-stores,
     .site-offers,
-    .site-categories {
+    .site-categories,
+    .site-static-page {
         --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
         --site-content-width: 75rem;
         --site-nav-link-padding: 0.75rem;
@@ -1211,7 +1259,8 @@ Store strip and shared marquee
 .site-offers,
 .site-categories,
 .site-store,
-.site-stores {
+.site-stores,
+.site-static-page {
     font-size: 1rem;
 }
 

@@ -1,24 +1,24 @@
 <x-layouts::website :title="$staticPage->title">
-    <section class="site-static-page container mx-auto my-5 py-5">
+    <section class="site-static-page py-4 py-md-5" aria-labelledby="static-page-title">
+        <div class="container site-container">
+            <header class="mb-4">
+                <h1 class="display-5 fw-bold mb-2" id="static-page-title">{{ $staticPage->title }}</h1>
+                @if ($staticPage->updated_at)
+                    <p class="text-secondary mb-0">
+                        {{ __('Last updated on :date', ['date' => $staticPage->updated_at->translatedFormat('d M Y')]) }}
+                    </p>
+                @endif
+            </header>
 
-        <div class="text-center mb-5">
-            <h1 class="display-6 mb-1">
-                {{ $staticPage->title }}
-            </h1>
-
-            <p class="text-muted">
-                {{ __('Last updated on :date', ['date' => $staticPage->updated_at->translatedFormat('d M Y')]) }}
-            </p>
+            @if ($staticPage->content)
+                <article class="site-static-article card">
+                    <div class="site-static-body card-body p-4 p-md-5">
+                        {!! $staticPage->content !!}
+                    </div>
+                </article>
+            @else
+                <x-empty :icon="null" class="rounded-4" />
+            @endif
         </div>
-
-        @if ($staticPage->content)
-            <div class="card card-md">
-                <div class="card-body">
-                    {!! $staticPage->content !!}
-                </div>
-            </div>
-        @else
-            <x-empty />
-        @endif
     </section>
 </x-layouts::website>
