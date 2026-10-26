@@ -30,8 +30,8 @@
 
                     <div class="site-footer-subscribe input-group mb-3">
                         <x-input type="email" name="email" :placeholder="__('Email Address')" validation="required" />
-                        <button class="btn btn-brand" type="submit">
-                            <i class="fas fa-arrow-left"></i>
+                        <button class="btn btn-brand btn-icon p-0" type="submit">
+                            <x-icon icon="ti ti-arrow-left" class="site-menu-arrow m-0" />
                         </button>
                     </div>
 
@@ -60,13 +60,13 @@
                 ];
             @endphp
 
-            <ul class="site-footer-social-list list-unstyled d-flex justify-content-center mb-0">
+            <ul class="site-footer-social-list list-unstyled d-flex flex-wrap justify-content-center gap-2 mb-0">
                 @foreach ($socialLinks as $key => $icon)
                     @continue(! setting($key))
 
-                    <li class="site-footer-social-item flex-center rounded-circle">
-                        <a class="site-footer-social d-inline-flex align-items-center justify-content-center rounded-circle border-0 bg-transparent" href="{{ setting($key) }}" target="_blank" rel="noopener noreferrer">
-                            <i class="fab {{ $icon }}"></i>
+                    <li>
+                        <a class="site-footer-social d-inline-flex align-items-center justify-content-center rounded-circle text-decoration-none" href="{{ setting($key) }}" target="_blank" rel="noopener noreferrer" aria-label="{{ ucfirst(str_replace('social_', '', $key)) }}">
+                            <i class="fab {{ $icon }}" aria-hidden="true"></i>
                         </a>
                     </li>
                 @endforeach
