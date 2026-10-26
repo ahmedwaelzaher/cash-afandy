@@ -142,6 +142,11 @@ Form Check (Radio)
     font-size: clamp(4rem, 12vw, 8rem);
 }
 
+/* Static content pages */
+.site-static-page {
+    max-inline-size: 50rem;
+}
+
 /* Center short auth forms below the measured header; long forms grow naturally. */
 .site-auth {
     min-block-size: calc(100svh - var(--site-navbar-height, 0px));
@@ -988,6 +993,10 @@ Form Check (Radio)
 /* ============================================================
 Footer
 ============================================================ */
+.site-footer {
+    background: var(--tblr-bg-surface);
+}
+
 .site-footer-subscribe .form-control {
     height: 100%;
     background-color: var(--White);
@@ -1300,6 +1309,15 @@ Store strip and shared marquee
 .site-offer-store {
     min-inline-size: 0;
     overflow-wrap: anywhere;
+}
+
+.site-offer-favorite {
+    color: var(--site-text);
+}
+
+.site-offer-favorite[aria-pressed='true'] {
+    color: var(--site-gold);
+    background: var(--site-soft);
 }
 
 .site-offer-summary {
