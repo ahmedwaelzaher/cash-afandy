@@ -21,7 +21,7 @@
                                     @if ($categorySlug === '') aria-current="page" @endif>
                                     <x-icon icon="ti ti-layout-grid" class="flex-shrink-0" />
                                     <span class="flex-fill">{{ __('All stores') }}</span>
-                                    <span class="badge bg-primary-lt">{{ number_format($allStoresCount) }}</span>
+                                    <span class="badge">{{ number_format($allStoresCount) }}</span>
                                 </a>
                                 @foreach ($categories as $category)
                                     <a href="{{ route('website.clients.index', ['category' => $category->slug, 'search' => $search !== '' ? $search : null]) }}"
@@ -29,7 +29,7 @@
                                         @if ($categorySlug === $category->slug) aria-current="page" @endif>
                                         <x-icon :icon="$category->icon" class="flex-shrink-0" />
                                         <span class="flex-fill">{{ $category->title }}</span>
-                                        <span class="badge bg-primary-lt">{{ number_format($category->clients_count) }}</span>
+                                        <span class="badge">{{ number_format($category->clients_count) }}</span>
                                     </a>
                                 @endforeach
                             </nav>

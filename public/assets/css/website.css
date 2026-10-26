@@ -1618,9 +1618,15 @@ Coupon Code
 }
 
 .site-store-filter.active,
+.site-store-filter .badge,
 [data-store-result-count] {
     background: var(--site-soft);
     color: var(--site-ink);
+}
+
+.site-store-filter.active .badge {
+    background: #244d2a;
+    color: var(--site-surface);
 }
 
 @media (min-width: 992px) {
