@@ -33,13 +33,13 @@
                         <x-input type="password" id="login-password" name="password" validation="required" />
                     </div>
 
-                    <div class="form-footer mt-3 mb-3">
+                    <div class="form-footer mt-3">
                         <button type="submit" class="btn btn-login-primary w-100">
                             {{ __('Continue') }}
                         </button>
                     </div>
 
-                    <div class="hr-text mb-3">{{ __('OR') }}</div>
+                    <div class="hr-text my-3">{{ __('OR') }}</div>
 
                     <div class="d-flex flex-column gap-2 mb-3">
                         <a href="{{ route('website.magic-link.create') }}" class="btn btn-social flex-center btn-social-magic-link">
