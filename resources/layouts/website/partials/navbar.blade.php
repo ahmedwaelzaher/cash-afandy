@@ -2,7 +2,6 @@
     $currentCountry = website_country();
     $availableCountries = \App\Models\Country::whereIn('code', setting('website_countries'))->get();
     $otherLocales = array_values(array_diff(setting('website_locales'), [app()->getLocale()]));
-    $navbarCategories = \App\Models\Category::all();
 @endphp
 
 <header class="site-navbar sticky-top d-print-none">
@@ -51,22 +50,13 @@
                         </a>
                     @endforeach
 
-                    @if ($navbarCategories->isNotEmpty())
-                        <div class="dropdown">
-                            <button type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                @class(['nav-link dropdown-toggle', 'active' => request()->routeIs('website.categories.*')])>
-                                <x-icon icon="ti ti-layout-grid" />
-                                {{ __('Categories') }}
-                                <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
-                            </button>
-                            <div class="dropdown-menu">
-                                @foreach ($navbarCategories as $category)
-                                    <a href="{{ route('website.categories.show', $category) }}"
-                                        @class(['dropdown-item', 'active' => request()->routeIs('website.categories.*') && request()->route('category')?->is($category)])>{{ $category->title }}</a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
+                    <a href="{{ route('website.clients.index') }}"
+                        @class(['nav-link', 'active' => request()->routeIs('website.clients.*')])
+                        @if (request()->routeIs('website.clients.*')) aria-current="page" @endif>
+                        <x-icon icon="ti ti-layout-grid" />
+                        {{ __('Categories') }}
+                        <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
+                    </a>
                 </nav>
 
                 <div class="site-navbar-settings d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center">
