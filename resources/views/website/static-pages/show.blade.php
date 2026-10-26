@@ -1,5 +1,5 @@
 <x-layouts::website :title="$staticPage->title">
-    <section class="container mx-auto my-5 py-5" style="max-width: 800px;">
+    <section class="site-static-page container mx-auto my-5 py-5">
 
         <div class="text-center mb-5">
             <h1 class="display-6 mb-1">

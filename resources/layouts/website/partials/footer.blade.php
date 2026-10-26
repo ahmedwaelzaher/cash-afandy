@@ -1,4 +1,4 @@
-<div class="border-top site-footer" style="background: var(--tblr-bg-surface)">
+<div class="border-top site-footer">
     <footer class="container py-5">
         <div class="row">
             <div class="col-12 col-lg-4 mb-4 mb-lg-0">

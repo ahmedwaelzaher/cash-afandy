@@ -136,6 +136,17 @@ $(() => {
 });
 
 // ==================================================
+// Favorites
+// ==================================================
+$(() => {
+    // Visual state only until favorites are connected to the backend.
+    $(document).on('click', '[data-coupon-favorite]', function () {
+        const $button = $(this);
+        $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+});
+
+// ==================================================
 // Shared coupon reveal and clipboard feedback
 // ==================================================
 $(() => {
