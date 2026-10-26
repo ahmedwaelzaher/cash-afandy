@@ -30,7 +30,7 @@
                                         @if ($category->image)
                                             <img src="{{ $category->image }}" alt="" width="24" height="24" class="object-fit-contain flex-shrink-0" loading="lazy" referrerpolicy="no-referrer">
                                         @else
-                                            <x-icon :icon="config('cash-afandy.category_icons.' . $category->slug, 'ti ti-category')" class="flex-shrink-0" />
+                                            <x-icon icon="ti ti-category" class="flex-shrink-0" />
                                         @endif
                                         <span class="flex-fill">{{ $category->title }}</span>
                                         <span class="badge bg-primary-lt">{{ number_format($category->clients_count) }}</span>
