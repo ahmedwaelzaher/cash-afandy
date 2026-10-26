@@ -2,7 +2,7 @@
     <div class="container site-container">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div>
-                <div class="site-offers-eyebrow mb-2">{{ __('Your way') }} <span aria-hidden="true">✦</span></div>
+                <div class="site-offers-eyebrow d-flex align-items-center gap-1 mb-2"><span aria-hidden="true">✦</span> {{ __('Your way') }}</div>
                 <h2 class="site-heading mb-2" id="categories-title">{{ __('Every day, a new chance to save') }}</h2>
                 <p class="text-secondary mb-0">{{ __('Choose what suits you and start saving.') }}</p>
             </div>
