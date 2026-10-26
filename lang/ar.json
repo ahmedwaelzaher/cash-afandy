@@ -558,6 +558,7 @@
     "Status": "الحالة",
     "Stone": "حجري",
     "Store": "المتجر",
+    "Store count": "{0} 0 متاجر|{1} متجر|{2} متجران|[3,10] :count متاجر|[11,*] :count متجر",
     "Store or offer name": "اسم المتجر أو العرض",
     "Stores": "المتاجر",
     "Subscribe": "اشترك",

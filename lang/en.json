@@ -561,6 +561,7 @@
     "Status": "Status",
     "Stone": "Stone",
     "Store": "Store",
+    "Store count": "{1} :count Store|[0,*] :count Stores",
     "Store or offer name": "Store or offer name",
     "Stores": "Stores",
     "Subscribe": "Subscribe",
