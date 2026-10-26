@@ -1,33 +1,24 @@
 @php
-    $categories = array_map(fn ($category) => $category['title'], $previewCategories);
-    $storeCategories = [
-        'noon' => ['fashion', 'electronics', 'home-living', 'groceries'],
-        'Amazon' => ['electronics', 'home-living', 'health'],
-        'Jumia' => ['fashion', 'electronics', 'beauty'],
-        'adidas' => ['sports', 'fashion'],
-        'Nice One' => ['beauty', 'health'],
-    ];
-
     // Temporary, unsaved coupons and direct offers until backend integration.
-    $previewOffers = collect(range(1, 20))->map(function ($number) use ($stores, $storeCategories) {
-        $store = $stores[($number - 1) % count($stores)];
-        $availableCategories = $storeCategories[$store['name']];
-        $category = $availableCategories[intdiv($number - 1, count($stores)) % count($availableCategories)];
+    $previewOffers = $stores->isEmpty() ? collect() : collect(range(1, 20))->map(function ($number) use ($stores) {
+        $store = $stores[($number - 1) % $stores->count()];
+        $availableCategories = $store->categories;
+        $category = $availableCategories->isEmpty() ? null : $availableCategories[intdiv($number - 1, $stores->count()) % $availableCategories->count()];
         $isDirectOffer = $number % 3 === 0;
         $coupon = new \App\Models\Coupon([
-            'title' => __('Save on your next order at :store', ['store' => $store['name']]),
+            'title' => __('Save on your next order at :store', ['store' => $store->title]),
             'code' => $isDirectOffer ? null : 'AFANDY' . str_pad($number, 2, '0', STR_PAD_LEFT),
             'discount' => [20, 15, 25, 10, 30][($number - 1) % 5],
             'description' => __('On selected products'),
             'tips' => ($isDirectOffer ? __('The offer is applied automatically through the store link.') : __('Use the coupon code at checkout.'))
                 . "\n" . __('Cannot be combined with other offers or discount codes.'),
         ]);
-        $coupon->setRelation('client', new \App\Models\Client(['title' => $store['name'], 'slug' => $store['slug'], 'logo' => $store['logo'], 'url' => $store['url']]));
+        $coupon->setRelation('client', $store);
 
         return [
             'coupon' => $coupon,
             'category' => $category,
-            'url' => $isDirectOffer ? $store['url'] . '?' . http_build_query(['affiliate' => 'cashafandy-demo']) : null,
+            'url' => $isDirectOffer && $store->url ? url()->query($store->url, ['affiliate' => 'cashafandy-demo']) : null,
         ];
     });
 @endphp
@@ -45,19 +36,23 @@
             </a>
         </div>
 
-        <div class="site-offers-filters d-flex flex-wrap gap-2 mb-4" role="group" aria-label="{{ __('Filter offers') }}">
-            <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All categories') }}</button>
-            @foreach ($categories as $category => $label)
-                <button type="button" class="btn" data-offer-filter="{{ $category }}" aria-pressed="false">{{ $label }}</button>
-            @endforeach
-        </div>
+        @if ($previewOffers->isNotEmpty())
+            <div class="site-offers-filters d-flex flex-wrap gap-2 mb-4" role="group" aria-label="{{ __('Filter offers') }}">
+                <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All categories') }}</button>
+                @foreach ($offerCategories as $category)
+                    <button type="button" class="btn" data-offer-filter="{{ $category->slug }}" aria-pressed="false">{{ $category->title }}</button>
+                @endforeach
+            </div>
 
-        <div class="site-offers-grid">
-            @foreach ($previewOffers as $preview)
-                <div data-offer-category="{{ $preview['category'] }}">
-                    @include('website.partials.coupon-card', ['coupon' => $preview['coupon'], 'categoryLabel' => $categories[$preview['category']], 'categorySlug' => $preview['category'], 'offerUrl' => $preview['url']])
-                </div>
-            @endforeach
-        </div>
+            <div class="site-offers-grid">
+                @foreach ($previewOffers as $preview)
+                    <div data-offer-category="{{ $preview['category']?->slug }}">
+                        @include('website.partials.coupon-card', ['coupon' => $preview['coupon'], 'categoryLabel' => $preview['category']?->title, 'categorySlug' => $preview['category']?->slug, 'offerUrl' => $preview['url']])
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <x-empty icon="ti ti-building-store" :title="__('No results found')" :subtitle="null" />
+        @endif
     </div>
 </section>
