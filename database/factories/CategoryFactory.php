@@ -25,7 +25,7 @@ class CategoryFactory extends Factory
             'description' => [
                 'en' => $this->faker->sentence(),
             ],
-            'image' => $this->faker->imageUrl(),
+            'icon' => 'ti ti-category',
         ];
     }
 }

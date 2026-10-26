@@ -3,8 +3,8 @@
         <div class="container">
             <div class="card mb-5">
                 <div class="card-body d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
-                    <span class="site-partners-logo flex-shrink-0">
-                        <img src="{{ $category->image }}" alt="{{ $category->title }}">
+                    <span class="site-partners-logo flex-center flex-shrink-0 fs-1" aria-hidden="true">
+                        <x-icon :icon="$category->icon" />
                     </span>
 
                     <div class="flex-fill">

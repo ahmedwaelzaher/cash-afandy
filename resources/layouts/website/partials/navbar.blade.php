@@ -40,21 +40,19 @@
 
             <div class="offcanvas-body">
                 <nav class="site-navbar-links d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center" aria-label="{{ __('Main navigation') }}">
-                    @foreach (['coupons' => __('Coupons'), 'cashbacks' => __('Cashback')] as $resource => $label)
-                        <a href="{{ route('website.' . $resource . '.index') }}"
-                            @class(['nav-link', 'active' => request()->routeIs('website.' . $resource . '.*')])
-                            @if (request()->routeIs('website.' . $resource . '.*')) aria-current="page" @endif>
-                            <x-icon :icon="$resource === 'coupons' ? 'ti ti-ticket' : 'ti ti-percentage'" />
-                            {{ $label }}
-                            <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
-                        </a>
-                    @endforeach
+                    <a href="{{ route('website.coupons.index') }}"
+                        @class(['nav-link', 'active' => request()->routeIs('website.coupons.*')])
+                        @if (request()->routeIs('website.coupons.*')) aria-current="page" @endif>
+                        <x-icon icon="ti ti-ticket" />
+                        {{ __('Offers') }}
+                        <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
+                    </a>
 
                     <a href="{{ route('website.clients.index') }}"
                         @class(['nav-link', 'active' => request()->routeIs('website.clients.*')])
                         @if (request()->routeIs('website.clients.*')) aria-current="page" @endif>
-                        <x-icon icon="ti ti-layout-grid" />
-                        {{ __('Categories') }}
+                        <x-icon icon="ti ti-building-store" />
+                        {{ __('Stores') }}
                         <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
                     </a>
                 </nav>

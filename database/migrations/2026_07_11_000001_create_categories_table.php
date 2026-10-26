@@ -16,7 +16,7 @@ return new class extends Migration
             $table->json('title');
             $table->string('slug')->unique();
             $table->json('description')->nullable();
-            $table->string('image');
+            $table->string('icon')->default('ti ti-category');
             $table->timestamps();
         });
     }

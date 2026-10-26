@@ -18,11 +18,7 @@
                     <a href="{{ route('website.clients.index', ['category' => $category->slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
                         <div class="card-body d-flex align-items-center gap-3 p-3">
                             <span class="site-category-icon flex-center flex-shrink-0 rounded-4" aria-hidden="true">
-                                @if ($category->image)
-                                    <img src="{{ $category->image }}" alt="" width="24" height="24" class="object-fit-contain" loading="lazy" referrerpolicy="no-referrer">
-                                @else
-                                    <x-icon icon="ti ti-category" />
-                                @endif
+                                <x-icon :icon="$category->icon" />
                             </span>
                             <div class="flex-fill">
                                 <h3 class="h3 mb-1">{{ $category->title }}</h3>

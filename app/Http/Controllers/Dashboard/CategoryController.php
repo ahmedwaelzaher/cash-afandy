@@ -5,12 +5,9 @@ namespace App\Http\Controllers\Dashboard;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
-use Redot\Traits\CanUploadFile;
 
 class CategoryController extends Controller
 {
-    use CanUploadFile;
-
     /**
      * Display a listing of the resource.
      */
@@ -38,12 +35,8 @@ class CategoryController extends Controller
             'slug' => 'required|string|alpha_dash|unique:categories,slug',
             'description' => 'nullable|array',
             'description.*' => 'nullable|string',
-            'image' => 'required|image',
+            'icon' => 'required|string|max:255',
         ]);
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $this->uploadFile($request->file('image'), 'categories');
-        }
 
         Category::create($validated);
 
@@ -71,12 +64,8 @@ class CategoryController extends Controller
             'slug' => 'required|string|alpha_dash|unique:categories,slug,' . $category->id,
             'description' => 'nullable|array',
             'description.*' => 'nullable|string',
-            'image' => 'nullable|image',
+            'icon' => 'required|string|max:255',
         ]);
-
-        if ($request->hasFile('image')) {
-            $validated['image'] = $this->uploadFile($request->file('image'), 'categories');
-        }
 
         $category->update($validated);
 

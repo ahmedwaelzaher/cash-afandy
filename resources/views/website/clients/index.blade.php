@@ -27,11 +27,7 @@
                                     <a href="{{ route('website.clients.index', ['category' => $category->slug, 'search' => $search !== '' ? $search : null]) }}"
                                         @class(['site-store-filter nav-link d-flex align-items-center gap-3 px-3 py-3', 'active' => $categorySlug === $category->slug])
                                         @if ($categorySlug === $category->slug) aria-current="page" @endif>
-                                        @if ($category->image)
-                                            <img src="{{ $category->image }}" alt="" width="24" height="24" class="object-fit-contain flex-shrink-0" loading="lazy" referrerpolicy="no-referrer">
-                                        @else
-                                            <x-icon icon="ti ti-category" class="flex-shrink-0" />
-                                        @endif
+                                        <x-icon :icon="$category->icon" class="flex-shrink-0" />
                                         <span class="flex-fill">{{ $category->title }}</span>
                                         <span class="badge bg-primary-lt">{{ number_format($category->clients_count) }}</span>
                                     </a>

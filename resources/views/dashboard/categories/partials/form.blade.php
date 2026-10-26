@@ -11,5 +11,5 @@
 </div>
 
 <div class="mb-3">
-    <x-uploader name="image" :title="__('Image')" :value="old('image', $entry?->image)" directory="categories" />
+    <x-icon-picker name="icon" :title="__('Icon')" :value="old('icon', $entry?->icon ?? 'ti ti-category')" validation="required" />
 </div>
