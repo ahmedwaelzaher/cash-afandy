@@ -24,8 +24,8 @@
                 @endif
 
                 <div class="site-hero-cta d-flex align-items-center text-nowrap gap-2 mt-3">
-                    <a href="{{ route('website.coupons.index') }}" class="btn btn-outline-primary gap-2"><x-icon icon="ti ti-ticket" /> {{ __('Find a coupon') }}</a>
-                    <span class="site-hero-guide d-inline-flex align-items-center gap-2" aria-disabled="true">{{ __('How does cashback work?') }} <x-icon icon="ti ti-arrow-down" /></span>
+                    <a href="#offers" class="btn btn-outline-primary gap-2"><x-icon icon="ti ti-ticket" /> {{ __('Find an offer') }}</a>
+                    <a href="{{ route('website.clients.index') }}" class="site-hero-guide d-inline-flex align-items-center gap-2">{{ __('Browse stores') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" /></a>
                 </div>
             </div>
         </div>

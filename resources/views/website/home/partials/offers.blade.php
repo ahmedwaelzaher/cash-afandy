@@ -23,7 +23,7 @@
     });
 @endphp
 
-<section class="site-offers py-5" aria-labelledby="offers-title">
+<section class="site-offers py-5" id="offers" aria-labelledby="offers-title">
     <div class="container site-container">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div>
