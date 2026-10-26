@@ -30,7 +30,7 @@
         </div>
 
         <div class="col-12 col-lg-6 login-split__illustration d-none d-lg-flex flex-column align-items-center justify-content-center">
-            <img src="{{ hashed_asset('assets/images/afandy-forgot-password.webp') }}" alt="" width="1024" height="1536"
+            <img src="{{ hashed_asset('assets/images/afandy-password-locked.webp') }}" alt="" width="1024" height="1536"
                 class="login-split__illustration-img" />
         </div>
     </div>
