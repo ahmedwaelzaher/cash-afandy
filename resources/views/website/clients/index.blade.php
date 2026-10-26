@@ -1,13 +1,6 @@
 <x-layouts::website :title="__('All stores')">
     <section class="site-stores py-4" aria-labelledby="stores-title">
         <div class="container site-container">
-            <nav aria-label="{{ __('Breadcrumb') }}" class="mb-4">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('website.index') }}">{{ __('Home') }}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ __('Stores') }}</li>
-                </ol>
-            </nav>
-
             <div class="row g-4 align-items-start">
                 <aside class="site-stores-sidebar col-12 col-lg-3">
                     <div class="offcanvas-lg offcanvas-start" id="store-filters" tabindex="-1" aria-labelledby="store-filters-title">
