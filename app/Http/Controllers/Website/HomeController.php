@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Models\Category;
 use App\Models\Client;
+use App\Models\Coupon;
 use Illuminate\Contracts\View\View;
 use Redot\Http\Controllers\Controller;
 
@@ -30,6 +31,7 @@ class HomeController extends Controller
         return view('website.index', [
             'stores' => $stores,
             'heroStores' => $stores->take(3),
+            'offers' => Coupon::available()->with('client.categories')->latest('id')->take(20)->get(),
             'categoryStoreCounts' => $stores->flatMap->categories->countBy('slug'),
             'offerCategories' => Category::orderBy('id')->get(),
         ]);

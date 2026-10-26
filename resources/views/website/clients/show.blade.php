@@ -76,7 +76,6 @@
                                         @include('website.partials.coupon-card', [
                                             'categoryLabel' => $client->categories->count() === 1 ? $client->categories->first()->title : null,
                                             'categorySlug' => $client->categories->count() === 1 ? $client->categories->first()->slug : null,
-                                            'offerUrl' => $client->url,
                                         ])
                                     </div>
                                 @endforeach

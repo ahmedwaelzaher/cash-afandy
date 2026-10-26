@@ -1619,7 +1619,7 @@ Coupon Code
 
 .site-store-filter.active,
 .site-store-filter .badge,
-[data-store-result-count] {
+[data-directory-count] {
     background: var(--site-soft);
     color: var(--site-ink);
 }
