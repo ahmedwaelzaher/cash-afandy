@@ -17,7 +17,7 @@
                             @endif
                         </span>
                         <div class="d-flex flex-column align-items-start">
-                            <h1 class="h2 mb-2" id="store-title">{{ __('Coupons and offers from :store', ['store' => $client->title]) }}</h1>
+                            <h1 class="h2 mb-2" id="store-title">{{ $client->title }}</h1>
                             @if ($client->description)
                                 <p class="text-secondary mb-2">{{ \Illuminate\Support\Str::limit(strip_tags($client->description), 160) }}</p>
                             @endif
@@ -52,7 +52,7 @@
             </div>
 
             <header class="site-offers bg-transparent mb-4">
-                <h2 class="site-heading mb-0" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Coupons and offers from :store', ['store' => $client->title]) }}</h2>
+                <h2 class="site-heading mb-0" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Offers') . ' ' . $client->title }}</h2>
                 @if ($coupons->isNotEmpty())
                     <p class="text-secondary mt-2 mb-0">{{ __('Choose an offer and review its terms before shopping.') }}</p>
                 @endif
