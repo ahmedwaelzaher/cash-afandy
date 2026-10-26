@@ -13,11 +13,11 @@ return [
 
     'features' => [
         'website-api' => [
-            'enabled' => true,
+            'enabled' => false,
         ],
 
         'dashboard-api' => [
-            'enabled' => true,
+            'enabled' => false,
             'prefix' => 'dashboard',
         ],
 
