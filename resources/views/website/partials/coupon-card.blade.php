@@ -1,5 +1,6 @@
 @php
     $detailsId = 'coupon-details-' . ($coupon->getKey() ?? \Illuminate\Support\Str::uuid());
+    $offerUrl = $coupon->url ?? null;
 @endphp
 <article class="site-offer-card card h-100">
     <div class="site-offer-discount d-flex flex-row-reverse flex-sm-column align-items-center justify-content-center gap-2 text-center">
@@ -42,7 +43,7 @@
             <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">
                 @if (filled($coupon->code))
                     @include('website.partials.coupon-code')
-                @elseif ($offerUrl ?? null)
+                @elseif (filled($offerUrl))
                     <a href="{{ $offerUrl }}" class="site-offer-link btn btn-outline-primary gap-2" target="_blank" rel="sponsored noopener noreferrer">
                         {{ __('View offer') }} <x-icon icon="ti ti-external-link" />
                     </a>
@@ -77,9 +78,6 @@
                         <li>{{ $tip }}</li>
                     @endforeach
                 </ul>
-                @unless ($coupon->exists)
-                    <p class="text-secondary small mt-3 mb-0">{{ __('This offer is for design preview only.') }}</p>
-                @endunless
             </div>
         </div>
     </div>

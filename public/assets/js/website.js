@@ -21,14 +21,14 @@ async function decodeCouponCode(encoded) {
 // ==================================================
 $(() => {
     // ==================================================
-    // Store directory search
+    // Directory search
     // ==================================================
-    $('[data-store-search]').each((index, element) => {
+    $('[data-directory-search]').each((index, element) => {
         const $input = $(element).find('[name="search"]');
-        const $clear = $(element).find('[data-clear-store-search]');
-        const $section = $(element).closest('.site-stores');
-        const $results = $section.find('[data-store-results]');
-        const $count = $section.find('[data-store-result-count]');
+        const $clear = $(element).find('[data-clear-directory-search]');
+        const $section = $(element).closest('[data-directory]');
+        const $results = $section.find('[data-directory-results]');
+        const $count = $section.find('[data-directory-count]');
         let currentSearch = $input.val().trim();
         let request;
         let revision = 0;
@@ -66,7 +66,7 @@ $(() => {
                 });
         };
 
-        const searchStores = () => {
+        const searchDirectory = () => {
             const url = new URL(window.location.href);
             const search = $input.val().trim();
             url.searchParams.delete('page');
@@ -76,7 +76,7 @@ $(() => {
         };
 
         const searchDebounced = _.debounce(() => {
-            if (!composing && $input.val().trim() !== currentSearch) searchStores();
+            if (!composing && $input.val().trim() !== currentSearch) searchDirectory();
         }, 500);
 
         $input.on('input', () => {
@@ -92,27 +92,27 @@ $(() => {
             searchDebounced();
         });
 
-        $results.on('click', '[data-store-pagination] a', (event) => {
+        $results.on('click', '[data-directory-pagination] a', (event) => {
             if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
             event.preventDefault();
             searchDebounced.cancel();
             const url = new URL(event.currentTarget.href);
             // Pagination must not discard a search that is still being debounced.
-            if ($input.val().trim() !== currentSearch) searchStores();
+            if ($input.val().trim() !== currentSearch) searchDirectory();
             else load(url);
         });
         $clear.on('click', () => {
             searchDebounced.cancel();
             $input.val('');
             $clear.addClass('d-none');
-            searchStores();
+            searchDirectory();
         });
     });
 
     // ==================================================
     // Sharing
     // ==================================================
-    $('[data-share-url]').on('click', async function () {
+    $(document).on('click', '[data-share-url]', async function () {
         const $button = $(this);
         const url = $button.attr('data-share-url');
 
@@ -137,7 +137,7 @@ $(() => {
     // Favorites
     // ==================================================
     // Preview only; favorites are not persisted until backend integration.
-    $('[data-coupon-favorite]').on('click', function () {
+    $(document).on('click', '[data-coupon-favorite]', function () {
         const $button = $(this);
         $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
     });
@@ -215,7 +215,7 @@ $(() => {
         $section.find('[data-offer-filter]').removeClass('btn-primary').attr('aria-pressed', 'false');
         $(this).addClass('btn-primary').attr('aria-pressed', 'true');
         $section.find('[data-offer-category]').each((_, element) => {
-            element.hidden = filter !== 'all' && element.dataset.offerCategory !== filter;
+            element.hidden = filter !== 'all' && !element.dataset.offerCategory.split(' ').includes(filter);
         });
     });
 });
