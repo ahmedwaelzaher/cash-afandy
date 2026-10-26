@@ -6,14 +6,6 @@
 <x-layouts::website :title="$client->title">
     <section class="site-store py-4" aria-labelledby="store-title">
         <div class="container site-container">
-            <nav aria-label="{{ __('Breadcrumb') }}" class="mb-3">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('website.index') }}">{{ __('Home') }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('website.clients.index') }}">{{ __('Stores') }}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $client->title }}</li>
-                </ol>
-            </nav>
-
             <div class="card rounded-4 mb-4">
                 <div class="card-body d-flex flex-column flex-md-row align-items-md-start gap-4 p-4">
                     <div class="d-flex align-items-start gap-3 flex-fill text-break">
