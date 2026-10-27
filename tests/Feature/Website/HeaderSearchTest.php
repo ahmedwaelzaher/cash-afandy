@@ -134,3 +134,24 @@ test('full results paginate beyond the dropdown and old links still work', funct
     $this->get(route('website.search', ['locale' => 'en', 'search' => 'Pagination Brand']))
         ->assertOk()->assertViewHas('search', 'Pagination Brand');
 });
+
+test('search binds SQL syntax as literal text instead of widening the results', function () {
+    $store = Client::factory()->create(['title' => ['en' => 'Unrelated visible store']]);
+    $store->countries()->attach($this->country);
+    $offer = Offer::factory()->create([
+        'client_id' => $store->id, 'title' => ['en' => 'Unrelated visible offer'],
+        'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
+    ]);
+    $offer->countries()->attach($this->country);
+    $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+        ->getJson(route('website.search', ['locale' => 'en', 'afandy_search' => "' OR 1=1 --"]))
+        ->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'No results found') && ! str_contains($html, 'Unrelated visible'));
+});
+
+test('LIKE escape characters and quotes remain searchable literal text', function (string $search) {
+    $store = Client::factory()->create(['title' => ['en' => 'Literal ' . $search . ' store']]);
+    $store->countries()->attach($this->country);
+    $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+        ->getJson(route('website.search', ['locale' => 'en', 'afandy_search' => $search]))
+        ->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, e('Literal ' . $search . ' store')));
+})->with(['20!%_', "O'Reilly", 'path\\name']);
