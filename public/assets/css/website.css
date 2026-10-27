@@ -373,6 +373,72 @@ Form Check (Radio)
     box-shadow: 0 0 0 4px #92b37822;
 }
 
+.site-header-search-panel {
+    position: relative;
+}
+
+.site-search-results {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + 0.5rem);
+    z-index: 10;
+    max-block-size: min(65dvh, 38rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--site-line);
+    border-radius: var(--site-radius);
+    background: var(--site-surface);
+    box-shadow: var(--site-shadow);
+}
+
+.site-search-group + .site-search-group,
+.site-search-result + .site-search-result {
+    border-block-start: 1px solid var(--site-line);
+}
+
+.site-search-group h3 {
+    font-size: 1em;
+}
+
+.site-search-group .badge,
+.site-search-view-all,
+.site-search-result:hover,
+.site-search-result:focus-visible,
+.site-search-result-visual:has(strong) {
+    background: var(--site-soft);
+    color: var(--site-ink);
+}
+
+.site-search-result-visual {
+    inline-size: 4.25rem;
+    min-block-size: 3rem;
+    padding: 0.25rem;
+    border: 1px solid var(--site-line);
+    border-radius: 0.75rem;
+}
+
+.site-search-result-visual img {
+    max-inline-size: 100%;
+}
+
+.site-search-result-copy {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.site-search-result-copy > strong {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+[data-afandy-search] input::-webkit-search-cancel-button {
+    display: none;
+}
+
 [dir='ltr'] .site-menu-arrow {
     transform: rotate(180deg);
 }
@@ -422,6 +488,12 @@ Form Check (Radio)
 
     .site-header-search .btn {
         --tblr-btn-color: var(--site-text);
+    }
+
+    .site-search-results {
+        position: static;
+        margin-block-start: 0.75rem;
+        max-block-size: 55dvh;
     }
 
     .site-header-search > .btn[aria-expanded='true'] {
@@ -772,9 +844,22 @@ Form Check (Radio)
 
 /* Preserve the navbar and hero's 75% desktop scale; fractional rem values are intentional. */
 @media (min-width: 1200px) {
-    .site-header-actions.d-flex,
-    .site-navbar .site-header-search-panel {
+    .site-header-actions.d-flex {
         display: contents !important;
+    }
+
+    .site-navbar .site-header-search-panel {
+        display: block !important;
+        position: relative;
+        inline-size: 100%;
+        max-inline-size: none;
+        max-block-size: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
     .site-navbar-menu,

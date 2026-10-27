@@ -17,6 +17,186 @@ async function decodeCouponCode(encoded) {
 }
 
 // ==================================================
+// Header search suggestions
+// ==================================================
+$(() => {
+    $('[data-afandy-search]').each((index, element) => {
+        const $form = $(element);
+        const $panel = $form.parent();
+        const $input = $form.find('[name="afandy_search"]');
+        const $button = $form.find('[data-afandy-search-button]');
+        const $spinner = $form.find('[data-submit-spinner]');
+        const $results = $panel.find('#afandy-search-results');
+        let request;
+        let revision = 0;
+        let composing = false;
+        let completed = false;
+        let loadedSearch = null;
+        let dismissed = false;
+
+        const show = (visible) => {
+            $results.prop('hidden', !visible);
+            $input.attr('aria-expanded', String(visible));
+        };
+        const buttonState = (clear) => {
+            completed = clear;
+            $button.attr('type', clear ? 'button' : 'submit')
+                .attr('aria-label', $button.attr(clear ? 'data-reset-label' : 'data-search-label'));
+            $button.find('.ti').toggleClass('ti-search', !clear).toggleClass('ti-x', clear);
+        };
+        const cancel = () => {
+            revision++;
+            if (request) request.abort();
+            request = null;
+            $spinner.empty();
+            $results.attr('aria-busy', 'false');
+        };
+        const updateUrl = (search) => {
+            const url = new URL(window.location.href);
+            if (search) url.searchParams.set('afandy_search', search);
+            else url.searchParams.delete('afandy_search');
+            window.history.replaceState(window.history.state, '', url.href);
+            // Directory links may already be rendered when the header search changes.
+            $('[data-directory] .site-store-filter, [data-directory-pagination] a').each((_, link) => {
+                const target = new URL(link.href);
+                if (search) target.searchParams.set('afandy_search', search);
+                else target.searchParams.delete('afandy_search');
+                link.href = target.href;
+            });
+        };
+        const load = () => {
+            cancel();
+            const search = $input.val().trim();
+            updateUrl(search);
+            if (Array.from(search).length < 2) {
+                loadedSearch = null;
+                $results.empty();
+                buttonState(Boolean(search));
+                show(false);
+                return;
+            }
+            const currentRevision = revision;
+            dismissed = false;
+            const url = new URL(element.action);
+            url.searchParams.set('afandy_search', search);
+            const country = new URL(window.location.href).searchParams.get('country');
+            if (country) url.searchParams.set('country', country);
+            buttonState(false);
+            $results.empty().attr('aria-busy', 'true');
+            show(false);
+            $spinner.append($('<span class="spinner-border spinner-border-sm" role="status"></span>').attr('aria-label', $button.attr('data-search-label')));
+            request = $.ajax({ url: url.href, dataType: 'json' })
+                .done((response) => {
+                    if (currentRevision !== revision) return;
+                    loadedSearch = search;
+                    $results.html(response.html);
+                    // Do not reopen a dropdown that the user has left or dismissed.
+                    show(!dismissed && $panel[0].contains(document.activeElement) && Boolean(response.html));
+                })
+                .fail((xhr, status) => {
+                    if (status === 'abort' || currentRevision !== revision) return;
+                    loadedSearch = null;
+                    $results.empty().append($('<p class="p-3 mb-0 text-center" role="status"></p>').text(__('Error')));
+                    show(!dismissed && $panel[0].contains(document.activeElement));
+                })
+                .always(() => {
+                    if (currentRevision !== revision) return;
+                    request = null;
+                    $spinner.empty();
+                    $results.attr('aria-busy', 'false');
+                    buttonState(true);
+                });
+        };
+        const debounced = _.debounce(load, 300);
+        const clear = () => {
+            debounced.cancel();
+            cancel();
+            $input.val('');
+            loadedSearch = null;
+            $results.empty();
+            buttonState(false);
+            show(false);
+            updateUrl('');
+            $input.trigger('focus');
+        };
+
+        $form.on('submit', (event) => {
+            event.preventDefault();
+            debounced.cancel();
+            load();
+        });
+        $button.on('click', (event) => {
+            if (!completed) return;
+            event.preventDefault();
+            clear();
+        });
+        $input.on('input', () => {
+            debounced.cancel();
+            cancel();
+            buttonState(false);
+            show(false);
+            if (!$input.val().trim()) clear();
+            else if (!composing) debounced();
+        }).on('compositionstart', () => {
+            composing = true;
+            debounced.cancel();
+            cancel();
+        }).on('compositionend', () => {
+            composing = false;
+            debounced();
+        }).on('focus', () => {
+            dismissed = false;
+            if (loadedSearch === $input.val().trim()) show(Boolean($results.children().length));
+            else if (Array.from($input.val().trim()).length >= 2 && !request) load();
+        });
+
+        $panel.on('keydown', (event) => {
+            if (composing || event.isComposing) return;
+            if (event.key === 'Escape') {
+                debounced.cancel();
+                cancel();
+                buttonState(Boolean($input.val().trim()));
+                show(false);
+                event.stopPropagation();
+                event.preventDefault();
+                if (document.activeElement !== $input[0]) $input.trigger('focus');
+                dismissed = true;
+                show(false);
+                return;
+            }
+            if (!['ArrowDown', 'ArrowUp'].includes(event.key) || $results.prop('hidden')) return;
+            const $links = $results.find('a');
+            if (!$links.length) return;
+            event.preventDefault();
+            const index = $links.index(document.activeElement);
+            const next = index + (event.key === 'ArrowDown' ? 1 : -1);
+            if (index === -1) $links.eq(event.key === 'ArrowDown' ? 0 : -1).trigger('focus');
+            else if (next < 0 || next >= $links.length) $input.trigger('focus');
+            else $links.eq(next).trigger('focus');
+        }).on('focusout', () => {
+            setTimeout(() => {
+                if (!$panel[0].contains(document.activeElement)) {
+                    dismissed = true;
+                    show(false);
+                }
+            }, 0);
+        });
+        $(document).on('click.afandySearch', (event) => {
+            if (!$panel[0].contains(event.target)) {
+                dismissed = true;
+                show(false);
+            }
+        });
+        $(window).on('popstate.afandySearch', () => {
+            debounced.cancel();
+            $input.val(new URL(window.location.href).searchParams.get('afandy_search') || '');
+            load();
+        });
+        if ($input.val().trim()) load();
+    });
+});
+
+// ==================================================
 // Directory search and pagination
 // ==================================================
 $(() => {
@@ -52,6 +232,9 @@ $(() => {
                         const filterUrl = new URL(link.href);
                         if (currentSearch) filterUrl.searchParams.set('search', currentSearch);
                         else filterUrl.searchParams.delete('search');
+                        const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
+                        if (headerSearch) filterUrl.searchParams.set('afandy_search', headerSearch);
+                        else filterUrl.searchParams.delete('afandy_search');
                         link.href = filterUrl.href;
                     });
                 })
@@ -94,6 +277,9 @@ $(() => {
             event.preventDefault();
             searchDebounced.cancel();
             const url = new URL(event.currentTarget.href);
+            const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
+            if (headerSearch) url.searchParams.set('afandy_search', headerSearch);
+            else url.searchParams.delete('afandy_search');
             // Pagination must not discard a search that is still being debounced.
             if ($input.val().trim() !== currentSearch) searchDirectory();
             else load(url);

@@ -5,7 +5,7 @@
                 <h2 class="mb-1">{{ __('Search results for: :search', ['search' => $search]) }}</h2>
             </div>
 
-            @if ($stores->isEmpty() && $coupons->isEmpty() && $cashbacks->isEmpty())
+            @if ($stores->isEmpty() && $offers->isEmpty())
                 <x-empty :title="__('No results found')" :subtitle="__('Try searching with a different keyword')" />
             @endif
 
@@ -23,50 +23,36 @@
                             </a>
                         @endforeach
                     </div>
+                    @if ($stores->hasPages())
+                        <div class="mt-4">{{ $stores->links() }}</div>
+                    @endif
                 </div>
             @endif
 
-            @if ($coupons->isNotEmpty())
+            @if ($offers->isNotEmpty())
                 <div class="mb-5">
                     <div class="d-flex justify-content-between align-items-end gap-3 mb-4">
                         <div class="site-deals-heading">
-                            <h2 class="mb-1">{{ __('Coupons') }}</h2>
+                            <h2 class="mb-1">{{ __('Offers') }}</h2>
                         </div>
 
-                        <a href="{{ route('website.coupons.index', ['search' => $search]) }}"
+                        <a href="{{ route('website.offers.index', ['search' => $search]) }}"
                             class="site-deals-view-all text-nowrap">{{ __('View all') }}</a>
                     </div>
 
                     <div class="site-offers-grid">
-                        @foreach ($coupons as $coupon)
+                        @foreach ($offers as $offer)
                             <div>
-                                @include('website.partials.coupon-card')
+                                @include('website.partials.offer-card')
                             </div>
                         @endforeach
                     </div>
+                    @if ($offers->hasPages())
+                        <div class="mt-4">{{ $offers->links() }}</div>
+                    @endif
                 </div>
             @endif
 
-            @if ($cashbacks->isNotEmpty())
-                <div>
-                    <div class="d-flex justify-content-between align-items-end gap-3 mb-4">
-                        <div class="site-deals-heading">
-                            <h2 class="mb-1">{{ __('Cashback') }}</h2>
-                        </div>
-
-                        <a href="{{ route('website.cashbacks.index', ['search' => $search]) }}"
-                            class="site-deals-view-all text-nowrap">{{ __('View all') }}</a>
-                    </div>
-
-                    <div class="row row-cards">
-                        @foreach ($cashbacks as $cashback)
-                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                @include('website.partials.cashback-card')
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
         </div>
     </section>
 </x-layouts::website>
