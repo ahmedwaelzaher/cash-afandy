@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Models\Category;
 use App\Models\Client;
-use App\Models\Coupon;
+use App\Models\Offer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
@@ -75,7 +75,7 @@ class ClientController extends Controller
 
         return view('website.clients.show', [
             'client' => $client,
-            'coupons' => Coupon::available()->with('client')->whereBelongsTo($client)->latest('id')->get(),
+            'offers' => Offer::available()->with('client')->whereBelongsTo($client)->latest('id')->get(),
         ]);
     }
 }

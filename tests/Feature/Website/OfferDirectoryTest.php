@@ -3,7 +3,7 @@
 use App\Models\Category;
 use App\Models\Client;
 use App\Models\Country;
-use App\Models\Coupon;
+use App\Models\Offer;
 use Redot\Http\Middleware\EnsureDependenciesBuilt;
 
 beforeEach(function () {
@@ -13,11 +13,11 @@ beforeEach(function () {
 });
 
 test('the offers page shares the directory layout and includes the reveal modal even when empty', function () {
-    $this->get(route('website.coupons.index', ['locale' => 'en', 'search' => 'missing-offer-7z']))
+    $this->get(route('website.offers.index', ['locale' => 'en', 'search' => 'missing-offer-7z']))
         ->assertOk()
         ->assertSee('data-directory-search', false)
         ->assertSee('data-directory-results', false)
-        ->assertSee('id="site-coupon-reveal"', false)
+        ->assertSee('id="site-offer-reveal"', false)
         ->assertDontSee('data-directory-search disable-validation', false);
 });
 
@@ -26,7 +26,7 @@ test('ajax offer search matches store names without case sensitivity and respect
     $store = Client::factory()->create(['title' => ['en' => 'Example Brand'], 'active' => true]);
     $store->categories()->attach($category);
     $country = Country::where('code', 'eg')->firstOrFail();
-    $offer = Coupon::factory()->create([
+    $offer = Offer::factory()->create([
         'client_id' => $store->id,
         'title' => ['en' => 'Eligible directory offer'],
         'launch_date' => now()->subDay(),
@@ -34,7 +34,7 @@ test('ajax offer search matches store names without case sensitivity and respect
         'active' => true,
     ]);
     $offer->countries()->attach($country);
-    $expired = Coupon::factory()->create([
+    $expired = Offer::factory()->create([
         'client_id' => $store->id,
         'title' => ['en' => 'Expired directory offer'],
         'launch_date' => now()->subDays(2),
@@ -44,7 +44,7 @@ test('ajax offer search matches store names without case sensitivity and respect
     $expired->countries()->attach($country);
 
     $response = $this->withHeader('X-Requested-With', 'XMLHttpRequest')
-        ->getJson(route('website.coupons.index', ['locale' => 'en', 'search' => 'example brand', 'category' => $category->slug]))
+        ->getJson(route('website.offers.index', ['locale' => 'en', 'search' => 'example brand', 'category' => $category->slug]))
         ->assertOk()->assertJsonStructure(['html', 'countLabel']);
 
     expect($response->json('html'))->toContain('Eligible directory offer')
@@ -54,15 +54,35 @@ test('ajax offer search matches store names without case sensitivity and respect
 
 test('ajax offer search validates the search length', function () {
     $this->withHeader('X-Requested-With', 'XMLHttpRequest')
-        ->getJson(route('website.coupons.index', ['locale' => 'en', 'search' => str_repeat('a', 256)]))
+        ->getJson(route('website.offers.index', ['locale' => 'en', 'search' => str_repeat('a', 256)]))
         ->assertUnprocessable();
+});
+
+test('an available offer resolves through its renamed detail route and country relation', function () {
+    $store = Client::factory()->create(['active' => true]);
+    $country = Country::where('code', 'eg')->firstOrFail();
+    $offer = Offer::factory()->create([
+        'client_id' => $store->id,
+        'title' => ['en' => 'Renamed offer detail'],
+        'launch_date' => now()->subDay(),
+        'expiration_date' => null,
+        'active' => true,
+    ]);
+    $offer->countries()->attach($country);
+
+    $this->get(route('website.offers.show', ['locale' => 'en', 'offer' => $offer]))
+        ->assertOk()
+        ->assertSee('Renamed offer detail')
+        ->assertSee('data-offer-code=', false);
+
+    $this->assertDatabaseHas('country_offer', ['offer_id' => $offer->id, 'country_id' => $country->id]);
 });
 
 test('the homepage shows available database offers instead of preview offers', function () {
     $store = Client::factory()->create(['active' => true]);
     $country = Country::where('code', 'eg')->firstOrFail();
     $store->countries()->attach($country);
-    $offer = Coupon::factory()->create([
+    $offer = Offer::factory()->create([
         'client_id' => $store->id,
         'title' => ['en' => 'Live homepage offer'],
         'launch_date' => now()->subDay(),
@@ -79,7 +99,7 @@ test('the homepage shows available database offers instead of preview offers', f
 });
 
 test('a direct offer card uses its own url when there is no code', function () {
-    $offer = new Coupon([
+    $offer = new Offer([
         'title' => ['en' => 'Direct offer'],
         'code' => null,
         'discount' => 20,
@@ -87,8 +107,8 @@ test('a direct offer card uses its own url when there is no code', function () {
     $offer->url = 'https://example.test/deal?affiliate=partner';
     $offer->setRelation('client', Client::factory()->create());
 
-    $html = view('website.partials.coupon-card', ['coupon' => $offer])->render();
+    $html = view('website.partials.offer-card', ['offer' => $offer])->render();
 
     expect($html)->toContain('href="https://example.test/deal?affiliate=partner"')
-        ->not->toContain('data-coupon-code=');
+        ->not->toContain('data-offer-code=');
 });

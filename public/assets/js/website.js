@@ -1,13 +1,13 @@
 // ==================================================
-// Coupon code decoding
+// Offer code decoding
 // ==================================================
 /**
- * Decode a coupon code that was encoded with AES-GCM and base64.
+ * Decode an offer code that was encoded with AES-GCM and base64.
  *
- * @param {string} encoded - The base64-encoded coupon code.
- * @returns {Promise<string>} - The decoded coupon code.
+ * @param {string} encoded - The base64-encoded offer code.
+ * @returns {Promise<string>} - The decoded offer code.
  */
-async function decodeCouponCode(encoded) {
+async function decodeOfferCode(encoded) {
     let bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
     let keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cashafandy'));
     let key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
@@ -326,17 +326,17 @@ $(() => {
 // ==================================================
 $(() => {
     // Visual state only until favorites are connected to the backend.
-    $(document).on('click', '[data-coupon-favorite]', function () {
+    $(document).on('click', '[data-offer-favorite]', function () {
         const $button = $(this);
         $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
     });
 });
 
 // ==================================================
-// Shared coupon reveal and clipboard feedback
+// Shared offer reveal and clipboard feedback
 // ==================================================
 $(() => {
-    const $modal = $('#site-coupon-reveal');
+    const $modal = $('#site-offer-reveal');
     if (!$modal.length) return;
 
     const $code = $modal.find('[data-revealed-code]');
@@ -366,7 +366,7 @@ $(() => {
         const logo = $button.attr('data-store-logo');
         const url = $button.attr('data-store-url');
 
-        $modal.find('#site-coupon-reveal-title').text($button.attr('data-coupon-title'));
+        $modal.find('#site-offer-reveal-title').text($button.attr('data-offer-title'));
         $modal.find('[data-reveal-store]').text($button.attr('data-store-name'));
         $modal.find('[data-reveal-logo]').prop('hidden', !logo).find('img').attr('src', logo || null);
         $modal.find('[data-reveal-link]').prop('hidden', !url).find('a').attr('href', url || null);
@@ -375,7 +375,7 @@ $(() => {
         $copy.prop('disabled', true).find('[data-copy-label]').text($status.attr('data-copy-label'));
         $copy.find('.ti').removeClass('ti-check').addClass('ti-copy');
         $status.text($status.attr('data-copy-pending'));
-        reveal = decodeCouponCode($button.attr('data-coupon-code'));
+        reveal = decodeOfferCode($button.attr('data-offer-code'));
         reveal.catch(() => {});
     }).on('shown.bs.modal', async () => {
         const currentReveal = reveal;

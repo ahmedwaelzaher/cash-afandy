@@ -106,8 +106,8 @@ return Sidebar::make([
                 ->icon('ti ti-heart-handshake'),
 
             Item::make()
-                ->title(__('Coupons'))
-                ->route('dashboard.coupons.index')
+                ->title(__('Offers'))
+                ->route('dashboard.offers.index')
                 ->icon('ti ti-ticket'),
 
             Item::make()

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Website;
 
 use App\Models\Category;
-use App\Models\Coupon;
+use App\Models\Offer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 
-class CouponController extends Controller
+class OfferController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -30,7 +30,7 @@ class CouponController extends Controller
             return $query->whereRaw("LOWER({$title}) LIKE ?", ['%' . mb_strtolower($search) . '%']);
         };
 
-        $coupons = Coupon::available()
+        $offers = Offer::available()
             ->with('client.categories')
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
                 ->where($matchTitle)->orWhereHas('client', $matchTitle)))
@@ -40,35 +40,35 @@ class CouponController extends Controller
                 ->whereHas('client', fn (Builder $query) => $query->where('slug', $slug)));
 
         match ($filters['sort'] ?? null) {
-            'highest' => $coupons->orderByDesc('discount'),
-            'expiring' => $coupons->orderByRaw('expiration_date is null')->orderBy('expiration_date'),
-            default => $coupons->latest('id'),
+            'highest' => $offers->orderByDesc('discount'),
+            'expiring' => $offers->orderByRaw('expiration_date is null')->orderBy('expiration_date'),
+            default => $offers->latest('id'),
         };
 
         $data = [
-            'coupons' => $coupons->paginate(12)->withQueryString(),
+            'offers' => $offers->paginate(12)->withQueryString(),
             'search' => $search,
             'categorySlug' => $categorySlug,
         ];
-        $data['countLabel'] = trans_choice('Offer count', $data['coupons']->total(), ['count' => number_format($data['coupons']->total())]);
+        $data['countLabel'] = trans_choice('Offer count', $data['offers']->total(), ['count' => number_format($data['offers']->total())]);
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('website.coupons.partials.results', $data)->render(),
+                'html' => view('website.offers.partials.results', $data)->render(),
                 'countLabel' => $data['countLabel'],
             ]);
         }
 
         $categories = Category::orderBy("title->{$locale}")->orderBy('id')->get();
-        $categoryCounts = Coupon::available()
-            ->join('category_client', 'coupons.client_id', '=', 'category_client.client_id')
-            ->selectRaw('category_client.category_id, COUNT(DISTINCT coupons.id) as total')
+        $categoryCounts = Offer::available()
+            ->join('category_client', 'offers.client_id', '=', 'category_client.client_id')
+            ->selectRaw('category_client.category_id, COUNT(DISTINCT offers.id) as total')
             ->groupBy('category_client.category_id')->pluck('total', 'category_client.category_id');
 
-        return view('website.coupons.index', array_merge($data, [
+        return view('website.offers.index', array_merge($data, [
             'categories' => $categories,
             'selectedCategory' => $categories->firstWhere('slug', $categorySlug),
-            'allOffersCount' => Coupon::available()->count(),
+            'allOffersCount' => Offer::available()->count(),
             'categoryCounts' => $categoryCounts,
         ]));
     }
@@ -76,23 +76,23 @@ class CouponController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Coupon $coupon)
+    public function show(Offer $offer)
     {
-        abort_unless(Coupon::available()->whereKey($coupon->id)->exists(), 404);
+        abort_unless(Offer::available()->whereKey($offer->id)->exists(), 404);
 
-        $coupon->load(['client', 'countries']);
+        $offer->load(['client', 'countries']);
 
-        $relatedCoupons = Coupon::available()
+        $relatedOffers = Offer::available()
             ->with('client')
-            ->where('client_id', $coupon->client_id)
-            ->whereKeyNot($coupon->id)
+            ->where('client_id', $offer->client_id)
+            ->whereKeyNot($offer->id)
             ->latest('id')
             ->take(4)
             ->get();
 
-        return view('website.coupons.show', [
-            'coupon' => $coupon,
-            'relatedCoupons' => $relatedCoupons,
+        return view('website.offers.show', [
+            'offer' => $offer,
+            'relatedOffers' => $relatedOffers,
         ]);
     }
 }

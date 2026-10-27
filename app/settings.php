@@ -15,16 +15,16 @@ Setting::define('app_name')->array()->default([
 ]);
 
 Setting::define('footer_about_description')->array()->default([
-    'en' => "<div>\r\n<div><span>Your smart friend in saving.</span></div>\r\n<div><span>Coupons, discounts, and offers... the right way</span></div>\r\n</div>",
-    'ar' => "<p>صاحبك الشاطر في التوفير.</p>\r\n<p>كوبونات، خصومات، وعروض&hellip; بأصول.</p>",
+    'en' => "<div>\r\n<div><span>Your smart friend in saving.</span></div>\r\n<div><span>Offers and discounts... the right way</span></div>\r\n</div>",
+    'ar' => "<p>صاحبك الشاطر في التوفير.</p>\r\n<p>عروض وخصومات&hellip; بأصول.</p>",
 ])->rules([
     'footer_about_description' => ['nullable', 'array'],
     'footer_about_description.*' => ['nullable', 'string'],
 ]);
 
 Setting::define('footer_subscribe_description')->array()->default([
-    'en' => "<p>Subscribe to our newsletter and be the first to know about the latest coupons, offers, and deals.</p>",
-    'ar' => "<p>اشترك في نشرتنا الإخبارية وكن أول من يعلم بأحدث الكوبونات والعروض والصفقات.</p>",
+    'en' => '<p>Subscribe to our newsletter and be the first to know about the latest offers and deals.</p>',
+    'ar' => '<p>اشترك في نشرتنا الإخبارية وكن أول من يعلم بأحدث العروض والصفقات.</p>',
 ])->rules([
     'footer_subscribe_description' => ['nullable', 'array'],
     'footer_subscribe_description.*' => ['nullable', 'string'],

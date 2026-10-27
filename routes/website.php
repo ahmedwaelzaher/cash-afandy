@@ -3,9 +3,9 @@
 use App\Http\Controllers\Website\CashbackController;
 use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\ClientController;
-use App\Http\Controllers\Website\CouponController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
+use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\ProfileController;
 use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
@@ -30,8 +30,8 @@ Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('
 Route::get('static-pages/{staticPage}', [StaticPageController::class, 'show'])->name('static-pages.show');
 Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
 
-Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
-Route::get('coupons/{coupon}', [CouponController::class, 'show'])->name('coupons.show');
+Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
 
 Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.index');
 Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');

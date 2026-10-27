@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Database\Factories\CouponFactory;
+use Database\Factories\OfferFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
-class Coupon extends Model
+class Offer extends Model
 {
-    /** @use HasFactory<CouponFactory> */
+    /** @use HasFactory<OfferFactory> */
     use HasFactory;
 
     use HasTranslations;
@@ -107,7 +107,7 @@ class Coupon extends Model
     }
 
     /**
-     * Scope a query to only include coupons visible on the website.
+     * Scope a query to only include offers visible on the website.
      */
     public function scopeAvailable(Builder $query): void
     {
@@ -121,7 +121,7 @@ class Coupon extends Model
     }
 
     /**
-     * Get the client that owns the coupon.
+     * Get the client that owns the offer.
      */
     public function client(): BelongsTo
     {
@@ -129,7 +129,7 @@ class Coupon extends Model
     }
 
     /**
-     * Get the representative that owns the coupon.
+     * Get the representative that owns the offer.
      */
     public function representative(): BelongsTo
     {
@@ -137,7 +137,7 @@ class Coupon extends Model
     }
 
     /**
-     * Get the countries the coupon is available in.
+     * Get the countries the offer is available in.
      */
     public function countries(): BelongsToMany
     {

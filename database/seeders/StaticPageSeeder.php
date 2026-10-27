@@ -17,7 +17,7 @@ class StaticPageSeeder extends Seeder
                 'title' => ['en' => 'Privacy Policy', 'ar' => 'سياسة الخصوصية'],
                 'content' => [
                     'ar' => <<<'HTML'
-                        <p>في كاش أفندي، نحرص على توضيح كيفية التعامل مع بياناتك عند تصفح الكوبونات وعروض الخصم واستخدام حسابك. توضح هذه السياسة البيانات المرتبطة بخدمات الموقع وكيفية التواصل معنا بشأنها.</p>
+                        <p>في كاش أفندي، نحرص على توضيح كيفية التعامل مع بياناتك عند تصفح عروض الخصم واستخدام حسابك. توضح هذه السياسة البيانات المرتبطة بخدمات الموقع وكيفية التواصل معنا بشأنها.</p>
                         <h2>البيانات التي نتعامل معها</h2>
                         <ul>
                             <li>بيانات الحساب التي تقدمها، مثل الاسم والبريد الإلكتروني وكلمة المرور وبيانات الملف الشخصي، بما فيها النوع ورقم الهاتف وتاريخ الميلاد عند تقديمها.</li>
@@ -39,7 +39,7 @@ class StaticPageSeeder extends Seeder
                         <p>قد نحدّث هذه السياسة لتوضيح تغييرات الخدمات أو طريقة التعامل مع البيانات. يظهر تاريخ آخر تحديث أعلى الصفحة.</p>
                         HTML,
                     'en' => <<<'HTML'
-                        <p>Cash Afandy aims to explain how your data is handled when you browse coupons and discount offers or use your account. This policy describes the data associated with our website services and how to contact us about it.</p>
+                        <p>Cash Afandy aims to explain how your data is handled when you browse offers or use your account. This policy describes the data associated with our website services and how to contact us about it.</p>
                         <h2>Data we handle</h2>
                         <ul>
                             <li>Account information you provide, such as your name, email address, password and profile details, including gender, phone number and date of birth when supplied.</li>
@@ -66,15 +66,15 @@ class StaticPageSeeder extends Seeder
                 'title' => ['en' => 'Terms and Conditions', 'ar' => 'الشروط والأحكام'],
                 'content' => [
                     'ar' => <<<'HTML'
-                        <p>مرحبًا بك في كاش أفندي. توضح هذه الشروط طريقة استخدام الموقع والكوبونات وعروض الخصم المعروضة عليه. يرجى قراءتها قبل استخدام الخدمات أو الاستفادة من أي عرض.</p>
+                        <p>مرحبًا بك في كاش أفندي. توضح هذه الشروط طريقة استخدام الموقع وعروض الخصم المعروضة عليه. يرجى قراءتها قبل استخدام الخدمات أو الاستفادة من أي عرض.</p>
                         <h2>طبيعة الخدمة</h2>
-                        <p>يساعدك كاش أفندي على اكتشاف كوبونات الخصم وعروض التوفير لدى المتاجر والجهات الشريكة. عند الانتقال إلى متجر خارجي، تتم عملية الشراء والدفع لدى الجهة التي تقدم المنتج أو الخدمة، وتخضع لشروطها.</p>
+                        <p>يساعدك كاش أفندي على اكتشاف عروض الخصم وعروض التوفير لدى المتاجر والجهات الشريكة. عند الانتقال إلى متجر خارجي، تتم عملية الشراء والدفع لدى الجهة التي تقدم المنتج أو الخدمة، وتخضع لشروطها.</p>
                         <h2>الحساب والاستخدام المسؤول</h2>
                         <p>قد تتطلب بعض الخدمات إنشاء حساب. قدّم بيانات صحيحة، واحفظ بيانات دخولك، وتواصل معنا إذا اشتبهت في استخدام حسابك دون إذنك. يُحظر استخدام الموقع للتحايل على العروض أو نشر محتوى ضار أو محاولة تعطيل الخدمة أو الوصول إلى بيانات الغير.</p>
-                        <h2>الكوبونات والعروض</h2>
+                        <h2>العروض</h2>
                         <p>لكل عرض شروطه الخاصة، مثل البلد والمنتجات المشمولة والحد الأدنى للطلب وتاريخ الانتهاء وإمكانية الجمع مع خصومات أخرى. راجع التفاصيل وتأكد من تطبيق الخصم في المتجر قبل الدفع. قد يعدّل المتجر العرض أو يوقفه، وقد تنتهي بعض الأكواد قبل تحديثها على الموقع.</p>
                         <h2>روابط التسويق بالعمولة</h2>
-                        <p>قد يحصل كاش أفندي على عمولة من بعض الروابط عند إتمام عملية مؤهلة لدى جهة شريكة. لا تعني هذه العمولة ضمان قبول الكوبون لكل طلب.</p>
+                        <p>قد يحصل كاش أفندي على عمولة من بعض الروابط عند إتمام عملية مؤهلة لدى جهة شريكة. لا تعني هذه العمولة ضمان قبول العرض لكل طلب.</p>
                         <h2>الشراء لدى المتاجر</h2>
                         <p>المتجر أو مقدم الخدمة مسؤول عن المنتجات والأسعار والدفع والشحن والإلغاء والاسترجاع والضمان وفق شروطه والحقوق القانونية المنطبقة. استفسارات الطلبات تُوجّه أولًا إلى المتجر، ويمكنك إبلاغنا بمشكلة في بيانات العرض لمراجعتها.</p>
                         <h2>المحتوى وتوافر الخدمة</h2>
@@ -83,15 +83,15 @@ class StaticPageSeeder extends Seeder
                         <p>قد تُحدّث هذه الشروط مع تطور الخدمات، ويظهر تاريخ آخر تحديث أعلى الصفحة. للاستفسارات، راسل <a href="mailto:support@cashafandy.com"><bdi>support@cashafandy.com</bdi></a>، وللشراكات راسل <a href="mailto:partners@cashafandy.com"><bdi>partners@cashafandy.com</bdi></a>.</p>
                         HTML,
                     'en' => <<<'HTML'
-                        <p>Welcome to Cash Afandy. These terms explain how to use the website and the coupons and discount offers it displays. Please read them before using the services or redeeming an offer.</p>
+                        <p>Welcome to Cash Afandy. These terms explain how to use the website and the offers it displays. Please read them before using the services or redeeming an offer.</p>
                         <h2>Our service</h2>
-                        <p>Cash Afandy helps you discover discount coupons and savings offers from stores and partners. When you visit an external store, purchases and payments take place with the product or service provider and are subject to its terms.</p>
+                        <p>Cash Afandy helps you discover discount offers and savings offers from stores and partners. When you visit an external store, purchases and payments take place with the product or service provider and are subject to its terms.</p>
                         <h2>Accounts and responsible use</h2>
                         <p>Some services may require an account. Provide accurate details, keep your sign-in credentials safe and contact us if you suspect unauthorised use. Do not use the website to abuse offers, publish harmful content, disrupt the service or access other people's data.</p>
-                        <h2>Coupons and offers</h2>
+                        <h2>Offers</h2>
                         <p>Each offer has its own conditions, such as country, eligible products, minimum spend, expiry and whether it can be combined with other discounts. Read the details and confirm that the store applies the discount before paying. Stores may change or withdraw offers, and some codes may expire before the website is updated.</p>
                         <h2>Affiliate links</h2>
-                        <p>Cash Afandy may earn a commission through some links when a qualifying transaction is completed with a partner. This does not guarantee that a coupon will be accepted for every order.</p>
+                        <p>Cash Afandy may earn a commission through some links when a qualifying transaction is completed with a partner. This does not guarantee that an offer will be accepted for every order.</p>
                         <h2>Purchases from stores</h2>
                         <p>The store or service provider is responsible for products, pricing, payments, delivery, cancellations, returns and warranties under its terms and applicable legal rights. Direct order enquiries to the store first. You can also report inaccurate offer details to us for review.</p>
                         <h2>Content and availability</h2>
@@ -107,11 +107,11 @@ class StaticPageSeeder extends Seeder
                     'ar' => <<<'HTML'
                         <p>عندك سؤال عن كاش أفندي أو واجهتك مشكلة في عرض؟ يسعدنا تواصلك. اختار البريد المناسب عشان رسالتك توصل للفريق المختص.</p>
                         <h2>الاستفسارات والدعم</h2>
-                        <p>للأسئلة العامة، ومشكلات الحساب، والإبلاغ عن كوبون لا يعمل أو بيانات عرض تحتاج إلى تصحيح، وطلبات الخصوصية:</p>
+                        <p>للأسئلة العامة، ومشكلات الحساب، والإبلاغ عن عرض لا يعمل أو بيانات عرض تحتاج إلى تصحيح، وطلبات الخصوصية:</p>
                         <p><a href="mailto:support@cashafandy.com"><bdi>support@cashafandy.com</bdi></a></p>
                         <p>اذكر اسم المتجر ورابط العرض ووصف المشكلة، وأرفق رسالة الخطأ أو صورة توضحها بعد إخفاء أي بيانات حساسة. إذا كانت المشكلة متعلقة بحسابك، يُفضّل مراسلتنا من البريد المسجل به.</p>
                         <h2>الشراكات والتعاون</h2>
-                        <p>للمتاجر والعلامات التجارية وشبكات التسويق الراغبة في عرض كوبونات أو عروض خصم أو مناقشة فرص التعاون:</p>
+                        <p>للمتاجر والعلامات التجارية وشبكات التسويق الراغبة في عرض عروض خصم أو مناقشة فرص التعاون:</p>
                         <p><a href="mailto:partners@cashafandy.com"><bdi>partners@cashafandy.com</bdi></a></p>
                         <p>عرّفنا باسم النشاط ورابط الموقع والبلدان المستهدفة وطبيعة العرض أو التعاون المقترح، مع وسيلة مناسبة للتواصل.</p>
                         <h2>قبل إرسال رسالتك</h2>
@@ -124,11 +124,11 @@ class StaticPageSeeder extends Seeder
                     'en' => <<<'HTML'
                         <p>Have a question about Cash Afandy or a problem with an offer? We would be happy to hear from you. Choose the appropriate email address so your message reaches the right team.</p>
                         <h2>Enquiries and support</h2>
-                        <p>For general questions, account issues, coupons that do not work, inaccurate offer details and privacy requests:</p>
+                        <p>For general questions, account issues, offers that do not work, inaccurate offer details and privacy requests:</p>
                         <p><a href="mailto:support@cashafandy.com"><bdi>support@cashafandy.com</bdi></a></p>
                         <p>Include the store name, offer link and a description of the issue. Attach any error message or screenshot after hiding sensitive information. For account issues, preferably write from your registered email address.</p>
                         <h2>Partnerships</h2>
-                        <p>For stores, brands and affiliate networks interested in listing coupons or discount offers, or discussing collaboration:</p>
+                        <p>For stores, brands and affiliate networks interested in listing offers or discount offers, or discussing collaboration:</p>
                         <p><a href="mailto:partners@cashafandy.com"><bdi>partners@cashafandy.com</bdi></a></p>
                         <p>Tell us your business name, website, target countries and proposed offer or collaboration, along with suitable contact details.</p>
                         <h2>Before sending your message</h2>
@@ -144,14 +144,14 @@ class StaticPageSeeder extends Seeder
                 'title' => ['en' => 'FAQ', 'ar' => 'الأسئلة الشائعة'],
                 'content' => [
                     'ar' => <<<'HTML'
-                        <p>هنا إجابات لأهم الأسئلة عن استخدام كاش أفندي والكوبونات وعروض الخصم.</p>
+                        <p>هنا إجابات لأهم الأسئلة عن استخدام كاش أفندي وعروض الخصم.</p>
                         <h2>إيه هو كاش أفندي؟</h2>
-                        <p>كاش أفندي بيساعدك تكتشف كوبونات وعروض خصم لدى متاجر مختلفة، وتقارن تفاصيل العروض قبل ما تبدأ التسوق.</p>
+                        <p>كاش أفندي بيساعدك تكتشف عروض خصم لدى متاجر مختلفة، وتقارن تفاصيل العروض قبل ما تبدأ التسوق.</p>
                         <h2>هل لازم أعمل حساب عشان أتصفح العروض؟</h2>
                         <p>تقدر تتصفح المتاجر والعروض من غير تسجيل دخول. الخدمات المرتبطة بحسابك وبياناتك الشخصية بتحتاج تسجيل الدخول.</p>
-                        <h2>إزاي أستخدم كوبون خصم؟</h2>
-                        <p>اختار العرض واقرأ شروطه، ثم اضغط لإظهار الكود وانسخه. افتح المتجر وأضف المنتجات المؤهلة، والصق الكود في خانة الكوبون عند إتمام الطلب. اتأكد إن الخصم اتطبق قبل الدفع.</p>
-                        <h2>ليه الكوبون مش شغال؟</h2>
+                        <h2>إزاي أستخدم عرض خصم؟</h2>
+                        <p>اختار العرض واقرأ شروطه، ثم اضغط لإظهار الكود وانسخه. افتح المتجر وأضف المنتجات المؤهلة، والصق الكود في خانة العرض عند إتمام الطلب. اتأكد إن الخصم اتطبق قبل الدفع.</p>
+                        <h2>ليه العرض مش شغال؟</h2>
                         <p>ممكن يكون انتهى، أو مخصص لبلد أو منتجات أو عملاء معينين، أو محتاج حد أدنى للطلب، أو ما ينفعش مع خصم تاني. راجع الشروط وتأكد من نسخ الكود من غير مسافات إضافية. لو المشكلة مستمرة، ابعت اسم المتجر ورابط العرض للدعم.</p>
                         <h2>هل العروض متاحة في كل البلاد؟</h2>
                         <p>مش بالضرورة. كل عرض ممكن يكون مرتبطًا ببلد أو متجر معين. اختار بلدك وراجع خانة التوفر وشروط العرض قبل الشراء.</p>
@@ -163,14 +163,14 @@ class StaticPageSeeder extends Seeder
                         <p>ابعت اسم النشاط ورابطه والبلدان المستهدفة وفكرة التعاون على <a href="mailto:partners@cashafandy.com"><bdi>partners@cashafandy.com</bdi></a>.</p>
                         HTML,
                     'en' => <<<'HTML'
-                        <p>Find answers to common questions about Cash Afandy, coupons and discount offers.</p>
+                        <p>Find answers to common questions about Cash Afandy and its offers.</p>
                         <h2>What is Cash Afandy?</h2>
-                        <p>Cash Afandy helps you discover coupons and discount offers from different stores and compare offer details before shopping.</p>
+                        <p>Cash Afandy helps you discover offers from different stores and compare offer details before shopping.</p>
                         <h2>Do I need an account to browse offers?</h2>
                         <p>You can browse stores and offers without signing in. Services linked to your account and personal details require sign-in.</p>
-                        <h2>How do I use a coupon?</h2>
-                        <p>Choose an offer and read its conditions, then reveal and copy the code. Visit the store, add eligible products and paste the code into the coupon field at checkout. Confirm that the discount has been applied before paying.</p>
-                        <h2>Why is a coupon not working?</h2>
+                        <h2>How do I use an offer?</h2>
+                        <p>Choose an offer and read its conditions, then reveal and copy the code. Visit the store, add eligible products and paste the code into the offer field at checkout. Confirm that the discount has been applied before paying.</p>
+                        <h2>Why is an offer not working?</h2>
                         <p>It may have expired, apply only to certain countries, products or customers, require a minimum spend or exclude other discounts. Check the conditions and copy the code without extra spaces. If the issue continues, send support the store name and offer link.</p>
                         <h2>Are offers available in every country?</h2>
                         <p>Not necessarily. Offers may be limited to a particular country or store. Select your country and check availability and offer conditions before purchasing.</p>

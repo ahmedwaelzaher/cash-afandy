@@ -3,14 +3,14 @@
 namespace Database\Factories;
 
 use App\Models\Client;
-use App\Models\Coupon;
+use App\Models\Offer;
 use App\Models\Representative;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Coupon>
+ * @extends Factory<Offer>
  */
-class CouponFactory extends Factory
+class OfferFactory extends Factory
 {
     /**
      * Define the model's default state.

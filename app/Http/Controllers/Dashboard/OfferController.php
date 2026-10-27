@@ -4,19 +4,19 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Client;
 use App\Models\Country;
-use App\Models\Coupon;
+use App\Models\Offer;
 use App\Models\Representative;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 
-class CouponController extends Controller
+class OfferController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('dashboard.coupons.index');
+        return view('dashboard.offers.index');
     }
 
     /**
@@ -24,7 +24,7 @@ class CouponController extends Controller
      */
     public function create()
     {
-        return view('dashboard.coupons.create', [
+        return view('dashboard.offers.create', [
             'clients' => Client::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
@@ -38,19 +38,19 @@ class CouponController extends Controller
     {
         $validated = $this->validated($request);
 
-        $coupon = Coupon::create($validated);
-        $coupon->countries()->attach($validated['countries']);
+        $offer = Offer::create($validated);
+        $offer->countries()->attach($validated['countries']);
 
-        return $this->created(__('Coupon'), 'dashboard.coupons.index');
+        return $this->created(__('Offer'), 'dashboard.offers.index');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Coupon $coupon)
+    public function edit(Offer $offer)
     {
-        return view('dashboard.coupons.edit', [
-            'coupon' => $coupon,
+        return view('dashboard.offers.edit', [
+            'offer' => $offer,
             'clients' => Client::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
@@ -60,35 +60,35 @@ class CouponController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Coupon $coupon)
+    public function update(Request $request, Offer $offer)
     {
-        $validated = $this->validated($request, $coupon);
+        $validated = $this->validated($request, $offer);
 
-        $coupon->update($validated);
-        $coupon->countries()->sync($validated['countries']);
+        $offer->update($validated);
+        $offer->countries()->sync($validated['countries']);
 
-        return $this->updated(__('Coupon'));
+        return $this->updated(__('Offer'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Coupon $coupon)
+    public function destroy(Offer $offer)
     {
-        $coupon->delete();
+        $offer->delete();
 
-        return $this->deleted(__('Coupon'));
+        return $this->deleted(__('Offer'));
     }
 
     /**
-     * Validate the request for storing/updating a coupon.
+     * Validate the request for storing/updating an offer.
      */
-    protected function validated(Request $request, ?Coupon $coupon = null): array
+    protected function validated(Request $request, ?Offer $offer = null): array
     {
         $validated = $request->validate([
             'title' => 'required|array',
             'title.*' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:coupons,code,' . $coupon?->id,
+            'code' => 'required|string|max:50|unique:offers,code,' . $offer?->id,
             'client_id' => 'required|exists:clients,id',
             'representative_id' => 'required|exists:representatives,id',
             'countries' => 'required|array',

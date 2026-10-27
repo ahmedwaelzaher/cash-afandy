@@ -212,7 +212,7 @@ Form Check (Radio)
 .site-categories,
 .site-offers-grid,
 .site-error-content,
-.site-coupon-reveal,
+.site-offer-reveal,
 .site-static-page {
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
     --site-content-width: 100rem;
@@ -1346,7 +1346,7 @@ Store strip and shared marquee
     }
 }
 
-/* Shared coupon and offer cards. */
+/* Shared offer and offer cards. */
 .site-offers,
 .site-categories,
 .site-store,
@@ -1636,16 +1636,16 @@ Cashback cards and shared listing headings
 }
 
 /* ============================================================
-Coupon Code
+Offer Code
 ============================================================ */
-.site-coupon-code {
+.site-offer-revealed-code {
     padding: 0.75rem 1rem;
     background: var(--site-soft);
     border: 2px dashed var(--site-line);
     border-radius: var(--tblr-border-radius);
 }
 
-.site-coupon-reveal .modal-content {
+.site-offer-reveal .modal-content {
     background: var(--site-surface);
 }
 

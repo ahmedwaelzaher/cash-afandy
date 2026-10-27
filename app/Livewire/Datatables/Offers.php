@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Datatables;
 
-use App\Models\Coupon;
+use App\Models\Offer;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\NumericColumn;
 use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
@@ -13,14 +14,14 @@ use Redot\Datatables\Filters\NumberFilter;
 use Redot\Datatables\Filters\StringFilter;
 use Redot\Datatables\Filters\TernaryFilter;
 
-class Coupons extends Datatable
+class Offers extends Datatable
 {
     /**
      * Get the query source of the datatable.
      */
     public function query(): Builder
     {
-        return Coupon::query()->with(['client', 'representative']);
+        return Offer::query()->with(['client', 'representative']);
     }
 
     /**
@@ -50,9 +51,9 @@ class Coupons extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
-            Action::edit('dashboard.coupons.edit'),
-            Action::delete('dashboard.coupons.destroy'),
+        return ActionGroup::auto([
+            Action::edit('dashboard.offers.edit'),
+            Action::delete('dashboard.offers.destroy'),
         ]);
     }
 

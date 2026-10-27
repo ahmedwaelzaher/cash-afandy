@@ -1,6 +1,6 @@
 @php
-    $hasCoupons = $coupons->contains(fn ($coupon) => filled($coupon->code));
-    $hasOffers = $coupons->contains(fn ($coupon) => blank($coupon->code));
+    $hasCodeOffers = $offers->contains(fn ($offer) => filled($offer->code));
+    $hasDirectOffers = $offers->contains(fn ($offer) => blank($offer->code));
 @endphp
 
 <x-layouts::website :title="$client->title">
@@ -38,7 +38,7 @@
                                 data-share-error="{{ __('Unable to share or copy the link. Please try again.') }}" aria-label="{{ __('Share') }}">
                                 <x-icon icon="ti ti-share" />
                             </button>
-                            <button type="button" class="site-offer-favorite btn btn-icon btn-outline-secondary" data-coupon-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
+                            <button type="button" class="site-offer-favorite btn btn-icon btn-outline-secondary" data-offer-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
                                 <x-icon icon="ti ti-heart" />
                             </button>
                         </div>
@@ -52,8 +52,8 @@
             </div>
 
             <header class="site-offers bg-transparent mb-4">
-                <h2 class="site-heading mb-0" id="store-offers-title">{{ $coupons->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Offers') . ' ' . $client->title }}</h2>
-                @if ($coupons->isNotEmpty())
+                <h2 class="site-heading mb-0" id="store-offers-title">{{ $offers->isNotEmpty() ? __('Save with :store', ['store' => $client->title]) : __('Offers') . ' ' . $client->title }}</h2>
+                @if ($offers->isNotEmpty())
                     <p class="text-secondary mt-2 mb-0">{{ __('Choose an offer and review its terms before shopping.') }}</p>
                 @endif
             </header>
@@ -61,17 +61,17 @@
             <div class="row g-4 align-items-start">
                 <div class="col-12 col-lg-8">
                     <section class="site-offers bg-transparent" aria-labelledby="store-offers-title" data-offer-filter-attribute="data-offer-type">
-                        @if ($coupons->isNotEmpty())
+                        @if ($offers->isNotEmpty())
                             <div class="site-offers-filters d-flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('Filter offers') }}">
                                 <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All') }}</button>
-                                <button type="button" class="btn" data-offer-filter="coupon" aria-pressed="false" @disabled(! $hasCoupons)>{{ __('Coupons') }}</button>
-                                <button type="button" class="btn" data-offer-filter="offer" aria-pressed="false" @disabled(! $hasOffers)>{{ __('Offers') }}</button>
+                                <button type="button" class="btn" data-offer-filter="code" aria-pressed="false" @disabled(! $hasCodeOffers)>{{ __('Offers with codes') }}</button>
+                                <button type="button" class="btn" data-offer-filter="link" aria-pressed="false" @disabled(! $hasDirectOffers)>{{ __('Direct offers') }}</button>
                             </div>
                             <div class="site-offers-grid">
                                 @php($category = $client->categories->first())
-                                @foreach ($coupons as $coupon)
-                                    <div data-offer-type="{{ filled($coupon->code) ? 'coupon' : 'offer' }}">
-                                        @include('website.partials.coupon-card', [
+                                @foreach ($offers as $offer)
+                                    <div data-offer-type="{{ filled($offer->code) ? 'code' : 'link' }}">
+                                        @include('website.partials.offer-card', [
                                             'categoryLabel' => $category?->title,
                                             'categorySlug' => $category?->slug,
                                         ])
@@ -80,8 +80,8 @@
                             </div>
                         @else
                             <x-empty icon="ti ti-ticket" :title="__('No offers from :store yet', ['store' => $client->title])"
-                                :subtitle="__('New offers and coupons will appear here when available.')" class="rounded-4">
-                                <a href="{{ route('website.coupons.index') }}" class="btn btn-primary gap-2">
+                                :subtitle="__('New offers will appear here when available.')" class="rounded-4">
+                                <a href="{{ route('website.offers.index') }}" class="btn btn-primary gap-2">
                                     {{ __('Browse other store offers') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
                                 </a>
                             </x-empty>
@@ -99,9 +99,9 @@
                                 <p class="text-secondary mb-0">{{ __('Explore the store and check the offer terms before shopping.') }}</p>
                             @endif
 
-                            @if ($hasCoupons)
+                            @if ($hasCodeOffers)
                                 <hr>
-                                <h3 class="h3 mb-3">{{ __('How to use a coupon?') }}</h3>
+                                <h3 class="h3 mb-3">{{ __('How to use an offer?') }}</h3>
                                 <ol class="list-unstyled d-flex flex-column gap-3 mb-0">
                                     @foreach ([__('Copy code'), __('Go to store'), __('Paste the code at checkout')] as $step)
                                         <li class="d-flex align-items-center gap-3">

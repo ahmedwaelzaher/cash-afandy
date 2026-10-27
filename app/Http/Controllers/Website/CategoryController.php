@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Models\Cashback;
 use App\Models\Category;
-use App\Models\Coupon;
+use App\Models\Offer;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Http\Controllers\Controller;
 
@@ -27,7 +27,7 @@ class CategoryController extends Controller
         return view('website.categories.show', [
             'category' => $category,
             'stores' => $stores,
-            'coupons' => Coupon::available()->with('client')->whereHas('client.categories', $inCategory)->latest('id')->take(8)->get(),
+            'offers' => Offer::available()->with('client')->whereHas('client.categories', $inCategory)->latest('id')->take(8)->get(),
             'cashbacks' => Cashback::available()->with('client')->whereHas('client.categories', $inCategory)->latest('id')->take(8)->get(),
         ]);
     }

@@ -4,9 +4,9 @@
             <div>
                 <div class="site-offers-eyebrow d-flex align-items-center gap-1 mb-2"><span aria-hidden="true">✦</span> {{ __("Afandy's picks") }}</div>
                 <h2 class="site-heading mb-2" id="offers-title">{{ __('Worthwhile offers. Savings done right.') }}</h2>
-                <p class="text-secondary mb-0">{{ __('Coupons and offers from your favorite stores. Choose what suits you.') }}</p>
+                <p class="text-secondary mb-0">{{ __('Offers from your favorite stores. Choose what suits you.') }}</p>
             </div>
-            <a href="{{ route('website.coupons.index') }}" class="d-inline-flex align-items-center gap-2">
+            <a href="{{ route('website.offers.index') }}" class="d-inline-flex align-items-center gap-2">
                 {{ __('View all offers') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
             </a>
         </div>
@@ -20,10 +20,10 @@
             </div>
 
             <div class="site-offers-grid">
-                @foreach ($offers as $coupon)
-                    @php($category = $coupon->client->categories->first())
-                    <div data-offer-category="{{ $coupon->client->categories->pluck('slug')->join(' ') }}">
-                        @include('website.partials.coupon-card', ['categoryLabel' => $category?->title, 'categorySlug' => $category?->slug])
+                @foreach ($offers as $offer)
+                    @php($category = $offer->client->categories->first())
+                    <div data-offer-category="{{ $offer->client->categories->pluck('slug')->join(' ') }}">
+                        @include('website.partials.offer-card', ['categoryLabel' => $category?->title, 'categorySlug' => $category?->slug])
                     </div>
                 @endforeach
             </div>

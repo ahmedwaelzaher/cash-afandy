@@ -40,9 +40,9 @@
 
             <div class="offcanvas-body">
                 <nav class="site-navbar-links d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center" aria-label="{{ __('Main navigation') }}">
-                    <a href="{{ route('website.coupons.index') }}"
-                        @class(['nav-link', 'active' => request()->routeIs('website.coupons.*')])
-                        @if (request()->routeIs('website.coupons.*')) aria-current="page" @endif>
+                    <a href="{{ route('website.offers.index') }}"
+                        @class(['nav-link', 'active' => request()->routeIs('website.offers.*')])
+                        @if (request()->routeIs('website.offers.*')) aria-current="page" @endif>
                         <x-icon icon="ti ti-ticket" />
                         {{ __('Offers') }}
                         <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />

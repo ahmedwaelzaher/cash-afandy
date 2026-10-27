@@ -4,13 +4,13 @@
             <div class="site-hero-heading">
                 <span class="site-hero-label d-inline-flex align-items-center gap-2"><x-icon icon="ti ti-sparkles" /> {{ __('Saving has its ways') }}</span>
                 <h1 class="site-heading" id="hero-title">
-                    <span>{{ __('A coupon in hand') }}</span>
+                    <span>{{ __('An offer in hand') }}</span>
                     <span>{{ __('No need to ask anyone') }}</span>
                 </h1>
             </div>
 
             <div class="site-hero-actions">
-                <p>{{ __('Coupons that lower your bill.') }}<br>{{ __('Cashback after confirmation.') }}</p>
+                <p>{{ __('Offers that lower your bill.') }}<br>{{ __('Cashback after confirmation.') }}</p>
 
                 @include('website.partials.search-form', ['id' => 'hero-search', 'submitLabel' => __('Search and save')])
 
@@ -34,12 +34,12 @@
             <div class="site-art-arch" aria-hidden="true"></div>
             <span class="site-hero-hello">{{ __('Welcome, Afandy!') }} <span aria-hidden="true">✦</span></span>
             <figure class="site-hero-figure m-0">
-                <img class="w-100 h-100 object-fit-contain" src="{{ hashed_asset('assets/images/' . (app()->getLocale() === 'ar' ? 'afandy-hero-coupon-rtl.webp' : 'afandy-hero-coupon-ltr.webp')) }}" width="1024" height="1536"
-                    alt="{{ __('Afandy presents a coupon and holds a wallet') }}" fetchpriority="high" loading="eager">
+                <img class="w-100 h-100 object-fit-contain" src="{{ hashed_asset('assets/images/' . (app()->getLocale() === 'ar' ? 'afandy-hero-offer-rtl.webp' : 'afandy-hero-offer-ltr.webp')) }}" width="1024" height="1536"
+                    alt="{{ __('Afandy presents an offer and holds a wallet') }}" fetchpriority="high" loading="eager">
             </figure>
             <span class="site-art-star" aria-hidden="true">✦</span>
             <div class="site-hero-notes">
-                @foreach ([['ti ti-ticket', __('Before you pay'), __('Look for a coupon')], ['ti ti-wallet', __('After confirmation'), __('Money back to you')]] as [$icon, $caption, $label])
+                @foreach ([['ti ti-ticket', __('Before you pay'), __('Look for an offer')], ['ti ti-wallet', __('After confirmation'), __('Money back to you')]] as [$icon, $caption, $label])
                     <div class="site-hero-note d-flex align-items-center gap-2">
                         <span class="site-hero-note-icon"><x-icon :icon="$icon" /></span>
                         <div><small class="d-block">{{ $caption }}</small><strong class="d-block">{{ $label }}</strong></div>

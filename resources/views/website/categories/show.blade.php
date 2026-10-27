@@ -17,7 +17,7 @@
                 </div>
             </div>
 
-            @if ($stores->isEmpty() && $coupons->isEmpty() && $cashbacks->isEmpty())
+            @if ($stores->isEmpty() && $offers->isEmpty() && $cashbacks->isEmpty())
                 <x-empty />
             @endif
 
@@ -38,21 +38,21 @@
                 </div>
             @endif
 
-            @if ($coupons->isNotEmpty())
+            @if ($offers->isNotEmpty())
                 <div class="mb-5">
                     <div class="d-flex justify-content-between align-items-end gap-3 mb-4">
                         <div class="site-deals-heading">
-                            <h2 class="mb-1">{{ __('Coupons') }}</h2>
+                            <h2 class="mb-1">{{ __('Offers') }}</h2>
                         </div>
 
-                        <a href="{{ route('website.coupons.index', ['category' => $category->slug]) }}"
+                        <a href="{{ route('website.offers.index', ['category' => $category->slug]) }}"
                             class="site-deals-view-all text-nowrap">{{ __('View all') }}</a>
                     </div>
 
                     <div class="site-offers-grid">
-                        @foreach ($coupons as $coupon)
+                        @foreach ($offers as $offer)
                             <div>
-                                @include('website.partials.coupon-card')
+                                @include('website.partials.offer-card')
                             </div>
                         @endforeach
                     </div>

@@ -1,23 +1,23 @@
 @php
-    $detailsId = 'coupon-details-' . ($coupon->getKey() ?? \Illuminate\Support\Str::uuid());
-    $offerUrl = $coupon->url ?? null;
+    $detailsId = 'offer-details-' . ($offer->getKey() ?? \Illuminate\Support\Str::uuid());
+    $offerUrl = $offer->url ?? null;
 @endphp
 <article class="site-offer-card card h-100">
     <div class="site-offer-discount d-flex flex-row-reverse flex-sm-column align-items-center justify-content-center gap-2 text-center">
-        <strong dir="ltr">{{ $coupon->discount }}{{ $coupon->fixed_discount ? ' ' . __('EGP') : '%' }}</strong>
+        <strong dir="ltr">{{ $offer->discount }}{{ $offer->fixed_discount ? ' ' . __('EGP') : '%' }}</strong>
         <span>{{ __('Discount') }}</span>
     </div>
     <div class="card-body d-flex flex-column p-3">
         <div class="d-flex align-items-center justify-content-between gap-2">
-            <a href="{{ route('website.clients.show', $coupon->client) }}" class="site-offer-store d-flex align-items-center gap-2 fw-semibold text-reset text-decoration-none">
+            <a href="{{ route('website.clients.show', $offer->client) }}" class="site-offer-store d-flex align-items-center gap-2 fw-semibold text-reset text-decoration-none">
                 <span class="site-offer-icon flex-center flex-shrink-0">
-                    @if ($coupon->client->logo)
-                        <img class="object-fit-contain" src="{{ $coupon->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                    @if ($offer->client->logo)
+                        <img class="object-fit-contain" src="{{ $offer->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
                     @else
                         <x-icon :icon="$icon ?? 'ti ti-shopping-bag'" />
                     @endif
                 </span>
-                {{ $coupon->client->title }}
+                {{ $offer->client->title }}
             </a>
             <div class="d-flex align-items-center flex-shrink-0">
                 <button type="button" class="btn btn-icon btn-link text-secondary text-decoration-none" data-share-url="{{ route('website.index') }}"
@@ -25,14 +25,14 @@
                     data-share-error="{{ __('Unable to share or copy the link. Please try again.') }}" aria-label="{{ __('Share') }}">
                     <x-icon icon="ti ti-share" />
                 </button>
-                <button type="button" class="site-offer-favorite btn btn-icon btn-link text-decoration-none" data-coupon-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
+                <button type="button" class="site-offer-favorite btn btn-icon btn-link text-decoration-none" data-offer-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
                     <x-icon icon="ti ti-heart" />
                 </button>
             </div>
         </div>
 
         <div class="site-offer-summary">
-            <h3 class="mb-0">{{ $coupon->title }}</h3>
+            <h3 class="mb-0">{{ $offer->title }}</h3>
         </div>
 
         <div class="site-offer-actions d-flex flex-wrap flex-sm-column align-items-center align-items-sm-stretch justify-content-between gap-2">
@@ -41,8 +41,8 @@
             @endisset
 
             <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">
-                @if (filled($coupon->code))
-                    @include('website.partials.coupon-code')
+                @if (filled($offer->code))
+                    @include('website.partials.offer-code')
                 @elseif (filled($offerUrl))
                     <a href="{{ $offerUrl }}" class="site-offer-link btn btn-outline-primary gap-2" target="_blank" rel="sponsored noopener noreferrer">
                         {{ __('View offer') }} <x-icon icon="ti ti-external-link" />
@@ -59,22 +59,22 @@
         <div class="modal-content rounded-4">
             <div class="modal-header border-0 p-4 pb-3">
                 <div class="d-flex align-items-center gap-2 text-secondary fw-semibold">
-                    @if ($coupon->client->logo)
+                    @if ($offer->client->logo)
                         <span class="site-offer-icon flex-center flex-shrink-0">
-                            <img class="object-fit-contain" src="{{ $coupon->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                            <img class="object-fit-contain" src="{{ $offer->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
                         </span>
                     @endif
-                    {{ $coupon->client->title }}
+                    {{ $offer->client->title }}
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
             </div>
             <div class="modal-body p-4 pt-0">
-                <h3 class="h2 mb-3" id="{{ $detailsId }}-title">{{ $coupon->title }}</h3>
+                <h3 class="h2 mb-3" id="{{ $detailsId }}-title">{{ $offer->title }}</h3>
                 <ul class="text-secondary lh-lg mb-0">
-                    @if ($coupon->description)
-                        <li>{{ strip_tags($coupon->description) }}</li>
+                    @if ($offer->description)
+                        <li>{{ strip_tags($offer->description) }}</li>
                     @endif
-                    @foreach (preg_split('/\R/u', strip_tags($coupon->tips ?? ''), flags: PREG_SPLIT_NO_EMPTY) as $tip)
+                    @foreach (preg_split('/\R/u', strip_tags($offer->tips ?? ''), flags: PREG_SPLIT_NO_EMPTY) as $tip)
                         <li>{{ $tip }}</li>
                     @endforeach
                 </ul>
