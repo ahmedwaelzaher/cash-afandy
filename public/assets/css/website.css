@@ -724,6 +724,12 @@ Form Check (Radio)
     }
 }
 
+@media (min-width: 768px) {
+    .site-hero-actions .site-search {
+        inline-size: 70%;
+    }
+}
+
 @media (max-width: 959.98px) {
     .site-hero-content {
         grid-template-columns: minmax(0, 1fr);

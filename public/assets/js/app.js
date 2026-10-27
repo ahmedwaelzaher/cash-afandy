@@ -128,8 +128,13 @@ $(document).on('submit', 'form:not([disable-validation])', (event) => {
     if (isValid) {
         const $submit = $form.find('[type="submit"]');
         const $spinner = $('<span class="spinner-border spinner-border-sm me-2" role="status"></span>');
+        const $spinnerTarget = $form.find('[data-submit-spinner]').first();
 
-        $submit.prepend($spinner);
+        if ($spinnerTarget.length) {
+            $spinnerTarget.append($spinner.removeClass('me-2'));
+        } else {
+            $submit.prepend($spinner);
+        }
         $submit.prop('disabled', true);
 
         return event.target.submit();
