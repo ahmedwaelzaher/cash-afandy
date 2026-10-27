@@ -6,6 +6,7 @@ use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Redot\Traits\UserAuditable;
 use Spatie\Translatable\HasTranslations;
 
@@ -102,6 +103,14 @@ class Client extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);
+    }
+
+    /**
+     * Get the offers belonging to the client.
+     */
+    public function offers(): HasMany
+    {
+        return $this->hasMany(Offer::class);
     }
 
     /**

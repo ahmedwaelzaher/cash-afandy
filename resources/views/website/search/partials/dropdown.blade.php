@@ -8,12 +8,7 @@
     @foreach ($storesFirst ? ['stores', 'offers'] : ['offers', 'stores'] as $group)
         @php($items = $group === 'stores' ? $stores : $offers)
         @if ($items->isNotEmpty())
-            <section class="site-search-group" aria-labelledby="afandy-search-{{ $group }}">
-                <h3 class="d-flex align-items-center gap-2 px-3 pt-3 pb-2 mb-0" id="afandy-search-{{ $group }}">
-                    <x-icon :icon="$group === 'stores' ? 'ti ti-building-store' : 'ti ti-ticket'" />
-                    {{ $group === 'stores' ? __('Stores') : __('Offers') }}
-                    <span class="badge rounded-pill">{{ $items->count() }}</span>
-                </h3>
+            <section class="site-search-group" id="afandy-search-{{ $group }}" aria-label="{{ $group === 'stores' ? __('Stores') : __('Offers') }}">
                 @foreach ($items as $item)
                     <a class="site-search-result d-flex align-items-center gap-3 text-reset text-decoration-none p-3"
                         href="{{ $group === 'stores' ? route('website.clients.show', $item) : route('website.offers.show', $item) }}">
@@ -30,7 +25,15 @@
                         </span>
                         <span class="site-search-result-copy flex-fill">
                             <strong class="d-block">{{ $item->title }}</strong>
-                            <small class="d-block text-secondary mt-1">{{ $group === 'stores' ? __('All offers') : $item->client->title }}</small>
+                            <small class="d-block text-secondary mt-1">
+                                @if ($group === 'stores')
+                                    {{ $item->available_offers_count > 0
+                                        ? trans_choice('Offer count', $item->available_offers_count, ['count' => number_format($item->available_offers_count)])
+                                        : __('No offers from :store yet', ['store' => $item->title]) }}
+                                @else
+                                    {{ $item->client->title }}
+                                @endif
+                            </small>
                         </span>
                         <x-icon icon="ti ti-arrow-left" class="site-menu-arrow flex-shrink-0" />
                     </a>
@@ -38,8 +41,8 @@
             </section>
         @endif
     @endforeach
-    <a class="site-search-view-all d-flex align-items-center justify-content-between gap-3 text-reset text-decoration-none p-3 fw-semibold"
-        href="{{ route('website.search', ['afandy_search' => $search, 'country' => website_country()?->code]) }}">
-        {{ __('View all') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
+    <a class="site-search-view-all d-flex align-items-center justify-content-center gap-2 text-reset text-decoration-none p-3"
+        href="{{ route('website.search', ['afandy_search' => $search, 'afandy_category' => $category ?? ($storesFirst ? 'stores' : 'offers'), 'country' => website_country()?->code]) }}">
+        {{ __('View all') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow m-0" />
     </a>
 @endif

@@ -14,15 +14,19 @@ use Redot\Http\Controllers\Controller;
 
 class SearchController extends Controller
 {
+    private const SUGGESTION_LIMIT = 10;
+
     public function __invoke(Request $request): View|JsonResponse|RedirectResponse
     {
         // Validate input and retain old full-page search links without sharing the directory key.
         $filters = $request->validate([
             'afandy_search' => ['nullable', 'string', 'max:255'],
+            'afandy_category' => ['nullable', 'string', 'in:stores,offers'],
             'search' => ['nullable', 'string', 'max:255'],
         ]);
         $isAjax = $request->ajax();
         $search = trim($filters['afandy_search'] ?? ($isAjax ? '' : ($filters['search'] ?? '')));
+        $category = $filters['afandy_category'] ?? null;
 
         // Stop empty or single-character searches before querying the database.
         if (mb_strlen($search) < 2) {
@@ -47,11 +51,34 @@ class SearchController extends Controller
                 ->orWhereHas('client', fn (Builder $query) => $this->whereTitleMatches($query, $pattern)));
         $this->orderByTitleRelevance($offerQuery, $term, $pattern);
 
-        // Limit suggestions and paginate full results, then determine which group is more relevant.
-        $stores = $isAjax ? $storeQuery->limit(2)->get() : $storeQuery->paginate(12, ['*'], 'stores_page')->withQueryString();
-        $offers = $isAjax ? $offerQuery->limit(4)->get() : $offerQuery->paginate(12, ['*'], 'offers_page')->withQueryString();
+        // Count all matching types for the sidebar independently of the selected type and page.
+        $counts = $isAjax ? [] : [
+            'stores' => (clone $storeQuery)->reorder()->count(),
+            'offers' => (clone $offerQuery)->reorder()->count(),
+        ];
+        if (! $isAjax && $category === null) {
+            $category = $counts['offers'] > 0 || $counts['stores'] === 0 ? 'offers' : 'stores';
+        }
+
+        // Fetch only the selected types, limiting suggestions and paginating full results.
+        $stores = collect();
+        $offers = collect();
+        if ($category !== 'offers') {
+            $storeQuery->with('categories');
+            // Count all available offers for each suggested store in the same query.
+            if ($isAjax) $storeQuery->withCount(['offers as available_offers_count' => fn (Builder $query) => $query->available()]);
+            $stores = $isAjax ? $storeQuery->limit(self::SUGGESTION_LIMIT)->get() : $storeQuery->paginate(12, ['*'], 'stores_page', total: $counts['stores'])->withQueryString();
+        }
+        if ($category !== 'stores') {
+            if (! $isAjax) $offerQuery->with('client.categories');
+            $offers = $isAjax ? $offerQuery->limit(self::SUGGESTION_LIMIT - $stores->count())->get() : $offerQuery->paginate(12, ['*'], 'offers_page', total: $counts['offers'])->withQueryString();
+        }
+
+        // Pass the selected type and the relevant groups to the existing result templates.
         $data = [
             'search' => $search,
+            'category' => $category,
+            'counts' => $counts,
             'stores' => $stores,
             'offers' => $offers,
             'storesFirst' => $stores->isNotEmpty() && $stores->first()->search_rank <= ($offers->first()?->search_rank ?? 3),

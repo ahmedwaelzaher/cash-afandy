@@ -367,6 +367,39 @@ Form Check (Radio)
     min-inline-size: 0;
 }
 
+.site-search-field {
+    min-inline-size: 0;
+}
+
+.site-search [data-submit-spinner]:empty {
+    display: none !important;
+}
+
+.site-search-type {
+    padding-inline-end: 0.25rem;
+}
+
+.site-search-type::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block: 25%;
+    border-inline-end: 1px solid var(--site-line);
+}
+
+.site-search-type > .btn {
+    inline-size: 6.5em;
+    padding-inline: 1.25em;
+    border: 0;
+    background: transparent;
+    color: var(--site-ink);
+    white-space: nowrap;
+}
+
+.site-header-search .site-search .form-control {
+    padding-inline: 0.5rem 3rem;
+}
+
 .site-search:focus-within,
 .site-store-search .input-icon:focus-within {
     border-color: #75985d;
@@ -398,17 +431,15 @@ Form Check (Radio)
     border-block-start: 1px solid var(--site-line);
 }
 
-.site-search-group h3 {
-    font-size: 1em;
-}
-
-.site-search-group .badge,
-.site-search-view-all,
 .site-search-result:hover,
 .site-search-result:focus-visible,
 .site-search-result-visual:has(strong) {
     background: var(--site-soft);
     color: var(--site-ink);
+}
+
+.site-search-view-all {
+    border-block-start: 1px solid var(--site-line);
 }
 
 .site-search-result-visual {
@@ -469,11 +500,17 @@ Form Check (Radio)
     }
 
     .site-navbar .site-header-search-panel {
+        /* Keep the open panel out of the header actions' flex layout. */
+        position: absolute;
         inset-inline: var(--site-gutter);
         top: 100%;
+        inline-size: auto;
+        min-inline-size: 0;
         margin: 0.25rem 0 0;
         padding: 0.75rem;
         max-inline-size: none;
+        max-block-size: none;
+        overflow: visible;
         background: var(--site-paper);
         border: 1px solid var(--site-line);
         box-shadow: var(--site-shadow);
@@ -1762,6 +1799,34 @@ Offer Code
 .site-store-filter.active .badge {
     background: #244d2a;
     color: var(--site-surface);
+}
+
+@media (max-width: 991.98px) {
+    .site-search-types {
+        padding-block: 0.25rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-inline: contain;
+    }
+
+    .site-search-types .site-store-filter {
+        min-block-size: 2.75rem;
+        border: 1px solid var(--site-line);
+        border-radius: var(--tblr-border-radius-pill);
+        white-space: nowrap;
+    }
+
+    .site-search-types .site-store-filter:not(.active) {
+        background: var(--site-surface);
+    }
+
+    .site-search-types .site-store-filter.active {
+        border-color: var(--site-ink);
+    }
+
+    .site-search-types .badge {
+        border-radius: var(--tblr-border-radius-pill);
+    }
 }
 
 @media (min-width: 992px) {

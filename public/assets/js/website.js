@@ -24,6 +24,7 @@ $(() => {
         const $form = $(element);
         const $panel = $form.parent();
         const $input = $form.find('[name="afandy_search"]');
+        const $category = $form.find('[name="afandy_category"]');
         const $button = $form.find('[data-afandy-search-button]');
         const $spinner = $form.find('[data-submit-spinner]');
         const $results = $panel.find('#afandy-search-results');
@@ -32,8 +33,21 @@ $(() => {
         let composing = false;
         let completed = false;
         let loadedSearch = null;
+        let loadedCategory = null;
         let dismissed = false;
 
+        const syncCategory = () => {
+            const selected = $category.val();
+            $form.find('[data-search-category]').each((_, option) => {
+                const $option = $(option);
+                const active = $option.attr('data-search-category') === selected;
+                $option.toggleClass('active', active).attr('aria-pressed', String(active));
+                $option.find('.ti-check').toggleClass('d-none', !active);
+                if (active) {
+                    $form.find('[data-search-type-label]').text($option.find('[data-search-category-label]').text());
+                }
+            });
+        };
         const show = (visible) => {
             $results.prop('hidden', !visible);
             $input.attr('aria-expanded', String(visible));
@@ -43,22 +57,36 @@ $(() => {
             $button.attr('type', clear ? 'button' : 'submit')
                 .attr('aria-label', $button.attr(clear ? 'data-reset-label' : 'data-search-label'));
             $button.find('.ti').toggleClass('ti-search', !clear).toggleClass('ti-x', clear);
+            $button.find('.ti').prop('hidden', false);
         };
         const cancel = () => {
             revision++;
             if (request) request.abort();
             request = null;
             $spinner.empty();
+            $button.find('.ti').prop('hidden', false);
             $results.attr('aria-busy', 'false');
         };
         const updateUrl = (search) => {
             const url = new URL(window.location.href);
             if (search) url.searchParams.set('afandy_search', search);
             else url.searchParams.delete('afandy_search');
+            url.searchParams.set('afandy_category', $category.val());
             window.history.replaceState(window.history.state, '', url.href);
             // Directory links may already be rendered when the header search changes.
             $('[data-directory] .site-store-filter, [data-directory-pagination] a').each((_, link) => {
                 const target = new URL(link.href);
+                if (search) target.searchParams.set('afandy_search', search);
+                else target.searchParams.delete('afandy_search');
+                target.searchParams.set('afandy_category', $category.val());
+                link.href = target.href;
+            });
+            $('[data-afandy-category], [data-search-pagination] a').each((_, link) => {
+                const target = new URL(link.href);
+                if (target.searchParams.get('afandy_search') !== search) {
+                    target.searchParams.delete('stores_page');
+                    target.searchParams.delete('offers_page');
+                }
                 if (search) target.searchParams.set('afandy_search', search);
                 else target.searchParams.delete('afandy_search');
                 link.href = target.href;
@@ -79,16 +107,20 @@ $(() => {
             dismissed = false;
             const url = new URL(element.action);
             url.searchParams.set('afandy_search', search);
+            const category = $category.val();
+            url.searchParams.set('afandy_category', category);
             const country = new URL(window.location.href).searchParams.get('country');
             if (country) url.searchParams.set('country', country);
             buttonState(false);
             $results.empty().attr('aria-busy', 'true');
             show(false);
             $spinner.append($('<span class="spinner-border spinner-border-sm" role="status"></span>').attr('aria-label', $button.attr('data-search-label')));
+            $button.find('.ti').prop('hidden', true);
             request = $.ajax({ url: url.href, dataType: 'json' })
                 .done((response) => {
                     if (currentRevision !== revision) return;
                     loadedSearch = search;
+                    loadedCategory = category;
                     $results.html(response.html);
                     // Do not reopen a dropdown that the user has left or dismissed.
                     show(!dismissed && $panel[0].contains(document.activeElement) && Boolean(response.html));
@@ -113,6 +145,7 @@ $(() => {
             cancel();
             $input.val('');
             loadedSearch = null;
+            loadedCategory = null;
             $results.empty();
             buttonState(false);
             show(false);
@@ -124,6 +157,17 @@ $(() => {
             event.preventDefault();
             debounced.cancel();
             load();
+        });
+        $form.on('click', '[data-search-category]', (event) => {
+            const selected = $(event.currentTarget).attr('data-search-category');
+            if (!['offers', 'stores'].includes(selected) || selected === $category.val()) return;
+            debounced.cancel();
+            $category.val(selected);
+            loadedSearch = null;
+            loadedCategory = null;
+            syncCategory();
+            load();
+            $input.trigger('focus');
         });
         $button.on('click', (event) => {
             if (!completed) return;
@@ -146,12 +190,13 @@ $(() => {
             debounced();
         }).on('focus', () => {
             dismissed = false;
-            if (loadedSearch === $input.val().trim()) show(Boolean($results.children().length));
+            if (loadedSearch === $input.val().trim() && loadedCategory === $category.val()) show(Boolean($results.children().length));
             else if (Array.from($input.val().trim()).length >= 2 && !request) load();
         });
 
         $panel.on('keydown', (event) => {
             if (composing || event.isComposing) return;
+            if ($(event.target).closest('.site-search-type').length) return;
             if (event.key === 'Escape') {
                 debounced.cancel();
                 cancel();
@@ -190,6 +235,9 @@ $(() => {
         $(window).on('popstate.afandySearch', () => {
             debounced.cancel();
             $input.val(new URL(window.location.href).searchParams.get('afandy_search') || '');
+            const category = new URL(window.location.href).searchParams.get('afandy_category');
+            $category.val(['offers', 'stores'].includes(category) ? category : 'offers');
+            syncCategory();
             load();
         });
         if ($input.val().trim()) load();
@@ -235,6 +283,9 @@ $(() => {
                         const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
                         if (headerSearch) filterUrl.searchParams.set('afandy_search', headerSearch);
                         else filterUrl.searchParams.delete('afandy_search');
+                        const headerCategory = new URL(window.location.href).searchParams.get('afandy_category');
+                        if (headerCategory) filterUrl.searchParams.set('afandy_category', headerCategory);
+                        else filterUrl.searchParams.delete('afandy_category');
                         link.href = filterUrl.href;
                     });
                 })
@@ -280,6 +331,9 @@ $(() => {
             const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
             if (headerSearch) url.searchParams.set('afandy_search', headerSearch);
             else url.searchParams.delete('afandy_search');
+            const headerCategory = new URL(window.location.href).searchParams.get('afandy_category');
+            if (headerCategory) url.searchParams.set('afandy_category', headerCategory);
+            else url.searchParams.delete('afandy_category');
             // Pagination must not discard a search that is still being debounced.
             if ($input.val().trim() !== currentSearch) searchDirectory();
             else load(url);
@@ -453,8 +507,8 @@ $(() => {
     $header.on('focusin show.bs.offcanvas show.bs.dropdown', () => $header.removeClass('is-hidden'));
 
     // Focus the search input after its dropdown opens.
-    $header.find('.site-header-search').on('shown.bs.dropdown', () => {
-        $('#navbar-search').trigger('focus');
+    $header.find('.site-header-search').on('shown.bs.dropdown', (event) => {
+        if ($(event.target).attr('aria-controls') === 'site-header-search') $('#navbar-search').trigger('focus');
     });
 
     // Track scroll direction to hide on the way down and reveal on the way up.
