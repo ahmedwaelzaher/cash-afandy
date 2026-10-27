@@ -1,9 +1,9 @@
 <x-layouts::website :title="__('Search results for: :search', ['search' => $search])">
-    <section class="site-stores py-4" aria-labelledby="search-results-title">
+    <section class="site-stores py-4" aria-labelledby="search-results-title" data-directory data-directory-mode="search">
         <div class="container site-container">
             <header class="mb-4">
-                <h1 class="display-6 fw-bold mb-2" id="search-results-title">{{ __('Search results for: :search', ['search' => $search]) }}</h1>
-                <p class="text-secondary mb-0">
+                <h1 class="display-6 fw-bold mb-2" id="search-results-title" data-search-title>{{ __('Search results for: :search', ['search' => $search]) }}</h1>
+                <p class="text-secondary mb-0" data-directory-summary>
                     {{ trans_choice($category === 'stores' ? 'Store count' : 'Offer count', $counts[$category], ['count' => number_format($counts[$category])]) }}
                 </p>
             </header>
@@ -26,42 +26,8 @@
                     </div>
                 </aside>
 
-                <div class="col-12 col-lg-9">
-                    @if ($stores->isEmpty() && $offers->isEmpty())
-                        <x-empty icon="ti ti-search" :title="__('No results found')" :subtitle="__('Try searching with a different keyword')" class="site-store-empty rounded-4 justify-content-center" />
-                    @endif
-                    @php($items = $category === 'stores' ? $stores : $offers)
-                    @if ($items->isNotEmpty())
-                        <section class="mb-4" data-search-result-type="{{ $category }}" aria-labelledby="search-results-{{ $category }}">
-                            <div class="d-flex flex-wrap justify-content-between align-items-stretch gap-3 mb-3">
-                                <div class="d-flex flex-wrap align-items-center align-self-stretch gap-2">
-                                    <h2 class="h3 lh-1 mb-0" id="search-results-{{ $category }}">{{ $category === 'stores' ? __('Stores') : __('Offers') }}</h2>
-                                    <span class="badge" data-directory-count aria-live="polite">{{ trans_choice($category === 'stores' ? 'Store count' : 'Offer count', $counts[$category], ['count' => number_format($counts[$category])]) }}</span>
-                                </div>
-                            </div>
-                            @if ($category === 'stores')
-                                <div class="site-stores-grid">
-                                    @foreach ($stores as $store)
-                                        @include('website.partials.store-card')
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="site-offers-grid">
-                                    @foreach ($offers as $offer)
-                                        <div>
-                                            @include('website.partials.offer-card', [
-                                                'categoryLabel' => $offer->client->categories->first()?->title,
-                                                'categorySlug' => $offer->client->categories->first()?->slug,
-                                            ])
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                            @if ($items->hasPages())
-                                <div class="mt-4" data-search-pagination>{{ $items->links() }}</div>
-                            @endif
-                        </section>
-                    @endif
+                <div class="col-12 col-lg-9" data-directory-results aria-busy="false">
+                    @include('website.search.partials.results')
                 </div>
             </div>
         </div>

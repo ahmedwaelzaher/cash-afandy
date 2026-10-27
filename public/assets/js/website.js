@@ -74,7 +74,7 @@ $(() => {
             url.searchParams.set('afandy_category', $category.val());
             window.history.replaceState(window.history.state, '', url.href);
             // Directory links may already be rendered when the header search changes.
-            $('[data-directory] .site-store-filter, [data-directory-pagination] a').each((_, link) => {
+            $('[data-directory]:not([data-directory-mode="search"]) .site-store-filter, [data-directory-pagination] a').each((_, link) => {
                 const target = new URL(link.href);
                 if (search) target.searchParams.set('afandy_search', search);
                 else target.searchParams.delete('afandy_search');
@@ -240,21 +240,40 @@ $(() => {
             syncCategory();
             load();
         });
+        $(window).on('directory:updated.afandySearch', (event, href, isSearch) => {
+            if (!isSearch) return;
+            const url = new URL(href);
+            const category = url.searchParams.get('afandy_category') || 'offers';
+            const search = url.searchParams.get('afandy_search') || '';
+            if ($category.val() === category && $input.val() === search) return;
+            debounced.cancel();
+            cancel();
+            $category.val(category);
+            $input.val(search);
+            loadedSearch = null;
+            loadedCategory = null;
+            $results.empty();
+            buttonState(Boolean(search));
+            show(false);
+            syncCategory();
+        });
         if ($input.val().trim()) load();
     });
 });
 
 // ==================================================
-// Directory search and pagination
+// Directory search, category navigation and pagination
 // ==================================================
 $(() => {
-    $('[data-directory-search]').each((index, element) => {
-        const $input = $(element).find('[name="search"]');
-        const $clear = $(element).find('[data-clear-directory-search]');
-        const $section = $(element).closest('[data-directory]');
+    $('[data-directory]').each((index, element) => {
+        const $section = $(element);
+        const isSearch = $section.attr('data-directory-mode') === 'search';
+        const searchKey = isSearch ? 'afandy_search' : 'search';
+        const categoryKey = isSearch ? 'afandy_category' : 'category';
+        const $input = $section.find('[data-directory-search] [name="search"]');
+        const $clear = $section.find('[data-clear-directory-search]');
         const $results = $section.find('[data-directory-results]');
-        const $count = $section.find('[data-directory-count]');
-        let currentSearch = $input.val().trim();
+        let currentSearch = new URL(window.location.href).searchParams.get(searchKey) || '';
         let request;
         let revision = 0;
         let composing = false;
@@ -262,50 +281,68 @@ $(() => {
         const cancelRequest = () => {
             revision++;
             if (request) request.abort();
+            request = null;
             $results.attr('aria-busy', 'false');
         };
-
-        const load = (url) => {
+        const syncLinks = (url, category) => {
+            $section.find('.site-store-filter').each((_, link) => {
+                const target = new URL(link.href);
+                const active = (target.searchParams.get(categoryKey) || '') === category;
+                $(link).toggleClass('active', active).attr('aria-current', active ? 'page' : null);
+                if (currentSearch) target.searchParams.set(searchKey, currentSearch);
+                else target.searchParams.delete(searchKey);
+                if (!isSearch) {
+                    for (const key of ['afandy_search', 'afandy_category']) {
+                        if (url.searchParams.has(key)) target.searchParams.set(key, url.searchParams.get(key));
+                        else target.searchParams.delete(key);
+                    }
+                }
+                link.href = target.href;
+            });
+        };
+        const load = (url, historyMode = 'replace') => {
             cancelRequest();
             const currentRevision = revision;
-            window.history.replaceState(window.history.state, '', url.href);
             $results.attr('aria-busy', 'true');
-            request = $.ajax({ url: url.href, dataType: 'json' })
+            request = $.ajax({ url: url.href, dataType: 'json', headers: isSearch ? { 'X-Search-Results': '1' } : {} })
                 .done((response) => {
                     if (currentRevision !== revision) return;
                     $results.html(response.html);
-                    $count.text(response.countLabel);
-                    currentSearch = url.searchParams.get('search') || '';
-                    $section.find('.site-store-filter').each((index, link) => {
-                        const filterUrl = new URL(link.href);
-                        if (currentSearch) filterUrl.searchParams.set('search', currentSearch);
-                        else filterUrl.searchParams.delete('search');
-                        const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
-                        if (headerSearch) filterUrl.searchParams.set('afandy_search', headerSearch);
-                        else filterUrl.searchParams.delete('afandy_search');
-                        const headerCategory = new URL(window.location.href).searchParams.get('afandy_category');
-                        if (headerCategory) filterUrl.searchParams.set('afandy_category', headerCategory);
-                        else filterUrl.searchParams.delete('afandy_category');
-                        link.href = filterUrl.href;
-                    });
+                    $section.find('[data-directory-count], [data-directory-summary]').text(response.countLabel);
+                    $section.find('[data-directory-label]').text(response.categoryLabel);
+                    if (response.pageTitle) $section.find('[data-search-title]').text(response.pageTitle);
+                    currentSearch = url.searchParams.get(searchKey) || '';
+                    $input.val(currentSearch);
+                    $clear.toggleClass('d-none', !currentSearch);
+                    syncLinks(url, response.category || '');
+                    if (response.counts) {
+                        $section.find('[data-afandy-category]').each((_, link) => {
+                            $(link).find('.badge').text(Number(response.counts[$(link).attr('data-afandy-category')]).toLocaleString('en-US'));
+                        });
+                    }
+                    if (historyMode === 'push' && url.href !== window.location.href) window.history.pushState(window.history.state, '', url.href);
+                    else if (historyMode === 'replace') window.history.replaceState(window.history.state, '', url.href);
+                    $(window).trigger('directory:updated', [url.href, isSearch]);
                 })
                 .fail((xhr, status) => {
-                    if (status !== 'abort' && currentRevision === revision) toastify().error(__('Error'));
+                    if (status === 'abort' || currentRevision !== revision) return;
+                    toastify().error(__('Error'));
+                    if (historyMode === 'none' || status === 'parsererror') window.location.assign(url.href);
                 })
                 .always(() => {
-                    if (currentRevision === revision) $results.attr('aria-busy', 'false');
+                    if (currentRevision !== revision) return;
+                    request = null;
+                    $results.attr('aria-busy', 'false');
                 });
         };
-
         const searchDirectory = () => {
             const url = new URL(window.location.href);
             const search = $input.val().trim();
             url.searchParams.delete('page');
-            if (search) url.searchParams.set('search', search);
-            else url.searchParams.delete('search');
+            if (search) url.searchParams.set(searchKey, search);
+            else url.searchParams.delete(searchKey);
             load(url);
         };
-
         const searchDebounced = _.debounce(() => {
             if (!composing && $input.val().trim() !== currentSearch) searchDirectory();
         }, 500);
@@ -322,21 +359,32 @@ $(() => {
             composing = false;
             searchDebounced();
         });
-
-        $results.on('click', '[data-directory-pagination] a', (event) => {
-            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        $section.on('click', '.site-store-filter, [data-directory-pagination] a, [data-search-pagination] a', (event) => {
+            const link = event.currentTarget;
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0 || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+            const target = new URL(link.href);
+            const url = new URL(window.location.href);
+            if (target.origin !== url.origin || target.pathname !== url.pathname) return;
             event.preventDefault();
             searchDebounced.cancel();
-            const url = new URL(event.currentTarget.href);
-            const headerSearch = new URL(window.location.href).searchParams.get('afandy_search');
-            if (headerSearch) url.searchParams.set('afandy_search', headerSearch);
-            else url.searchParams.delete('afandy_search');
-            const headerCategory = new URL(window.location.href).searchParams.get('afandy_category');
-            if (headerCategory) url.searchParams.set('afandy_category', headerCategory);
-            else url.searchParams.delete('afandy_category');
-            // Pagination must not discard a search that is still being debounced.
-            if ($input.val().trim() !== currentSearch) searchDirectory();
-            else load(url);
+            if ($(link).hasClass('site-store-filter')) {
+                if (target.searchParams.has(categoryKey)) url.searchParams.set(categoryKey, target.searchParams.get(categoryKey));
+                else url.searchParams.delete(categoryKey);
+                for (const key of ['page', 'stores_page', 'offers_page']) url.searchParams.delete(key);
+            } else {
+                for (const key of ['page', 'stores_page', 'offers_page']) {
+                    if (target.searchParams.has(key)) url.searchParams.set(key, target.searchParams.get(key));
+                    else url.searchParams.delete(key);
+                }
+            }
+            // Keep a newly typed search when navigating before its debounce has fired.
+            if ($input.length) {
+                const search = $input.val().trim();
+                if (search !== currentSearch) for (const key of ['page', 'stores_page', 'offers_page']) url.searchParams.delete(key);
+                if (search) url.searchParams.set(searchKey, search);
+                else url.searchParams.delete(searchKey);
+            }
+            load(url, 'push');
         });
         $clear.on('click', () => {
             searchDebounced.cancel();
@@ -344,8 +392,11 @@ $(() => {
             $clear.addClass('d-none');
             searchDirectory();
         });
+        $(window).on('popstate.directory', () => {
+            searchDebounced.cancel();
+            load(new URL(window.location.href), 'none');
+        });
     });
-
 });
 
 // ==================================================

@@ -24,13 +24,13 @@ class SearchController extends Controller
             'afandy_category' => ['nullable', 'string', 'in:stores,offers'],
             'search' => ['nullable', 'string', 'max:255'],
         ]);
-        $isAjax = $request->ajax();
-        $search = trim($filters['afandy_search'] ?? ($isAjax ? '' : ($filters['search'] ?? '')));
+        $isSuggestions = $request->ajax() && $request->header('X-Search-Results') !== '1';
+        $search = trim($filters['afandy_search'] ?? ($isSuggestions ? '' : ($filters['search'] ?? '')));
         $category = $filters['afandy_category'] ?? null;
 
         // Stop empty or single-character searches before querying the database.
         if (mb_strlen($search) < 2) {
-            return $isAjax ? response()->json(['html' => '']) : redirect()->route('website.index');
+            return $isSuggestions ? response()->json(['html' => '']) : redirect()->route('website.index');
         }
 
         // Prepare the current market and a case-normalized, literal LIKE search pattern.
@@ -52,11 +52,11 @@ class SearchController extends Controller
         $this->orderByTitleRelevance($offerQuery, $term, $pattern);
 
         // Count all matching types for the sidebar independently of the selected type and page.
-        $counts = $isAjax ? [] : [
+        $counts = $isSuggestions ? [] : [
             'stores' => (clone $storeQuery)->reorder()->count(),
             'offers' => (clone $offerQuery)->reorder()->count(),
         ];
-        if (! $isAjax && $category === null) {
+        if (! $isSuggestions && $category === null) {
             $category = $counts['offers'] > 0 || $counts['stores'] === 0 ? 'offers' : 'stores';
         }
 
@@ -66,12 +66,12 @@ class SearchController extends Controller
         if ($category !== 'offers') {
             $storeQuery->with('categories');
             // Count all available offers for each suggested store in the same query.
-            if ($isAjax) $storeQuery->withCount(['offers as available_offers_count' => fn (Builder $query) => $query->available()]);
-            $stores = $isAjax ? $storeQuery->limit(self::SUGGESTION_LIMIT)->get() : $storeQuery->paginate(12, ['*'], 'stores_page', total: $counts['stores'])->withQueryString();
+            if ($isSuggestions) $storeQuery->withCount(['offers as available_offers_count' => fn (Builder $query) => $query->available()]);
+            $stores = $isSuggestions ? $storeQuery->limit(self::SUGGESTION_LIMIT)->get() : $storeQuery->paginate(12, ['*'], 'stores_page', total: $counts['stores'])->withQueryString();
         }
         if ($category !== 'stores') {
-            if (! $isAjax) $offerQuery->with('client.categories');
-            $offers = $isAjax ? $offerQuery->limit(self::SUGGESTION_LIMIT - $stores->count())->get() : $offerQuery->paginate(12, ['*'], 'offers_page', total: $counts['offers'])->withQueryString();
+            if (! $isSuggestions) $offerQuery->with('client.categories');
+            $offers = $isSuggestions ? $offerQuery->limit(self::SUGGESTION_LIMIT - $stores->count())->get() : $offerQuery->paginate(12, ['*'], 'offers_page', total: $counts['offers'])->withQueryString();
         }
 
         // Pass the selected type and the relevant groups to the existing result templates.
@@ -85,8 +85,18 @@ class SearchController extends Controller
         ];
 
         // Render escaped Blade templates for the dropdown or the full results page.
-        if ($isAjax) {
+        if ($isSuggestions) {
             return response()->json(['html' => view('website.search.partials.dropdown', $data)->render()]);
+        }
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('website.search.partials.results', $data)->render(),
+                'category' => $category,
+                'categoryLabel' => $category === 'stores' ? __('Stores') : __('Offers'),
+                'countLabel' => trans_choice($category === 'stores' ? 'Store count' : 'Offer count', $counts[$category], ['count' => number_format($counts[$category])]),
+                'counts' => $counts,
+                'pageTitle' => __('Search results for: :search', ['search' => $search]),
+            ]);
         }
         return view('website.search.index', $data);
     }

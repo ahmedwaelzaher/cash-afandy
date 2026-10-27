@@ -56,6 +56,8 @@ class OfferController extends Controller
             return response()->json([
                 'html' => view('website.offers.partials.results', $data)->render(),
                 'countLabel' => $data['countLabel'],
+                'category' => $categorySlug,
+                'categoryLabel' => Category::where('slug', $categorySlug)->first(['title'])?->title ?? __('Offers'),
             ]);
         }
 

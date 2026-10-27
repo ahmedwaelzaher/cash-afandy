@@ -112,3 +112,33 @@ test('a direct offer card uses its own url when there is no code', function () {
     expect($html)->toContain('href="https://example.test/deal?affiliate=partner"')
         ->not->toContain('data-offer-code=');
 });
+
+test('directories share inline scrollable categories and preserve their selected search filters', function (string $route, string $locale) {
+    $category = Category::factory()->create();
+    $response = $this->get(route($route, ['locale' => $locale, 'search' => 'sample', 'category' => $category->slug]))
+        ->assertOk()->assertSee('site-directory-layout', false)
+        ->assertDontSee('data-bs-target="#directory-filters"', false)
+        ->assertDontSee('offcanvas-lg offcanvas-start', false);
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
+    $xpath = new DOMXPath($document);
+    $layout = '//div[contains(@class,"site-directory-layout")]';
+
+    expect($xpath->query($layout . '/div[contains(@class,"site-directory-heading")]//*[@data-directory-search]'))->toHaveCount(1);
+    expect($xpath->query($layout . '/aside//nav[contains(@class,"site-search-types")]'))->toHaveCount(1);
+    expect($xpath->query($layout . '/aside//a[@aria-current="page"]'))->toHaveCount(1);
+    foreach ($xpath->query($layout . '/aside//a[@href]') as $link) {
+        parse_str(parse_url($link->getAttribute('href'), PHP_URL_QUERY), $query);
+        expect($query['search'])->toBe('sample');
+        if ($link->hasAttribute('aria-current')) expect($query['category'])->toBe($category->slug);
+    }
+})->with(['website.clients.index', 'website.offers.index'])->with(['ar', 'en']);
+
+test('ajax category navigation supplies the translated heading and selected category', function (string $route, string $locale) {
+    $category = Category::factory()->create(['title' => ['en' => 'Navigation category', 'ar' => 'تصنيف التنقل']]);
+    $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+        ->getJson(route($route, ['locale' => $locale, 'category' => $category->slug, 'search' => 'missing-navigation-result']))
+        ->assertOk()->assertJsonStructure(['html', 'countLabel', 'category', 'categoryLabel'])
+        ->assertJsonPath('category', $category->slug)
+        ->assertJsonPath('categoryLabel', $category->getTranslation('title', $locale));
+})->with(['website.clients.index', 'website.offers.index'])->with(['ar', 'en']);

@@ -1730,8 +1730,35 @@ Offer Code
 }
 
 /* Store directory: compact horizontal cards and category navigation. */
+.site-directory-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'heading' 'filters' 'results';
+    gap: 1rem 1.5rem;
+}
+
+.site-directory-heading {
+    grid-area: heading;
+    min-inline-size: 0;
+}
+
+.site-directory-layout > .site-stores-sidebar {
+    grid-area: filters;
+    min-inline-size: 0;
+}
+
+.site-directory-layout > [data-directory-results] {
+    grid-area: results;
+    min-inline-size: 0;
+}
+
 .site-store-empty {
     min-block-size: min(16rem, 40svh);
+}
+
+[data-directory-results][aria-busy='true'] {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .site-store-search {
@@ -1802,6 +1829,10 @@ Offer Code
 }
 
 @media (max-width: 991.98px) {
+    .site-directory-layout .site-store-search {
+        inline-size: 100%;
+    }
+
     .site-search-types {
         padding-block: 0.25rem;
         overflow-x: auto;
@@ -1830,6 +1861,12 @@ Offer Code
 }
 
 @media (min-width: 992px) {
+    .site-directory-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas: 'filters heading' 'filters results';
+    }
+
     .site-store-filters {
         border: 1px solid var(--site-line);
         border-radius: var(--site-radius);

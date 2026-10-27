@@ -202,6 +202,30 @@ describe('search result types', function () {
             ->not->toContain('id="afandy-search-' . $otherType . '"');
     })->with(['stores', 'offers']);
 
+    test('ajax type navigation returns full result cards and sidebar metadata instead of suggestions', function (string $type, string $locale) {
+        $otherType = $type === 'stores' ? 'offers' : 'stores';
+        $response = $this->withHeaders(['X-Requested-With' => 'XMLHttpRequest', 'X-Search-Results' => '1'])
+            ->getJson(route('website.search', ['locale' => $locale, 'afandy_search' => 'Typed', 'afandy_category' => $type]))
+            ->assertOk()->assertJsonStructure(['html', 'category', 'categoryLabel', 'countLabel', 'counts', 'pageTitle'])
+            ->assertJsonPath('category', $type)->assertJsonPath('counts', ['stores' => 1, 'offers' => 1]);
+
+        expect($response->json('html'))->toContain('data-search-result-type="' . $type . '"', $type === 'stores' ? 'site-store-card' : 'site-offer-card')
+            ->not->toContain('data-search-result-type="' . $otherType . '"', 'site-search-result ', 'site-navbar');
+        expect($response->json('categoryLabel'))->toBe($type === 'stores' ? __('Stores') : __('Offers'));
+        expect($response->json('countLabel'))->toBe(trans_choice($type === 'stores' ? 'Store count' : 'Offer count', 1, ['count' => '1']));
+    })->with(['stores', 'offers'])->with(['ar', 'en']);
+
+    test('ajax full results retain pagination beyond the suggestion limit', function () {
+        foreach (range(1, 12) as $number) {
+            $store = Client::factory()->create(['title' => ['en' => "Typed Brand {$number}"]]);
+            $store->countries()->attach($this->country);
+        }
+        $this->withHeaders(['X-Requested-With' => 'XMLHttpRequest', 'X-Search-Results' => '1'])
+            ->getJson(route('website.search', ['locale' => 'en', 'afandy_search' => 'Typed', 'afandy_category' => 'stores']))
+            ->assertOk()->assertJsonPath('counts.stores', 13)
+            ->assertJsonPath('html', fn ($html) => substr_count($html, 'class="site-store-card ') === 12 && str_contains($html, 'stores_page=2'));
+    });
+
     test('a missing type defaults to offers without introducing an all results tab', function () {
         $this->get(route('website.search', ['locale' => 'en', 'afandy_search' => 'Typed']))
             ->assertOk()->assertViewHas('category', 'offers')
