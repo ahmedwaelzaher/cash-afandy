@@ -6,6 +6,7 @@ use App\Http\Controllers\Website\FavoriteOfferController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\OfferController;
+use App\Http\Controllers\Website\PendingActionController;
 use App\Http\Controllers\Website\ProfileController;
 use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
@@ -43,6 +44,9 @@ Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.sho
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('search', SearchController::class)->name('search');
+
+Route::post('auth/pending-action', [PendingActionController::class, 'store'])->middleware('throttle:30,1')->name('pending-action.store');
+Route::delete('auth/pending-action', [PendingActionController::class, 'destroy'])->middleware('throttle:30,1')->name('pending-action.destroy');
 
 Route::middleware('guest:users')->group(function () {
     Route::get('auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->whereIn('provider', SocialiteController::PROVIDERS)->name('socialite.redirect');

@@ -426,6 +426,166 @@ $(() => {
 });
 
 // ==================================================
+// Login modal and protected website actions
+// ==================================================
+$(() => {
+    const $modal = $('#site-login-modal');
+    if (!$modal.length) return;
+
+    const modal = tabler.Modal.getOrCreateInstance($modal[0]);
+    const loginUrl = new URL($modal.attr('data-login-url'));
+    const $form = $modal.find('[data-login-modal-form]');
+    const $error = $modal.find('[data-login-error]');
+    let pendingToken;
+    let trigger;
+    let submitting = false;
+    let preparing = false;
+    let cancelling = false;
+
+    // Use the current address, including any filters changed through AJAX.
+    $modal.on('click', '[data-login-return]', function () {
+        const url = new URL(this.href);
+        url.searchParams.set('return_to', window.location.href);
+        this.href = url.href;
+    });
+
+    $(document).on('website:login-required', (event, options = {}) => {
+        if (submitting || preparing || cancelling) return;
+        preparing = true;
+        trigger = options.trigger || document.activeElement;
+        $error.prop('hidden', true).empty();
+        const $trigger = $(trigger).attr('aria-busy', 'true');
+        $.ajax({
+            url: $modal.attr('data-pending-action-url'),
+            method: 'POST',
+            dataType: 'json',
+            loginRequiredHandled: true,
+            data: {
+                name: options.action?.name || 'navigate',
+                offer_id: options.action?.offer_id,
+                return_to: options.returnTo || window.location.href,
+            },
+        }).done((response) => {
+            if (response.authenticated) {
+                window.location.assign(response.redirect);
+                return;
+            }
+            pendingToken = response.token;
+            const $drawer = $('.site-navbar-menu.show');
+            if ($drawer.length) {
+                $drawer.one('hidden.bs.offcanvas', () => modal.show());
+                tabler.Offcanvas.getOrCreateInstance($drawer[0]).hide();
+            } else {
+                modal.show();
+            }
+        }).fail((xhr) => {
+            if (xhr.status !== 419) toastify().error(__('Error'));
+        }).always(() => {
+            preparing = false;
+            $trigger.removeAttr('aria-busy');
+        });
+    });
+
+    $(document).on('click', 'a[href], [data-requires-login]', function (event) {
+        if ($modal.attr('data-authenticated') === 'true' || event.isDefaultPrevented()) return;
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const href = $(this).attr('href');
+        const url = href ? new URL(href, document.baseURI) : null;
+        const isLoginLink = url?.origin === loginUrl.origin && url.pathname === loginUrl.pathname;
+        if (!isLoginLink && !this.hasAttribute('data-requires-login')) return;
+        if (url && url.origin !== window.location.origin) return;
+
+        event.preventDefault();
+        $(document).trigger('website:login-required', [{
+            trigger: this,
+            returnTo: !isLoginLink && url ? url.href : window.location.href,
+        }]);
+    });
+
+    // Expired sessions still pass through the server's authentication middleware.
+    $(document).ajaxError((event, xhr, settings) => {
+        if (xhr.status !== 401 || settings.loginRequiredHandled) return;
+        const url = new URL(settings.url, document.baseURI);
+        if (url.origin !== window.location.origin) return;
+        $modal.attr('data-authenticated', 'false');
+        $(document).trigger('website:login-required');
+    });
+
+    $modal.on('shown.bs.modal', () => {
+        $form.find('[name="email"]').trigger('focus');
+    }).on('hide.bs.modal', (event) => {
+        if (submitting || cancelling) {
+            event.preventDefault();
+            return;
+        }
+        if (!pendingToken) return;
+
+        // Confirm cancellation on the server before discarding the local token.
+        event.preventDefault();
+        cancelling = true;
+        $.ajax({
+            url: $modal.attr('data-pending-action-url'),
+            method: 'DELETE',
+            data: { token: pendingToken },
+            loginRequiredHandled: true,
+        }).done(() => {
+            pendingToken = null;
+            cancelling = false;
+            modal.hide();
+        }).fail((xhr) => {
+            if (xhr.status !== 419) $error.text(__('Error')).prop('hidden', false);
+        }).always(() => { cancelling = false; });
+    }).on('hidden.bs.modal', () => {
+        $form.find('[name="password"]').val('');
+        appendErrorsToForm($form);
+        if (trigger?.isConnected && $(trigger).is(':visible')) $(trigger).trigger('focus');
+        trigger = null;
+    });
+
+    // Stop here before the shared form handler performs a full-page submission.
+    $modal.on('submit', '[data-login-modal-form]', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (submitting || cancelling || !validateForm($form, true)) return;
+
+        submitting = true;
+        $error.prop('hidden', true).empty();
+        appendErrorsToForm($form);
+        const $submit = $form.find('[type="submit"]').prop('disabled', true).attr('aria-busy', 'true');
+        const $spinner = $('<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>').prependTo($submit);
+        let completed = false;
+        $.ajax({
+            url: this.action,
+            method: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            headers: { 'X-Login-Modal': 'true' },
+            loginRequiredHandled: true,
+        }).done((response) => {
+            completed = true;
+            $('meta[name="csrf-token"]').attr('content', response.csrfToken);
+            $('input[name="_token"]').val(response.csrfToken);
+            $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': response.csrfToken } });
+            $modal.attr('data-authenticated', 'true');
+            pendingToken = null;
+            window.location.assign(response.redirect || window.location.href);
+        }).fail((xhr) => {
+            if (xhr.status === 422 && xhr.responseJSON?.payload) {
+                appendErrorsToForm($form, xhr.responseJSON.payload);
+                $form.find('.is-invalid').first().trigger('focus');
+            } else if (xhr.status !== 419) {
+                $error.text(xhr.responseJSON?.message || __('Error')).prop('hidden', false);
+            }
+        }).always(() => {
+            if (completed) return;
+            submitting = false;
+            $submit.prop('disabled', false).removeAttr('aria-busy');
+            $spinner.remove();
+        });
+    });
+});
+
+// ==================================================
 // Favorites
 // ==================================================
 $(() => {
@@ -467,7 +627,10 @@ $(() => {
     $(document).on('click', '[data-offer-favorite]', function () {
         const $button = $(this);
         if ($button.attr('data-favorite-authenticated') !== 'true') {
-            window.location.assign($button.attr('data-favorite-login-url'));
+            $(document).trigger('website:login-required', [{
+                trigger: this,
+                action: { name: 'favorite_offer', offer_id: $button.attr('data-offer-favorite') },
+            }]);
             return;
         }
 
@@ -482,7 +645,7 @@ $(() => {
 
         pending.add(id);
         buttons().prop('disabled', true).attr('aria-busy', 'true');
-        $.ajax({ url, method: favorited ? 'PUT' : 'DELETE', dataType: 'json' })
+        $.ajax({ url, method: favorited ? 'PUT' : 'DELETE', dataType: 'json', loginRequiredHandled: true })
             .done((response) => {
                 const active = response.favorited;
                 buttons().each((_, element) => {
@@ -504,7 +667,10 @@ $(() => {
             })
             .fail((xhr) => {
                 if (xhr.status === 401) {
-                    window.location.assign($button.attr('data-favorite-login-url'));
+                    $(document).trigger('website:login-required', [{
+                        trigger: this,
+                        action: { name: favorited ? 'favorite_offer' : 'unfavorite_offer', offer_id: id },
+                    }]);
                     return;
                 }
                 if (xhr.status !== 419) toastify().error(__('Unable to update favorites. Please try again.'));

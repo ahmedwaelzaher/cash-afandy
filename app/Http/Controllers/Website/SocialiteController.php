@@ -22,9 +22,17 @@ class SocialiteController extends Controller
     /**
      * Redirect the user to the provider's authentication page.
      */
-    public function redirect(string $provider)
+    public function redirect(Request $request, string $provider)
     {
         abort_unless(static::enabled($provider), 404);
+
+        $returnTo = $request->query('return_to');
+        // Only remember local destinations; OAuth's callback URL and state stay unchanged.
+        if (is_string($returnTo) && strlen($returnTo) <= 4096
+            && filter_var($returnTo, FILTER_VALIDATE_URL)
+            && str_starts_with($returnTo, $request->getSchemeAndHttpHost() . '/')) {
+            $request->session()->put('url.intended', $returnTo);
+        }
 
         return $this->driver($provider)->redirect();
     }

@@ -86,3 +86,25 @@
 .login-split__footer-text a:hover {
     text-decoration: underline;
 }
+
+/* Reuse the login form inside the modal; only its container and artwork change. */
+.site-login-modal .modal-content {
+    background: var(--site-background);
+}
+
+.site-login-modal .btn-close {
+    inset-block-start: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 1;
+}
+
+.site-login-modal .login-split__illustration {
+    position: static;
+    align-self: center;
+    block-size: auto;
+}
+
+.site-login-modal .login-split__illustration-img {
+    max-inline-size: 14rem;
+    max-block-size: 24rem;
+}

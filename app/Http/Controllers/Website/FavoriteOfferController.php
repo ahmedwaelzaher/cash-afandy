@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Actions\Offers\SaveFavoriteOffer;
 use App\Models\Offer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Redot\Http\Controllers\Controller;
 
 class FavoriteOfferController extends Controller
@@ -24,19 +24,13 @@ class FavoriteOfferController extends Controller
         ]);
     }
 
-    public function store(Request $request, Offer $offer): JsonResponse
+    public function store(Request $request, Offer $offer, SaveFavoriteOffer $save): JsonResponse
     {
         // Published expired offers can be restored from the saved list.
         abort_unless(Offer::published()->whereKey($offer->id)->exists(), 404);
         $user = $request->user('users');
 
-        // Keep repeated requests idempotent, including requests from multiple tabs.
-        DB::table('offer_user')->insertOrIgnore([
-            'user_id' => $user->id,
-            'offer_id' => $offer->id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $save->handle($user, $offer);
 
         return $this->favoriteResponse($user, true);
     }

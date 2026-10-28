@@ -3,14 +3,18 @@
 namespace App\Providers;
 
 use App\Actions\Auth\CreateUser;
+use App\Actions\Auth\PendingAction;
+use App\Http\Responses\LoginResponse;
 use App\Models\Admin;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Login as AuthLogin;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Redot\Auth\Contracts\CreatesUsers;
@@ -33,6 +37,12 @@ class AuthServiceProvider extends ServiceProvider
         $this->configurePanels();
         $this->configureNotifications();
         $this->configureRedirects();
+
+        Event::listen(AuthLogin::class, function (AuthLogin $event) {
+            if ($event->guard === 'users' && $event->user instanceof User && request()->hasSession()) {
+                app(PendingAction::class)->complete(request(), $event->user);
+            }
+        });
     }
 
     /**
@@ -66,6 +76,7 @@ class AuthServiceProvider extends ServiceProvider
             ->guard('users')
             ->views('website.auth')
             ->using(CreatesUsers::class, CreateUser::class)
+            ->using(\Redot\Auth\Responses\LoginResponse::class, LoginResponse::class)
             ->features(
                 Login::make(),
                 Registration::make(),

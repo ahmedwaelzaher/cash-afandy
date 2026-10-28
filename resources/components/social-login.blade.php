@@ -1,6 +1,7 @@
 @props([
     // Render the buttons in their own wrapper, preceded by an "OR" divider.
     'divider' => false,
+    'returnTo' => null,
 ])
 
 @php
@@ -18,7 +19,8 @@
     @endif
 
     @foreach ($providers as $provider => $label)
-        <a href="{{ route('website.socialite.redirect', $provider) }}" class="btn btn-social flex-center btn-social-{{ $provider }}">
+        <a href="{{ route('website.socialite.redirect', ['provider' => $provider, 'return_to' => $returnTo]) }}"
+            @if ($returnTo) data-login-return @endif class="btn btn-social flex-center btn-social-{{ $provider }}">
             <x-social-icon :social="$provider" size="xs" />
             {{ $label }}
         </a>

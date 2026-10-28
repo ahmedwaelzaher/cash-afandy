@@ -41,6 +41,10 @@
         @endif
     </main>
 
+    @if (! request()->routeIs('website.login'))
+        @include('website.auth.partials.login-modal')
+    @endif
+
     @include('components.google-analytics')
     @include('components.facebook-pixel')
 
