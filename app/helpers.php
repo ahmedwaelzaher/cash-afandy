@@ -107,9 +107,9 @@ function website_ip_country(): ?Country
 /**
  * Get the website's currently selected country.
  *
- * Resolution order: an explicit `?country=` query param, the previously
- * selected country in the session or cookie, then the IP-detected country,
- * then the default market. Only supported shopping markets can be selected.
+ * Resolution order: an explicit `?country=` query param, the signed-in user's
+ * saved preference, session or cookie, IP-detected country, then the default
+ * market. Only supported shopping markets can be selected.
  *
  * Uses the default market when the countries dropdown is disabled.
  */
@@ -121,8 +121,14 @@ function website_country(): ?Country
     }
 
     $codes = setting('website_countries');
-
+    $user = auth('users')->user();
+    $preferences = $user?->preferences;
     $code = request()->query('country');
+    $explicit = is_string($code) && in_array($code, $codes, true);
+
+    if (! $explicit) {
+        $code = $preferences?->country?->code;
+    }
 
     if (! is_string($code) || ! in_array($code, $codes, true)) {
         $code = session('website_country');
@@ -139,6 +145,14 @@ function website_country(): ?Country
     $country = Country::code(in_array($code, $codes, true) ? $code : $default) ?? Country::code($default);
 
     if ($country) {
+        if ($explicit && $user && $country->code === request()->query('country')) {
+            $preferences ??= $user->preferences()->firstOrCreate();
+            $preferences->fill(['country_id' => $country->id]);
+            if ($preferences->isDirty('country_id')) $preferences->save();
+            $preferences->setRelation('country', $country);
+            $user->setRelation('preferences', $preferences);
+        }
+
         session()->put('website_country', $country->code);
         cookie()->queue(cookie()->forever('website_country', $country->code));
     }

@@ -21,12 +21,18 @@ class UserPreference extends Model
         'user_id',
         'theme',
         'language',
+        'country_id',
     ];
 
     /**
-     * Legacy location data is no longer part of user preferences.
+     * Keep the internal shopping-country key out of serialized preferences.
      */
     protected $hidden = ['country_id'];
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
 
     /**
      * Get the user that owns the preferences.
