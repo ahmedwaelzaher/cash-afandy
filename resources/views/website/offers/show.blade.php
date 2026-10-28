@@ -20,6 +20,7 @@
                                 </div>
 
                                 <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2">{{ $discount }}</span>
+                            @include('website.partials.offer-favorite')
                             </div>
 
                             @if ($offer->description)

@@ -106,18 +106,36 @@ class Offer extends Model
         ];
     }
 
+    /** Include expired offers in saved lists, while keeping unpublished offers private. */
+    public function scopePublished(Builder $query): void
+    {
+        $query->where('active', true)
+            ->where('launch_date', '<=', now())
+            ->whereHas('store', fn (Builder $query) => $query->where('active', true));
+    }
+
     /**
-     * Scope a query to only include offers visible on the website.
+     * Scope a query to only include offers available in the current market.
      */
     public function scopeAvailable(Builder $query): void
     {
         $country = website_country();
 
-        $query->where('active', true)
-            ->where('launch_date', '<=', now())
+        $query->published()
             ->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()))
-            ->whereHas('store', fn (Builder $query) => $query->where('active', true))
             ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)));
+    }
+
+    public function scopeWithFavoriteState(Builder $query): void
+    {
+        if ($userId = auth('users')->id()) {
+            $query->withExists(['favoritedBy as is_favorited' => fn (Builder $query) => $query->where('users.id', $userId)]);
+        }
+    }
+
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 
     /**

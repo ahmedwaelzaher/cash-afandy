@@ -103,6 +103,7 @@ Form Check (Radio)
     --site-surface: #fffefa;
     --site-soft: #e9efdf;
     --site-gold: #eab642;
+    --site-green: #244d2a;
     --site-ink: #1b301e;
     --site-text: #53634a;
     --site-line: #dce3d0;
@@ -1493,8 +1494,40 @@ Store strip and shared marquee
 }
 
 .site-offer-favorite[aria-pressed='true'] {
-    color: var(--site-gold);
-    background: var(--site-soft);
+    color: var(--site-green);
+    background: transparent;
+}
+
+[data-favorite-item].is-removed > .site-offer-card {
+    opacity: 0.5;
+}
+
+.site-favorite-removed {
+    --tblr-primary: var(--site-green);
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--site-radius);
+    background: color-mix(in srgb, var(--site-surface) 40%, transparent);
+    color: var(--site-green);
+}
+
+.site-favorite-removed:not([hidden]) {
+    display: flex;
+}
+
+.site-favorite-countdown {
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    background: conic-gradient(var(--site-green) var(--favorite-progress, 360deg), var(--site-soft) 0);
+    font-variant-numeric: tabular-nums;
+}
+
+.site-favorite-countdown::before {
+    content: '';
+    position: absolute;
+    inset: 0.25rem;
+    border-radius: inherit;
+    background: var(--site-surface);
 }
 
 .site-offer-summary {
@@ -1824,7 +1857,7 @@ Offer Code
 }
 
 .site-store-filter.active .badge {
-    background: #244d2a;
+    background: var(--site-green);
     color: var(--site-surface);
 }
 

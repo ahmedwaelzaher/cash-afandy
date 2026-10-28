@@ -11,6 +11,8 @@
 
             <a class="dropdown-item" href="{{ route('website.profile.edit') }}">{{ __('Profile') }}</a>
 
+            <a class="dropdown-item" href="{{ route('website.favorites.index') }}"><x-icon icon="ti ti-heart" class="me-2" /> {{ __('Favorite offers') }}</a>
+
             <x-form :action="route('website.logout')" method="POST" disable-validation>
                 <button type="submit" class="dropdown-item">{{ __('Logout') }}</button>
             </x-form>

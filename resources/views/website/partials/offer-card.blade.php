@@ -1,6 +1,7 @@
 @php
     $detailsId = 'offer-details-' . ($offer->getKey() ?? \Illuminate\Support\Str::uuid());
     $offerUrl = $offer->url ?? null;
+    $isExpiredFavorite = ($favoritePage ?? false) && $offer->expiration_date?->lte(now());
 @endphp
 <article class="site-offer-card card h-100">
     <div class="site-offer-discount d-flex flex-row-reverse flex-sm-column align-items-center justify-content-center gap-2 text-center">
@@ -25,14 +26,15 @@
                     data-share-error="{{ __('Unable to share or copy the link. Please try again.') }}" aria-label="{{ __('Share') }}">
                     <x-icon icon="ti ti-share" />
                 </button>
-                <button type="button" class="site-offer-favorite btn btn-icon btn-link text-decoration-none" data-offer-favorite aria-pressed="false" aria-label="{{ __('Favorite') }}">
-                    <x-icon icon="ti ti-heart" />
-                </button>
+                @include('website.partials.offer-favorite')
             </div>
         </div>
 
         <div class="site-offer-summary">
             <h3 class="mb-0">{{ $offer->title }}</h3>
+            @if ($isExpiredFavorite)
+                <span class="site-offer-label d-inline-block mt-2">{{ __('Expired') }}</span>
+            @endif
         </div>
 
         <div class="site-offer-actions d-flex flex-wrap flex-sm-column align-items-center align-items-sm-stretch justify-content-between gap-2">
@@ -41,7 +43,9 @@
             @endisset
 
             <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">
-                @if (filled($offer->code))
+                @if ($isExpiredFavorite)
+                    <span class="text-secondary">{{ __('This offer has expired') }}</span>
+                @elseif (filled($offer->code))
                     @include('website.partials.offer-code')
                 @elseif (filled($offerUrl))
                     <a href="{{ $offerUrl }}" class="site-offer-link btn btn-outline-primary gap-2" target="_blank" rel="sponsored noopener noreferrer">

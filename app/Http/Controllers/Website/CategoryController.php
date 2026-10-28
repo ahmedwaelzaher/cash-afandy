@@ -27,7 +27,7 @@ class CategoryController extends Controller
         return view('website.categories.show', [
             'category' => $category,
             'stores' => $stores,
-            'offers' => Offer::available()->with('store')->whereHas('store.categories', $inCategory)->latest('id')->take(8)->get(),
+            'offers' => Offer::available()->withFavoriteState()->with('store')->whereHas('store.categories', $inCategory)->latest('id')->take(8)->get(),
             'cashbacks' => Cashback::available()->with('store')->whereHas('store.categories', $inCategory)->latest('id')->take(8)->get(),
         ]);
     }

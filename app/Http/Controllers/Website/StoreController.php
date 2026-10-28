@@ -77,7 +77,7 @@ class StoreController extends Controller
 
         return view('website.stores.show', [
             'store' => $store,
-            'offers' => Offer::available()->with('store')->whereBelongsTo($store)->latest('id')->get(),
+            'offers' => Offer::available()->withFavoriteState()->with('store')->whereBelongsTo($store)->latest('id')->get(),
         ]);
     }
 }

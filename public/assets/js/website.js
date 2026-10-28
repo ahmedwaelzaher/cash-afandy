@@ -430,8 +430,96 @@ $(() => {
 // Favorites
 // ==================================================
 $(() => {
-    // Visual state only until favorites are connected to the backend.
+    const pending = new Set();
+    const countdowns = new Map();
+    const favoriteItems = (id) => $('[data-favorite-item]').filter((_, element) => element.getAttribute('data-favorite-item') === id);
+    const pauseCountdown = (id) => {
+        const countdown = countdowns.get(id);
+        if (!countdown) return;
+        clearTimeout(countdown.timeout);
+        countdowns.delete(id);
+        return Math.max(0, countdown.deadline - performance.now());
+    };
+    const startCountdown = (id, remaining) => {
+        pauseCountdown(id);
+        const $items = favoriteItems(id);
+        if (!$items.length) return;
+        const duration = Number($items.find('[data-favorite-removed]').attr('data-countdown-seconds')) * 1000;
+        const countdown = { deadline: performance.now() + (remaining ?? duration), timeout: null };
+        countdowns.set(id, countdown);
+
+        const tick = () => {
+            const left = Math.max(0, countdown.deadline - performance.now());
+            $items.find('[data-favorite-seconds]').text(Math.ceil(left / 1000));
+            $items.find('.site-favorite-countdown').css('--favorite-progress', `${left / duration * 360}deg`);
+            if (left === 0) {
+                const focused = $items.toArray().some((item) => item.contains(document.activeElement));
+                countdowns.delete(id);
+                $items.remove();
+                $('[data-favorites-empty]').prop('hidden', $('[data-favorite-item]').length !== 0);
+                if (focused) $('#favorites-title').trigger('focus');
+                return;
+            }
+            countdown.timeout = setTimeout(tick, 100);
+        };
+        tick();
+    };
+
     $(document).on('click', '[data-offer-favorite]', function () {
+        const $button = $(this);
+        if ($button.attr('data-favorite-authenticated') !== 'true') {
+            window.location.assign($button.attr('data-favorite-login-url'));
+            return;
+        }
+
+        const id = $button.attr('data-offer-favorite');
+        const url = $button.attr('data-favorite-url');
+        if (!url || pending.has(id)) return;
+        const favorited = $button.attr('aria-pressed') !== 'true';
+        // Keep an undo request from racing the countdown that removes its card.
+        const pausedTime = favorited ? pauseCountdown(id) : undefined;
+        const buttons = () => $('[data-offer-favorite]').filter((_, element) => element.getAttribute('data-offer-favorite') === id);
+        let $focusTarget;
+
+        pending.add(id);
+        buttons().prop('disabled', true).attr('aria-busy', 'true');
+        $.ajax({ url, method: favorited ? 'PUT' : 'DELETE', dataType: 'json' })
+            .done((response) => {
+                const active = response.favorited;
+                buttons().each((_, element) => {
+                    const $target = $(element);
+                    $target.attr('aria-pressed', String(active))
+                        .attr('aria-label', $target.attr(active ? 'data-remove-label' : 'data-add-label'));
+                    $target.find('.ti').toggleClass('ti-heart-filled', active).toggleClass('ti-heart', !active);
+                });
+                favoriteItems(id).each((_, element) => {
+                    const $item = $(element);
+                    const $card = $item.children('.site-offer-card');
+                    $item.toggleClass('is-removed', !active);
+                    $card.prop('inert', !active);
+                    $item.find('[data-favorite-removed]').prop('hidden', active);
+                    $focusTarget = $item.find(active ? '.site-offer-card [data-offer-favorite]' : '[data-favorite-removed] [data-offer-favorite]');
+                });
+                if (active) pauseCountdown(id);
+                else startCountdown(id);
+            })
+            .fail((xhr) => {
+                if (xhr.status === 401) {
+                    window.location.assign($button.attr('data-favorite-login-url'));
+                    return;
+                }
+                if (xhr.status !== 419) toastify().error(__('Unable to update favorites. Please try again.'));
+                if (pausedTime !== undefined) startCountdown(id, pausedTime);
+            })
+            .always(() => {
+                pending.delete(id);
+                buttons().prop('disabled', false).removeAttr('aria-busy');
+                if ($focusTarget) $focusTarget.trigger('focus');
+            });
+    });
+
+    // Store following remains separate from saved offers until its backend is connected.
+    $(document).on('click', '[data-store-favorite]', function () {
         const $button = $(this);
         $button.attr('aria-pressed', $button.attr('aria-pressed') === 'true' ? 'false' : 'true');
     });

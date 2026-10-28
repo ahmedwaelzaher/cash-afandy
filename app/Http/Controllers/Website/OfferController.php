@@ -30,7 +30,7 @@ class OfferController extends Controller
             return $query->whereRaw("LOWER({$title}) LIKE ?", ['%' . mb_strtolower($search) . '%']);
         };
 
-        $offers = Offer::available()
+        $offers = Offer::available()->withFavoriteState()
             ->with('store.categories')
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
                 ->where($matchTitle)->orWhereHas('store', $matchTitle)))
@@ -80,11 +80,9 @@ class OfferController extends Controller
      */
     public function show(Offer $offer)
     {
-        abort_unless(Offer::available()->whereKey($offer->id)->exists(), 404);
+        $offer = Offer::available()->withFavoriteState()->with(['store', 'countries'])->findOrFail($offer->id);
 
-        $offer->load(['store', 'countries']);
-
-        $relatedOffers = Offer::available()
+        $relatedOffers = Offer::available()->withFavoriteState()
             ->with('store')
             ->where('store_id', $offer->store_id)
             ->whereKeyNot($offer->id)

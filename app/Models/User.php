@@ -7,6 +7,7 @@ use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -132,6 +133,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function preferences(): HasOne
     {
         return $this->hasOne(UserPreference::class);
+    }
+
+    public function favoriteOffers(): BelongsToMany
+    {
+        return $this->belongsToMany(Offer::class)->withTimestamps();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Website\CashbackController;
 use App\Http\Controllers\Website\CategoryController;
+use App\Http\Controllers\Website\FavoriteOfferController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\OfferController;
@@ -49,6 +50,10 @@ Route::middleware('guest:users')->group(function () {
 });
 
 Route::middleware('auth:users')->group(function () {
+    Route::get('favorites', [FavoriteOfferController::class, 'index'])->name('favorites.index');
+    Route::put('favorites/{offer}', [FavoriteOfferController::class, 'store'])->name('favorites.store');
+    Route::delete('favorites/{offer}', [FavoriteOfferController::class, 'destroy'])->name('favorites.destroy');
+
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences.update');

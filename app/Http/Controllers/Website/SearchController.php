@@ -70,7 +70,7 @@ class SearchController extends Controller
             $stores = $isSuggestions ? $storeQuery->limit(self::SUGGESTION_LIMIT)->get() : $storeQuery->paginate(12, ['*'], 'stores_page', total: $counts['stores'])->withQueryString();
         }
         if ($category !== 'stores') {
-            if (! $isSuggestions) $offerQuery->with('store.categories');
+            if (! $isSuggestions) $offerQuery->withFavoriteState()->with('store.categories');
             $offers = $isSuggestions ? $offerQuery->limit(self::SUGGESTION_LIMIT - $stores->count())->get() : $offerQuery->paginate(12, ['*'], 'offers_page', total: $counts['offers'])->withQueryString();
         }
 

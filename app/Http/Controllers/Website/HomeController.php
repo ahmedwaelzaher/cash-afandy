@@ -31,7 +31,7 @@ class HomeController extends Controller
         return view('website.index', [
             'stores' => $stores,
             'heroStores' => $stores->take(3),
-            'offers' => Offer::available()->with('store.categories')->latest('id')->take(20)->get(),
+            'offers' => Offer::available()->withFavoriteState()->with('store.categories')->latest('id')->take(20)->get(),
             'categoryStoreCounts' => $stores->flatMap->categories->countBy('slug'),
             'offerCategories' => Category::orderBy('id')->get(),
         ]);
