@@ -8,8 +8,7 @@
         <div class="site-directory-layout">
             <div class="site-directory-heading d-flex flex-wrap justify-content-between align-items-stretch gap-3">
                 <div class="d-flex flex-wrap align-items-center align-self-stretch gap-2">
-                    <h2 class="h3 lh-1 mb-0" data-directory-label>{{ $selectedCategory?->title ?? $directoryLabel }}</h2>
-                    <span class="badge" data-directory-count aria-live="polite">{{ $countLabel }}</span>
+                    <h2 class="h2 lh-1 mb-0" data-directory-label>{{ $selectedCategory?->title ?? $allItemsLabel }}</h2>
                 </div>
                 <div role="search" class="site-store-search d-flex align-items-center gap-2" data-directory-search>
                     <div class="input-icon flex-fill">

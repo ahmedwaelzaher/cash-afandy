@@ -3,7 +3,6 @@
         'directoryRoute' => 'website.stores.index',
         'directoryTitle' => __('All stores'),
         'directorySubtitle' => __('Your favorite stores.') . ' ' . __('Better savings.'),
-        'directoryLabel' => __('Stores'),
         'allItemsLabel' => __('All stores'),
         'allItemsCount' => $allStoresCount,
         'categoryCounts' => $categories->pluck('stores_count', 'id'),

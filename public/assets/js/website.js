@@ -308,7 +308,6 @@ $(() => {
                 .done((response) => {
                     if (currentRevision !== revision) return;
                     $results.html(response.html);
-                    $section.find('[data-directory-count], [data-directory-summary]').text(response.countLabel);
                     $section.find('[data-directory-label]').text(response.categoryLabel);
                     if (response.pageTitle) $section.find('[data-search-title]').text(response.pageTitle);
                     currentSearch = url.searchParams.get(searchKey) || '';

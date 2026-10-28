@@ -3,9 +3,6 @@
         <div class="container site-container">
             <header class="mb-4">
                 <h1 class="display-6 fw-bold mb-2" id="search-results-title" data-search-title>{{ __('Search results for: :search', ['search' => $search]) }}</h1>
-                <p class="text-secondary mb-0" data-directory-summary>
-                    {{ trans_choice($category === 'stores' ? 'Store count' : 'Offer count', $counts[$category], ['count' => number_format($counts[$category])]) }}
-                </p>
             </header>
 
             <div class="row g-4 align-items-start">

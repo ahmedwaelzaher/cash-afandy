@@ -49,7 +49,7 @@ class StoreController extends Controller
                 'html' => view('website.stores.partials.results', $data)->render(),
                 'countLabel' => $data['countLabel'],
                 'category' => $categorySlug,
-                'categoryLabel' => Category::where('slug', $categorySlug)->first(['title'])?->title ?? __('Stores'),
+                'categoryLabel' => Category::where('slug', $categorySlug)->first(['title'])?->title ?? __('All stores'),
             ]);
         }
 

@@ -6,8 +6,7 @@
     <section class="mb-4" data-search-result-type="{{ $category }}" aria-labelledby="search-results-{{ $category }}">
         <div class="d-flex flex-wrap justify-content-between align-items-stretch gap-3 mb-3">
             <div class="d-flex flex-wrap align-items-center align-self-stretch gap-2">
-                <h2 class="h3 lh-1 mb-0" id="search-results-{{ $category }}">{{ $category === 'stores' ? __('Stores') : __('Offers') }}</h2>
-                <span class="badge" data-directory-count aria-live="polite">{{ trans_choice($category === 'stores' ? 'Store count' : 'Offer count', $counts[$category], ['count' => number_format($counts[$category])]) }}</span>
+                <h2 class="h2 lh-1 mb-0" id="search-results-{{ $category }}">{{ $category === 'stores' ? __('Stores') : __('Offers') }}</h2>
             </div>
         </div>
         @if ($category === 'stores')

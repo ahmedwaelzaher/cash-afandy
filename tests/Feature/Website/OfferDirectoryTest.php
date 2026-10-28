@@ -142,3 +142,15 @@ test('ajax category navigation supplies the translated heading and selected cate
         ->assertJsonPath('category', $category->slug)
         ->assertJsonPath('categoryLabel', $category->getTranslation('title', $locale));
 })->with(['website.stores.index', 'website.offers.index'])->with(['ar', 'en']);
+
+test('the directory heading matches the selected all filter on load and after ajax navigation', function (string $route, string $locale) {
+    $response = $this->get(route($route, ['locale' => $locale]))->assertOk();
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
+    $xpath = new DOMXPath($document);
+    $selected = trim($xpath->query('//*[@id="directory-filters"]//a[@aria-current="page"]/span[contains(@class,"flex-fill")]')->item(0)->textContent);
+
+    expect(trim($xpath->query('//*[@data-directory-label]')->item(0)->textContent))->toBe($selected);
+    $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+        ->getJson(route($route, ['locale' => $locale]))->assertOk()->assertJsonPath('categoryLabel', $selected);
+})->with(['website.stores.index', 'website.offers.index'])->with(['ar', 'en']);

@@ -1919,8 +1919,7 @@ Offer Code
 }
 
 .site-store-filter.active,
-.site-store-filter .badge,
-[data-directory-count] {
+.site-store-filter .badge {
     background: var(--site-soft);
     color: var(--site-ink);
 }
