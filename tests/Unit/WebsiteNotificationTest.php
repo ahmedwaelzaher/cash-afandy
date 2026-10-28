@@ -15,6 +15,8 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Bus;
 use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Exception\Messaging\NotFound;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 uses(TestCase::class);
 
@@ -206,3 +208,54 @@ test('push jobs require a surviving recipient and a notification owned by the sa
 
     expect(app()->resolved(Messaging::class))->toBeFalse();
 })->with([User::class, Admin::class, AdditionalNotificationRecipient::class])->with([false, true]);
+
+test('Firebase delivery builds the SDK message and preserves subscriptions on unrelated failures', function (?string $failure) {
+    config(['redot.notifications.push_enabled' => true]);
+    $this->connection->shouldReceive('select')->times(3)->andReturn(
+        [(object) ['id' => 11, 'notifiable_type' => AdditionalNotificationRecipient::class, 'notifiable_id' => 7, 'token' => 'device-token', 'token_hash' => 'token-hash']],
+        [(object) ['id' => 7]],
+        [(object) ['id' => 'notification-id', 'notifiable_type' => AdditionalNotificationRecipient::class, 'notifiable_id' => 7, 'data' => json_encode(['title' => 'Title', 'body' => 'Body'])]],
+    );
+    $messaging = Mockery::mock(Messaging::class);
+    app()->instance(Messaging::class, $messaging);
+    $send = $messaging->shouldReceive('send')->once()->with(Mockery::on(function (CloudMessage $message) {
+        expect($message->jsonSerialize())->toMatchArray([
+            'token' => 'device-token',
+            'notification' => ['title' => 'Title', 'body' => 'Body'],
+            'data' => ['notification_id' => 'notification-id'],
+            'webpush' => ['notification' => ['tag' => 'notification-id']],
+        ]);
+
+        return true;
+    }));
+
+    if ($failure === null) {
+        $send->andReturn(['name' => 'projects/test/messages/test']);
+    } elseif ($failure === 'temporary') {
+        $exception = new RuntimeException('Temporary connection failure');
+        $send->andThrow($exception);
+    } else {
+        $exception = (new NotFound('Not found'))->withErrors([
+            'error' => ['details' => [['errorCode' => $failure]]],
+        ]);
+        $send->andThrow($exception);
+    }
+
+    if ($failure === 'UNREGISTERED') {
+        $this->connection->shouldReceive('update')->once()->andReturnUsing(function ($sql, $bindings) {
+            expect($sql)->toContain('"notifiable_type" = ?', '"notifiable_id" = ?', '"token_hash" = ?')
+                ->and($bindings)->toContain(11, AdditionalNotificationRecipient::class, 7, 'token-hash');
+
+            return 1;
+        });
+    } else {
+        $this->connection->shouldNotReceive('update');
+    }
+
+    $job = new SendPushNotification('notification-id', 11, 'token-hash');
+    if ($failure !== null && $failure !== 'UNREGISTERED') {
+        expect(fn () => $job->handle())->toThrow($exception);
+    } else {
+        $job->handle();
+    }
+})->with([null, 'temporary', 'NOT_FOUND', 'UNREGISTERED']);

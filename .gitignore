@@ -20,6 +20,7 @@
 /public/storage
 /public/assets/dist
 /storage/*.key
+/storage/app/firebase/
 /storage/pail
 /vendor
 _ide_helper.php
