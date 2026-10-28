@@ -3,8 +3,7 @@
 @endPushOnce
 
 <div class="modal fade site-login-modal" id="site-login-modal" tabindex="-1" aria-labelledby="site-login-title" aria-hidden="true"
-    data-login-url="{{ route('website.login') }}" data-pending-action-url="{{ route('website.pending-action.store') }}"
-    data-authenticated="{{ auth('users')->check() ? 'true' : 'false' }}">
+    data-pending-action-url="{{ route('website.pending-action.store') }}">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
             <div class="modal-body p-4 pt-5">

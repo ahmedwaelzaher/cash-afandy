@@ -433,7 +433,6 @@ $(() => {
     if (!$modal.length) return;
 
     const modal = tabler.Modal.getOrCreateInstance($modal[0]);
-    const loginUrl = new URL($modal.attr('data-login-url'));
     const $form = $modal.find('[data-login-modal-form]');
     const $error = $modal.find('[data-login-error]');
     let pendingToken;
@@ -486,28 +485,11 @@ $(() => {
         });
     });
 
-    $(document).on('click', 'a[href], [data-requires-login]', function (event) {
-        if ($modal.attr('data-authenticated') === 'true' || event.isDefaultPrevented()) return;
-        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        const href = $(this).attr('href');
-        const url = href ? new URL(href, document.baseURI) : null;
-        const isLoginLink = url?.origin === loginUrl.origin && url.pathname === loginUrl.pathname;
-        if (!isLoginLink && !this.hasAttribute('data-requires-login')) return;
-        if (url && url.origin !== window.location.origin) return;
-
-        event.preventDefault();
-        $(document).trigger('website:login-required', [{
-            trigger: this,
-            returnTo: !isLoginLink && url ? url.href : window.location.href,
-        }]);
-    });
-
     // Expired sessions still pass through the server's authentication middleware.
     $(document).ajaxError((event, xhr, settings) => {
         if (xhr.status !== 401 || settings.loginRequiredHandled) return;
         const url = new URL(settings.url, document.baseURI);
         if (url.origin !== window.location.origin) return;
-        $modal.attr('data-authenticated', 'false');
         $(document).trigger('website:login-required');
     });
 
@@ -566,7 +548,6 @@ $(() => {
             $('meta[name="csrf-token"]').attr('content', response.csrfToken);
             $('input[name="_token"]').val(response.csrfToken);
             $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': response.csrfToken } });
-            $modal.attr('data-authenticated', 'true');
             pendingToken = null;
             window.location.assign(response.redirect || window.location.href);
         }).fail((xhr) => {
