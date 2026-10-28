@@ -21,6 +21,10 @@
         {!! setting('head_code') !!}
     @endPushOnce
 
+    @if (setting('page_loader_enabled'))
+        <x-page-loader variant="coin" />
+    @endif
+
     <main class="page">
         @if (! $inline)
             @include('layouts.website.partials.navbar')

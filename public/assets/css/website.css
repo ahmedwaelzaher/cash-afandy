@@ -123,6 +123,75 @@ Form Check (Radio)
     background: var(--site-background);
 }
 
+/* Website page loader; the dashboard keeps its existing loader. */
+.site-page-loader {
+    background: var(--site-background);
+    perspective: 36rem;
+    transition: opacity 180ms ease;
+}
+
+.site-page-loader.is-loaded {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.site-loader-coin {
+    --site-loader-size: 7rem;
+    position: relative;
+    inline-size: var(--site-loader-size);
+    block-size: var(--site-loader-size);
+    transform-style: preserve-3d;
+    animation: site-coin-spin 3s linear infinite;
+}
+
+.site-loader-coin-edge,
+.site-page-loader .site-loader-coin-face {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: 50%;
+}
+
+.site-loader-coin-edge {
+    background: repeating-conic-gradient(#bd812c 0deg 3deg, #e7bc59 3deg 6deg);
+    transform: translateZ(var(--coin-depth));
+}
+
+.site-loader-coin-face {
+    backface-visibility: hidden;
+}
+
+.site-loader-coin-front {
+    transform: translateZ(4.5px);
+}
+
+.site-loader-coin-back {
+    transform: rotateY(180deg) translateZ(4.5px);
+}
+
+@keyframes site-coin-spin {
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .site-loader-coin {
+        --site-loader-size: 5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-loader-coin {
+        animation: none;
+    }
+
+    .site-page-loader {
+        transition: none;
+    }
+}
+
 /* Illustrated 404 and 500 pages. */
 .site-error-content {
     max-inline-size: 64rem;
