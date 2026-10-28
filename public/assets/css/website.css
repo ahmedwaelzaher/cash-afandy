@@ -418,6 +418,10 @@ Form Check (Radio)
     min-inline-size: 8.5rem;
 }
 
+.site-account-name {
+    max-inline-size: 10rem;
+}
+
 .site-search,
 .site-store-search .input-icon {
     border: 1px solid #cfd9c1;
