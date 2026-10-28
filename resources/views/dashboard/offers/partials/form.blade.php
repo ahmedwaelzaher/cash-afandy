@@ -8,7 +8,7 @@
     </div>
 
     <div class="col-12 col-md-3 mb-3">
-        <x-select-remote name="client_id" :title="__('Client')" :query="$clients" text="title" :value="old('client_id', $entry?->client_id)" validation="required" />
+        <x-select-remote name="store_id" :title="__('Store')" :query="$stores" text="title" :value="old('store_id', $entry?->store_id)" validation="required" />
     </div>
 
     <div class="col-12 col-md-3 mb-3">

@@ -19,11 +19,11 @@
 </div>
 
 <div class="mb-3">
-    <x-repeater name="clients" :title="__('Client Assignments')" :value="old('clients', $entry?->clients ?? [])">
+    <x-repeater name="stores" :title="__('Store Assignments')" :value="old('stores', $entry?->stores ?? [])">
         <x-repeater-card>
             <div class="row">
                 <div class="col-12 col-md-6 mb-3">
-                    <x-select-remote name="client_id" :title="__('Client')" :query="$clients" text="title" validation="required" />
+                    <x-select-remote name="store_id" :title="__('Store')" :query="$stores" text="title" validation="required" />
                 </div>
 
                 <div class="col-12 col-md-6 mb-3">

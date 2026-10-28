@@ -25,7 +25,7 @@ class Offer extends Model
     protected $fillable = [
         'title',
         'code',
-        'client_id',
+        'store_id',
         'representative_id',
         'description',
         'tips',
@@ -116,16 +116,16 @@ class Offer extends Model
         $query->where('active', true)
             ->where('launch_date', '<=', now())
             ->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()))
-            ->whereHas('client', fn (Builder $query) => $query->where('active', true))
+            ->whereHas('store', fn (Builder $query) => $query->where('active', true))
             ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)));
     }
 
     /**
-     * Get the client that owns the offer.
+     * Get the store that owns the offer.
      */
-    public function client(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**

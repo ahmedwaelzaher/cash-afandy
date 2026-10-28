@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Database\Factories\ClientFactory;
+use Database\Factories\StoreFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Redot\Traits\UserAuditable;
 use Spatie\Translatable\HasTranslations;
 
-class Client extends Model
+class Store extends Model
 {
-    /** @use HasFactory<ClientFactory> */
+    /** @use HasFactory<StoreFactory> */
     use HasFactory;
 
     use HasTranslations, UserAuditable;
@@ -98,7 +98,7 @@ class Client extends Model
     }
 
     /**
-     * Get the categories that belong to the client.
+     * Get the categories that belong to the store.
      */
     public function categories(): BelongsToMany
     {
@@ -106,7 +106,7 @@ class Client extends Model
     }
 
     /**
-     * Get the offers belonging to the client.
+     * Get the offers belonging to the store.
      */
     public function offers(): HasMany
     {
@@ -114,7 +114,7 @@ class Client extends Model
     }
 
     /**
-     * Get the countries that belong to the client.
+     * Get the countries that belong to the store.
      */
     public function countries(): BelongsToMany
     {

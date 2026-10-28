@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Website;
 
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Offer;
+use App\Models\Store;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -39,16 +39,16 @@ class SearchController extends Controller
         $pattern = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term);
 
         // Match active stores in the current market and order them by title relevance.
-        $storeQuery = $this->availableStores(Client::query(), $country);
+        $storeQuery = $this->availableStores(Store::query(), $country);
         $this->whereTitleMatches($storeQuery, $pattern);
         $this->orderByTitleRelevance($storeQuery, $term, $pattern);
 
         // Match available offers by their title or store name, keeping market restrictions grouped.
-        $offerQuery = Offer::available()->with('client')
-            ->whereHas('client', fn (Builder $query) => $this->availableStores($query, $country))
+        $offerQuery = Offer::available()->with('store')
+            ->whereHas('store', fn (Builder $query) => $this->availableStores($query, $country))
             ->where(fn (Builder $query) => $query
                 ->where(fn (Builder $query) => $this->whereTitleMatches($query, $pattern))
-                ->orWhereHas('client', fn (Builder $query) => $this->whereTitleMatches($query, $pattern)));
+                ->orWhereHas('store', fn (Builder $query) => $this->whereTitleMatches($query, $pattern)));
         $this->orderByTitleRelevance($offerQuery, $term, $pattern);
 
         // Count all matching types for the sidebar independently of the selected type and page.
@@ -70,7 +70,7 @@ class SearchController extends Controller
             $stores = $isSuggestions ? $storeQuery->limit(self::SUGGESTION_LIMIT)->get() : $storeQuery->paginate(12, ['*'], 'stores_page', total: $counts['stores'])->withQueryString();
         }
         if ($category !== 'stores') {
-            if (! $isSuggestions) $offerQuery->with('client.categories');
+            if (! $isSuggestions) $offerQuery->with('store.categories');
             $offers = $isSuggestions ? $offerQuery->limit(self::SUGGESTION_LIMIT - $stores->count())->get() : $offerQuery->paginate(12, ['*'], 'offers_page', total: $counts['offers'])->withQueryString();
         }
 
@@ -98,6 +98,7 @@ class SearchController extends Controller
                 'pageTitle' => __('Search results for: :search', ['search' => $search]),
             ]);
         }
+
         return view('website.search.index', $data);
     }
 
@@ -113,6 +114,7 @@ class SearchController extends Controller
         // Build identifiers only from model metadata and fixed supported translation keys.
         $grammar = $query->getQuery()->getGrammar();
         $column = $query->getModel()->qualifyColumn('title');
+
         return array_map(fn (string $locale) => 'LOWER(' . $grammar->wrap("{$column}->{$locale}") . ')', ['ar', 'en']);
     }
 

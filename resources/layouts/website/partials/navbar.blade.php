@@ -48,9 +48,9 @@
                         <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />
                     </a>
 
-                    <a href="{{ route('website.clients.index') }}"
-                        @class(['nav-link', 'active' => request()->routeIs('website.clients.*')])
-                        @if (request()->routeIs('website.clients.*')) aria-current="page" @endif>
+                    <a href="{{ route('website.stores.index') }}"
+                        @class(['nav-link', 'active' => request()->routeIs('website.stores.*')])
+                        @if (request()->routeIs('website.stores.*')) aria-current="page" @endif>
                         <x-icon icon="ti ti-building-store" />
                         {{ __('Stores') }}
                         <x-icon icon="ti ti-chevron-left" class="site-menu-arrow d-xl-none" />

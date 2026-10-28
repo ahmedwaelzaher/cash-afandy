@@ -23,7 +23,7 @@ class RepresentativeFactory extends Factory
             'email' => $this->faker->optional()->safeEmail(),
             'phone' => $this->faker->optional()->phoneNumber(),
             'broker_id' => null,
-            'clients' => [],
+            'stores' => [],
         ];
     }
 }

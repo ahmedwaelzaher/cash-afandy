@@ -66,11 +66,11 @@ class Category extends Model
     }
 
     /**
-     * Get the clients that belong to the category.
+     * Get the stores that belong to the category.
      */
-    public function clients(): BelongsToMany
+    public function stores(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class);
+        return $this->belongsToMany(Store::class);
     }
 
     /**

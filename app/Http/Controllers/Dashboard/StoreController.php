@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Category;
-use App\Models\Client;
 use App\Models\Country;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 use Redot\Traits\CanUploadFile;
 
-class ClientController extends Controller
+class StoreController extends Controller
 {
     use CanUploadFile;
 
@@ -18,7 +18,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return view('dashboard.clients.index');
+        return view('dashboard.stores.index');
     }
 
     /**
@@ -26,7 +26,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        return view('dashboard.clients.create', [
+        return view('dashboard.stores.create', [
             'categories' => Category::query(),
             'countries' => Country::query(),
         ]);
@@ -40,7 +40,7 @@ class ClientController extends Controller
         $validated = $request->validate([
             'title' => 'required|array',
             'title.*' => 'required|string|max:255',
-            'slug' => 'required|string|alpha_dash|unique:clients,slug',
+            'slug' => 'required|string|alpha_dash|unique:stores,slug',
             'description' => 'nullable|array',
             'description.*' => 'nullable|string',
             'url' => 'required|url',
@@ -55,23 +55,23 @@ class ClientController extends Controller
         $validated['active'] = $request->boolean('active');
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $this->uploadFile($request->file('logo'), 'clients');
+            $validated['logo'] = $this->uploadFile($request->file('logo'), 'stores');
         }
 
-        $client = Client::create($validated);
-        $client->categories()->attach($validated['categories']);
-        $client->countries()->attach($validated['countries']);
+        $store = Store::create($validated);
+        $store->categories()->attach($validated['categories']);
+        $store->countries()->attach($validated['countries']);
 
-        return $this->created(__('Client'), 'dashboard.clients.index');
+        return $this->created(__('Store'), 'dashboard.stores.index');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Client $client)
+    public function edit(Store $store)
     {
-        return view('dashboard.clients.edit', [
-            'client' => $client,
+        return view('dashboard.stores.edit', [
+            'store' => $store,
             'categories' => Category::query(),
             'countries' => Country::query(),
         ]);
@@ -80,12 +80,12 @@ class ClientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Client $client)
+    public function update(Request $request, Store $store)
     {
         $validated = $request->validate([
             'title' => 'required|array',
             'title.*' => 'required|string|max:255',
-            'slug' => 'required|string|alpha_dash|unique:clients,slug,' . $client->id,
+            'slug' => 'required|string|alpha_dash|unique:stores,slug,' . $store->id,
             'description' => 'nullable|array',
             'description.*' => 'nullable|string',
             'url' => 'required|url',
@@ -100,23 +100,23 @@ class ClientController extends Controller
         $validated['active'] = $request->boolean('active');
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $this->uploadFile($request->file('logo'), 'clients');
+            $validated['logo'] = $this->uploadFile($request->file('logo'), 'stores');
         }
 
-        $client->update($validated);
-        $client->categories()->sync($validated['categories']);
-        $client->countries()->sync($validated['countries']);
+        $store->update($validated);
+        $store->categories()->sync($validated['categories']);
+        $store->countries()->sync($validated['countries']);
 
-        return $this->updated(__('Client'));
+        return $this->updated(__('Store'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Client $client)
+    public function destroy(Store $store)
     {
-        $client->delete();
+        $store->delete();
 
-        return $this->deleted(__('Client'));
+        return $this->deleted(__('Store'));
     }
 }

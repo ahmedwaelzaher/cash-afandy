@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Offer;
 use App\Models\Representative;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 
@@ -25,7 +25,7 @@ class OfferController extends Controller
     public function create()
     {
         return view('dashboard.offers.create', [
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
         ]);
@@ -51,7 +51,7 @@ class OfferController extends Controller
     {
         return view('dashboard.offers.edit', [
             'offer' => $offer,
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
         ]);
@@ -89,7 +89,7 @@ class OfferController extends Controller
             'title' => 'required|array',
             'title.*' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:offers,code,' . $offer?->id,
-            'client_id' => 'required|exists:clients,id',
+            'store_id' => 'required|exists:stores,id',
             'representative_id' => 'required|exists:representatives,id',
             'countries' => 'required|array',
             'countries.*' => 'exists:countries,id',

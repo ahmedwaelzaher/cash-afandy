@@ -17,7 +17,7 @@
 </div>
 
 <div class="mb-3">
-    <x-uploader name="logo" :title="__('Logo')" :value="old('logo', $entry?->logo)" directory="clients" />
+    <x-uploader name="logo" :title="__('Logo')" :value="old('logo', $entry?->logo)" directory="stores" />
 </div>
 
 <div class="row">

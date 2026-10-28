@@ -21,8 +21,8 @@
 
             <div class="site-offers-grid">
                 @foreach ($offers as $offer)
-                    @php($category = $offer->client->categories->first())
-                    <div data-offer-category="{{ $offer->client->categories->pluck('slug')->join(' ') }}">
+                    @php($category = $offer->store->categories->first())
+                    <div data-offer-category="{{ $offer->store->categories->pluck('slug')->join(' ') }}">
                         @include('website.partials.offer-card', ['categoryLabel' => $category?->title, 'categorySlug' => $category?->slug])
                     </div>
                 @endforeach

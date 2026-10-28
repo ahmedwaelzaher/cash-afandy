@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('url');
             $table->float('percentage');
             $table->json('details');
-            $table->foreignId('client_id')->constrained();
+            $table->foreignId('store_id')->constrained();
             $table->foreignId('representative_id')->constrained();
             $table->foreignId('country_id')->constrained();
             $table->json('terms')->nullable();

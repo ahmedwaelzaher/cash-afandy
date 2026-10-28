@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->json('title');
             $table->string('code')->unique();
-            $table->foreignId('client_id')->constrained();
+            $table->foreignId('store_id')->constrained();
             $table->foreignId('representative_id')->constrained();
             $table->json('description')->nullable();
             $table->json('tips')->nullable();

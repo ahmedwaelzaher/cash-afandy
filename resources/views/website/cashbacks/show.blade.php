@@ -1,4 +1,4 @@
-<x-layouts::website :title="$cashback->client->title">
+<x-layouts::website :title="$cashback->store->title">
     <section class="py-5">
         <div class="container">
             <div class="row g-4">
@@ -7,12 +7,12 @@
                         <div class="card-body">
                             <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
                                 <span class="site-partners-logo flex-shrink-0">
-                                    <img src="{{ $cashback->client->logo }}" alt="{{ $cashback->client->title }}">
+                                    <img src="{{ $cashback->store->logo }}" alt="{{ $cashback->store->title }}">
                                 </span>
 
                                 <div class="flex-fill">
                                     <div class="text-body-secondary">{{ __('Cashback') }}</div>
-                                    <h1 class="h2 mb-0">{{ $cashback->client->title }}</h1>
+                                    <h1 class="h2 mb-0">{{ $cashback->store->title }}</h1>
                                 </div>
 
                                 <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2">

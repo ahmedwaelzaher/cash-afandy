@@ -18,7 +18,7 @@ class CategoryController extends Controller
         $country = website_country();
         $inCategory = fn (Builder $query) => $query->whereKey($category->id);
 
-        $stores = $category->clients()
+        $stores = $category->stores()
             ->where('active', true)
             ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)))
             ->latest('id')
@@ -27,8 +27,8 @@ class CategoryController extends Controller
         return view('website.categories.show', [
             'category' => $category,
             'stores' => $stores,
-            'offers' => Offer::available()->with('client')->whereHas('client.categories', $inCategory)->latest('id')->take(8)->get(),
-            'cashbacks' => Cashback::available()->with('client')->whereHas('client.categories', $inCategory)->latest('id')->take(8)->get(),
+            'offers' => Offer::available()->with('store')->whereHas('store.categories', $inCategory)->latest('id')->take(8)->get(),
+            'cashbacks' => Cashback::available()->with('store')->whereHas('store.categories', $inCategory)->latest('id')->take(8)->get(),
         ]);
     }
 }

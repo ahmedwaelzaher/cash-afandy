@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->foreignId('broker_id')->nullable()->constrained()->nullOnDelete();
-            $table->json('clients')->nullable();
+            $table->json('stores')->nullable();
             $table->timestamps();
         });
     }

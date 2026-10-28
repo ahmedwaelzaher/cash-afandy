@@ -21,7 +21,7 @@ class Offers extends Datatable
      */
     public function query(): Builder
     {
-        return Offer::query()->with(['client', 'representative']);
+        return Offer::query()->with(['store', 'representative']);
     }
 
     /**
@@ -36,7 +36,7 @@ class Offers extends Datatable
             TextColumn::make('code', __('Code'))
                 ->searchable()
                 ->sortable(),
-            TextColumn::make('client.title', __('Client'))
+            TextColumn::make('store.title', __('Store'))
                 ->sortable(),
             TextColumn::make('representative.full_name', __('Representative'))
                 ->sortable(),

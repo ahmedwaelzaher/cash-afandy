@@ -29,7 +29,7 @@
 
                     <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
                         @foreach ($stores as $store)
-                            <a class="site-partners-logo" href="{{ route('website.clients.show', $store) }}"
+                            <a class="site-partners-logo" href="{{ route('website.stores.show', $store) }}"
                                 title="{{ $store->title }}">
                                 <img src="{{ $store->logo }}" alt="{{ $store->title }}" loading="lazy">
                             </a>

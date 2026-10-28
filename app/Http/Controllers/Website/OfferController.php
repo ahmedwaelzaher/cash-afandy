@@ -31,13 +31,13 @@ class OfferController extends Controller
         };
 
         $offers = Offer::available()
-            ->with('client.categories')
+            ->with('store.categories')
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                ->where($matchTitle)->orWhereHas('client', $matchTitle)))
+                ->where($matchTitle)->orWhereHas('store', $matchTitle)))
             ->when($categorySlug !== '', fn (Builder $query) => $query
-                ->whereHas('client.categories', fn (Builder $query) => $query->where('slug', $categorySlug)))
+                ->whereHas('store.categories', fn (Builder $query) => $query->where('slug', $categorySlug)))
             ->when($filters['store'] ?? '', fn (Builder $query, string $slug) => $query
-                ->whereHas('client', fn (Builder $query) => $query->where('slug', $slug)));
+                ->whereHas('store', fn (Builder $query) => $query->where('slug', $slug)));
 
         match ($filters['sort'] ?? null) {
             'highest' => $offers->orderByDesc('discount'),
@@ -63,9 +63,9 @@ class OfferController extends Controller
 
         $categories = Category::orderBy("title->{$locale}")->orderBy('id')->get();
         $categoryCounts = Offer::available()
-            ->join('category_client', 'offers.client_id', '=', 'category_client.client_id')
-            ->selectRaw('category_client.category_id, COUNT(DISTINCT offers.id) as total')
-            ->groupBy('category_client.category_id')->pluck('total', 'category_client.category_id');
+            ->join('category_store', 'offers.store_id', '=', 'category_store.store_id')
+            ->selectRaw('category_store.category_id, COUNT(DISTINCT offers.id) as total')
+            ->groupBy('category_store.category_id')->pluck('total', 'category_store.category_id');
 
         return view('website.offers.index', array_merge($data, [
             'categories' => $categories,
@@ -82,11 +82,11 @@ class OfferController extends Controller
     {
         abort_unless(Offer::available()->whereKey($offer->id)->exists(), 404);
 
-        $offer->load(['client', 'countries']);
+        $offer->load(['store', 'countries']);
 
         $relatedOffers = Offer::available()
-            ->with('client')
-            ->where('client_id', $offer->client_id)
+            ->with('store')
+            ->where('store_id', $offer->store_id)
             ->whereKeyNot($offer->id)
             ->latest('id')
             ->take(4)

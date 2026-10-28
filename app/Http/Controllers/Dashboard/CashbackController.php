@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Cashback;
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Representative;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 
@@ -25,7 +25,7 @@ class CashbackController extends Controller
     public function create()
     {
         return view('dashboard.cashbacks.create', [
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
         ]);
@@ -50,7 +50,7 @@ class CashbackController extends Controller
     {
         return view('dashboard.cashbacks.edit', [
             'cashback' => $cashback,
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
             'representatives' => Representative::query(),
         ]);
@@ -89,7 +89,7 @@ class CashbackController extends Controller
             'details' => 'required|array',
             'details.*.category' => 'required|string',
             'details.*.value' => 'required|numeric|min:0|max:100',
-            'client_id' => 'required|exists:clients,id',
+            'store_id' => 'required|exists:stores,id',
             'representative_id' => 'required|exists:representatives,id',
             'country_id' => 'required|exists:countries,id',
             'terms' => 'nullable|array',

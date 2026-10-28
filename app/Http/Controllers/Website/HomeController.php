@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Website;
 
 use App\Models\Category;
-use App\Models\Client;
 use App\Models\Offer;
+use App\Models\Store;
 use Illuminate\Contracts\View\View;
 use Redot\Http\Controllers\Controller;
 
@@ -22,7 +22,7 @@ class HomeController extends Controller
         }
 
         $country = website_country();
-        $stores = Client::where('active', true)
+        $stores = Store::where('active', true)
             ->with('categories')
             ->when($country, fn ($query) => $query->whereHas('countries', fn ($query) => $query->whereKey($country->id)))
             ->orderBy('id')
@@ -31,7 +31,7 @@ class HomeController extends Controller
         return view('website.index', [
             'stores' => $stores,
             'heroStores' => $stores->take(3),
-            'offers' => Offer::available()->with('client.categories')->latest('id')->take(20)->get(),
+            'offers' => Offer::available()->with('store.categories')->latest('id')->take(20)->get(),
             'categoryStoreCounts' => $stores->flatMap->categories->countBy('slug'),
             'offerCategories' => Category::orderBy('id')->get(),
         ]);

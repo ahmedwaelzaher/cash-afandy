@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Category;
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Offer;
+use App\Models\Store;
 use Redot\Http\Middleware\EnsureDependenciesBuilt;
 
 beforeEach(function () {
@@ -23,11 +23,11 @@ test('the offers page shares the directory layout and includes the reveal modal 
 
 test('ajax offer search matches store names without case sensitivity and respects category and availability', function () {
     $category = Category::factory()->create();
-    $store = Client::factory()->create(['title' => ['en' => 'Example Brand'], 'active' => true]);
+    $store = Store::factory()->create(['title' => ['en' => 'Example Brand'], 'active' => true]);
     $store->categories()->attach($category);
     $country = Country::where('code', 'eg')->firstOrFail();
     $offer = Offer::factory()->create([
-        'client_id' => $store->id,
+        'store_id' => $store->id,
         'title' => ['en' => 'Eligible directory offer'],
         'launch_date' => now()->subDay(),
         'expiration_date' => null,
@@ -35,7 +35,7 @@ test('ajax offer search matches store names without case sensitivity and respect
     ]);
     $offer->countries()->attach($country);
     $expired = Offer::factory()->create([
-        'client_id' => $store->id,
+        'store_id' => $store->id,
         'title' => ['en' => 'Expired directory offer'],
         'launch_date' => now()->subDays(2),
         'expiration_date' => now()->subDay(),
@@ -59,10 +59,10 @@ test('ajax offer search validates the search length', function () {
 });
 
 test('an available offer resolves through its renamed detail route and country relation', function () {
-    $store = Client::factory()->create(['active' => true]);
+    $store = Store::factory()->create(['active' => true]);
     $country = Country::where('code', 'eg')->firstOrFail();
     $offer = Offer::factory()->create([
-        'client_id' => $store->id,
+        'store_id' => $store->id,
         'title' => ['en' => 'Renamed offer detail'],
         'launch_date' => now()->subDay(),
         'expiration_date' => null,
@@ -79,11 +79,11 @@ test('an available offer resolves through its renamed detail route and country r
 });
 
 test('the homepage shows available database offers instead of preview offers', function () {
-    $store = Client::factory()->create(['active' => true]);
+    $store = Store::factory()->create(['active' => true]);
     $country = Country::where('code', 'eg')->firstOrFail();
     $store->countries()->attach($country);
     $offer = Offer::factory()->create([
-        'client_id' => $store->id,
+        'store_id' => $store->id,
         'title' => ['en' => 'Live homepage offer'],
         'launch_date' => now()->subDay(),
         'expiration_date' => null,
@@ -105,7 +105,7 @@ test('a direct offer card uses its own url when there is no code', function () {
         'discount' => 20,
     ]);
     $offer->url = 'https://example.test/deal?affiliate=partner';
-    $offer->setRelation('client', Client::factory()->create());
+    $offer->setRelation('store', Store::factory()->create());
 
     $html = view('website.partials.offer-card', ['offer' => $offer])->render();
 
@@ -132,7 +132,7 @@ test('directories share inline scrollable categories and preserve their selected
         expect($query['search'])->toBe('sample');
         if ($link->hasAttribute('aria-current')) expect($query['category'])->toBe($category->slug);
     }
-})->with(['website.clients.index', 'website.offers.index'])->with(['ar', 'en']);
+})->with(['website.stores.index', 'website.offers.index'])->with(['ar', 'en']);
 
 test('ajax category navigation supplies the translated heading and selected category', function (string $route, string $locale) {
     $category = Category::factory()->create(['title' => ['en' => 'Navigation category', 'ar' => 'تصنيف التنقل']]);
@@ -141,4 +141,4 @@ test('ajax category navigation supplies the translated heading and selected cate
         ->assertOk()->assertJsonStructure(['html', 'countLabel', 'category', 'categoryLabel'])
         ->assertJsonPath('category', $category->slug)
         ->assertJsonPath('categoryLabel', $category->getTranslation('title', $locale));
-})->with(['website.clients.index', 'website.offers.index'])->with(['ar', 'en']);
+})->with(['website.stores.index', 'website.offers.index'])->with(['ar', 'en']);

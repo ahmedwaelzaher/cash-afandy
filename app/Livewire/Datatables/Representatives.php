@@ -6,6 +6,7 @@ use App\Models\Broker;
 use App\Models\Representative;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
 use Redot\Datatables\Filters\StringFilter;
@@ -48,7 +49,7 @@ class Representatives extends Datatable
             TextColumn::make('phone', __('Phone'))
                 ->searchable()
                 ->sortable(),
-            TextColumn::make('clients', __('No. Clients'))
+            TextColumn::make('stores', __('No. Stores'))
                 ->getter(fn ($value) => count($value ?? [])),
         ];
     }
@@ -58,7 +59,7 @@ class Representatives extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
             Action::edit('dashboard.brokers.representatives.edit')
                 ->parameters(['broker' => $this->broker])
                 ->visible(route_allowed('dashboard.brokers.representatives.edit')),

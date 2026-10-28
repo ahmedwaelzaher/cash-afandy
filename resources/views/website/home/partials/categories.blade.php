@@ -6,7 +6,7 @@
                 <h2 class="site-heading mb-2" id="categories-title">{{ __('Every day, a new chance to save') }}</h2>
                 <p class="text-secondary mb-0">{{ __('Choose what suits you and start saving.') }}</p>
             </div>
-            <a href="{{ route('website.clients.index') }}" class="d-inline-flex align-items-center gap-2">
+            <a href="{{ route('website.stores.index') }}" class="d-inline-flex align-items-center gap-2">
                 {{ __('All categories') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
             </a>
         </div>
@@ -15,7 +15,7 @@
             @foreach ($offerCategories as $category)
                 @php($storeCount = $categoryStoreCounts->get($category->slug, 0))
                 <div class="col-12 col-sm-6 col-lg-4">
-                    <a href="{{ route('website.clients.index', ['category' => $category->slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
+                    <a href="{{ route('website.stores.index', ['category' => $category->slug]) }}" class="site-category-card card card-link h-100 text-decoration-none">
                         <div class="card-body d-flex align-items-center gap-3 p-3">
                             <span class="site-category-icon flex-center flex-shrink-0 rounded-4" aria-hidden="true">
                                 <x-icon :icon="$category->icon" />

@@ -1,4 +1,4 @@
-<a href="{{ route('website.clients.show', $store) }}" class="site-store-card card card-link rounded-4 h-100 m-0 text-reset text-decoration-none">
+<a href="{{ route('website.stores.show', $store) }}" class="site-store-card card card-link rounded-4 h-100 m-0 text-reset text-decoration-none">
     <div class="card-body d-flex align-items-center gap-3 p-3">
         <span class="site-directory-logo d-flex align-items-center justify-content-center flex-shrink-0 rounded-4 p-2 fs-1">
             @if ($store->logo)

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Website;
 
 use App\Models\Cashback;
 use App\Models\Category;
-use App\Models\Client;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
@@ -20,13 +20,13 @@ class CashbackController extends Controller
         $search = $request->string('search')->trim()->toString();
 
         $cashbacks = Cashback::available()
-            ->with('client')
+            ->with('store')
             ->when($search, fn (Builder $query) => $query
-                ->whereHas('client', fn (Builder $query) => $query->where("title->{$locale}", 'like', "%{$search}%")))
+                ->whereHas('store', fn (Builder $query) => $query->where("title->{$locale}", 'like', "%{$search}%")))
             ->when($request->string('category')->toString(), fn (Builder $query, string $slug) => $query
-                ->whereHas('client.categories', fn (Builder $query) => $query->where('slug', $slug)))
+                ->whereHas('store.categories', fn (Builder $query) => $query->where('slug', $slug)))
             ->when($request->string('store')->toString(), fn (Builder $query, string $slug) => $query
-                ->whereHas('client', fn (Builder $query) => $query->where('slug', $slug)));
+                ->whereHas('store', fn (Builder $query) => $query->where('slug', $slug)));
 
         match ($request->query('sort')) {
             'highest' => $cashbacks->orderByDesc('percentage'),
@@ -37,7 +37,7 @@ class CashbackController extends Controller
         return view('website.cashbacks.index', [
             'cashbacks' => $cashbacks->paginate(12)->withQueryString(),
             'categories' => Category::all(),
-            'stores' => Client::where('active', true)->get(),
+            'stores' => Store::where('active', true)->get(),
         ]);
     }
 
@@ -48,13 +48,13 @@ class CashbackController extends Controller
     {
         abort_unless(Cashback::available()->whereKey($cashback->id)->exists(), 404);
 
-        $cashback->load(['client.categories', 'country']);
+        $cashback->load(['store.categories', 'country']);
 
         $relatedCashbacks = Cashback::available()
-            ->with('client')
+            ->with('store')
             ->whereKeyNot($cashback->id)
-            ->whereHas('client.categories', fn (Builder $query) => $query
-                ->whereIn('categories.id', $cashback->client->categories->modelKeys()))
+            ->whereHas('store.categories', fn (Builder $query) => $query
+                ->whereIn('categories.id', $cashback->store->categories->modelKeys()))
             ->latest('id')
             ->take(4)
             ->get();

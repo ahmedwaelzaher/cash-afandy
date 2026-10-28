@@ -9,15 +9,15 @@
     </div>
     <div class="card-body d-flex flex-column p-3">
         <div class="d-flex align-items-center justify-content-between gap-2">
-            <a href="{{ route('website.clients.show', $offer->client) }}" class="site-offer-store d-flex align-items-center gap-2 fw-semibold text-reset text-decoration-none">
+            <a href="{{ route('website.stores.show', $offer->store) }}" class="site-offer-store d-flex align-items-center gap-2 fw-semibold text-reset text-decoration-none">
                 <span class="site-offer-icon flex-center flex-shrink-0">
-                    @if ($offer->client->logo)
-                        <img class="object-fit-contain" src="{{ $offer->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                    @if ($offer->store->logo)
+                        <img class="object-fit-contain" src="{{ $offer->store->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
                     @else
                         <x-icon :icon="$icon ?? 'ti ti-shopping-bag'" />
                     @endif
                 </span>
-                {{ $offer->client->title }}
+                {{ $offer->store->title }}
             </a>
             <div class="d-flex align-items-center flex-shrink-0">
                 <button type="button" class="btn btn-icon btn-link text-secondary text-decoration-none" data-share-url="{{ route('website.index') }}"
@@ -37,7 +37,7 @@
 
         <div class="site-offer-actions d-flex flex-wrap flex-sm-column align-items-center align-items-sm-stretch justify-content-between gap-2">
             @isset($categoryLabel)
-                <a href="{{ route('website.clients.index', ['category' => $categorySlug ?? null]) }}" class="site-offer-label align-self-sm-start text-decoration-none">{{ $categoryLabel }}</a>
+                <a href="{{ route('website.stores.index', ['category' => $categorySlug ?? null]) }}" class="site-offer-label align-self-sm-start text-decoration-none">{{ $categoryLabel }}</a>
             @endisset
 
             <div class="site-offer-footer d-sm-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -59,12 +59,12 @@
         <div class="modal-content rounded-4">
             <div class="modal-header border-0 p-4 pb-3">
                 <div class="d-flex align-items-center gap-2 text-secondary fw-semibold">
-                    @if ($offer->client->logo)
+                    @if ($offer->store->logo)
                         <span class="site-offer-icon flex-center flex-shrink-0">
-                            <img class="object-fit-contain" src="{{ $offer->client->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
+                            <img class="object-fit-contain" src="{{ $offer->store->logo }}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">
                         </span>
                     @endif
-                    {{ $offer->client->title }}
+                    {{ $offer->store->title }}
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
             </div>

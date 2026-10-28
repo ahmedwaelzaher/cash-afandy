@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Offer;
+use App\Models\Store;
 use Redot\Http\Middleware\EnsureDependenciesBuilt;
 
 beforeEach(function () {
@@ -13,10 +13,10 @@ beforeEach(function () {
 });
 
 test('header search uses its own key and renders localized escaped grouped suggestions', function (string $locale) {
-    $store = Client::factory()->create(['title' => ['en' => 'Afandy Brand', 'ar' => 'متجر أفندي'], 'logo' => '']);
+    $store = Store::factory()->create(['title' => ['en' => 'Afandy Brand', 'ar' => 'متجر أفندي'], 'logo' => '']);
     $store->countries()->attach($this->country);
     $offer = Offer::factory()->create([
-        'client_id' => $store->id,
+        'store_id' => $store->id,
         'title' => ['en' => 'Afandy <script>alert(1)</script>', 'ar' => 'عرض أفندي'],
         'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
     ]);
@@ -28,21 +28,21 @@ test('header search uses its own key and renders localized escaped grouped sugge
     $html = $response->json('html');
 
     expect($html)->toContain('afandy-search-stores', 'afandy-search-offers', 'ti-arrow-left',
-        route('website.clients.show', $store), route('website.offers.show', $offer),
+        route('website.stores.show', $store), route('website.offers.show', $offer),
         e($offer->getTranslation('title', $locale)), 'afandy_search=AFANDY')
         ->not->toContain('<script>', 'site-navbar', 'Cashback');
 })->with(['ar', 'en']);
 
 test('search ranks exact store names first', function () {
-    $exact = Client::factory()->create(['title' => ['en' => 'Needle']]);
+    $exact = Store::factory()->create(['title' => ['en' => 'Needle']]);
     $exact->countries()->attach($this->country);
     foreach (range(1, 3) as $number) {
-        $store = Client::factory()->create(['title' => ['en' => "Needle Store {$number}"]]);
+        $store = Store::factory()->create(['title' => ['en' => "Needle Store {$number}"]]);
         $store->countries()->attach($this->country);
     }
     foreach (range(1, 5) as $number) {
         $offer = Offer::factory()->create([
-            'client_id' => $exact->id, 'title' => ['en' => "Sale {$number}"],
+            'store_id' => $exact->id, 'title' => ['en' => "Sale {$number}"],
             'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
         ]);
         $offer->countries()->attach($this->country);
@@ -57,10 +57,10 @@ test('search ranks exact store names first', function () {
 });
 
 test('an exact offer title precedes stores that only contain the term', function () {
-    $store = Client::factory()->create(['title' => ['en' => 'My Laptop Store']]);
+    $store = Store::factory()->create(['title' => ['en' => 'My Laptop Store']]);
     $store->countries()->attach($this->country);
     $offer = Offer::factory()->create([
-        'client_id' => $store->id, 'title' => ['en' => 'Laptop'],
+        'store_id' => $store->id, 'title' => ['en' => 'Laptop'],
         'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
     ]);
     $offer->countries()->attach($this->country);
@@ -72,20 +72,20 @@ test('an exact offer title precedes stores that only contain the term', function
 });
 
 test('header search excludes unavailable stores and offers in the current market', function () {
-    $visible = Client::factory()->create(['title' => ['en' => 'Searchable Visible']]);
+    $visible = Store::factory()->create(['title' => ['en' => 'Searchable Visible']]);
     $visible->countries()->attach($this->country);
-    $inactive = Client::factory()->create(['title' => ['en' => 'Searchable Inactive'], 'active' => false]);
+    $inactive = Store::factory()->create(['title' => ['en' => 'Searchable Inactive'], 'active' => false]);
     $inactive->countries()->attach($this->country);
-    $foreign = Client::factory()->create(['title' => ['en' => 'Searchable Foreign']]);
+    $foreign = Store::factory()->create(['title' => ['en' => 'Searchable Foreign']]);
     $foreign->countries()->attach(Country::where('code', 'sa')->firstOrFail());
     foreach ([
-        ['label' => 'Expired', 'client_id' => $visible->id, 'expiration_date' => now()->subHour()],
-        ['label' => 'Future', 'client_id' => $visible->id, 'launch_date' => now()->addDay()],
-        ['label' => 'Inactive offer', 'client_id' => $visible->id, 'active' => false],
-        ['label' => 'Inactive owner', 'client_id' => $inactive->id],
-        ['label' => 'Foreign owner', 'client_id' => $foreign->id],
-        ['label' => 'Foreign offer', 'client_id' => $visible->id, 'foreign' => true],
-        ['label' => 'Visible offer', 'client_id' => $visible->id],
+        ['label' => 'Expired', 'store_id' => $visible->id, 'expiration_date' => now()->subHour()],
+        ['label' => 'Future', 'store_id' => $visible->id, 'launch_date' => now()->addDay()],
+        ['label' => 'Inactive offer', 'store_id' => $visible->id, 'active' => false],
+        ['label' => 'Inactive owner', 'store_id' => $inactive->id],
+        ['label' => 'Foreign owner', 'store_id' => $foreign->id],
+        ['label' => 'Foreign offer', 'store_id' => $visible->id, 'foreign' => true],
+        ['label' => 'Visible offer', 'store_id' => $visible->id],
     ] as $attributes) {
         $offer = Offer::factory()->create(array_merge([
             'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
@@ -113,7 +113,7 @@ test('header search validates length and scalar input', function (mixed $query) 
 })->with([str_repeat('a', 256), [['invalid']]]);
 
 test('search treats percent and underscore as literal characters', function () {
-    $store = Client::factory()->create(['title' => ['en' => 'Unique 20%_ savings']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Unique 20%_ savings']]);
     $store->countries()->attach($this->country);
     $this->withHeader('X-Requested-With', 'XMLHttpRequest')
         ->getJson(route('website.search', ['locale' => 'en', 'afandy_search' => '20%_']))
@@ -125,7 +125,7 @@ test('search treats percent and underscore as literal characters', function () {
 
 test('full results paginate beyond the dropdown and old links still work', function () {
     foreach (range(1, 13) as $number) {
-        $store = Client::factory()->create(['title' => ['en' => "Pagination Brand {$number}"]]);
+        $store = Store::factory()->create(['title' => ['en' => "Pagination Brand {$number}"]]);
         $store->countries()->attach($this->country);
     }
     $this->get(route('website.search', ['locale' => 'en', 'afandy_search' => 'Pagination Brand']))
@@ -136,10 +136,10 @@ test('full results paginate beyond the dropdown and old links still work', funct
 });
 
 test('search binds SQL syntax as literal text instead of widening the results', function () {
-    $store = Client::factory()->create(['title' => ['en' => 'Unrelated visible store']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Unrelated visible store']]);
     $store->countries()->attach($this->country);
     $offer = Offer::factory()->create([
-        'client_id' => $store->id, 'title' => ['en' => 'Unrelated visible offer'],
+        'store_id' => $store->id, 'title' => ['en' => 'Unrelated visible offer'],
         'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
     ]);
     $offer->countries()->attach($this->country);
@@ -149,7 +149,7 @@ test('search binds SQL syntax as literal text instead of widening the results', 
 });
 
 test('LIKE escape characters and quotes remain searchable literal text', function (string $search) {
-    $store = Client::factory()->create(['title' => ['en' => 'Literal ' . $search . ' store']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Literal ' . $search . ' store']]);
     $store->countries()->attach($this->country);
     $this->withHeader('X-Requested-With', 'XMLHttpRequest')
         ->getJson(route('website.search', ['locale' => 'en', 'afandy_search' => $search]))
@@ -158,10 +158,10 @@ test('LIKE escape characters and quotes remain searchable literal text', functio
 
 describe('search result types', function () {
     beforeEach(function () {
-        $this->store = Client::factory()->create(['title' => ['en' => 'Typed Brand', 'ar' => 'متجر الأنواع']]);
+        $this->store = Store::factory()->create(['title' => ['en' => 'Typed Brand', 'ar' => 'متجر الأنواع']]);
         $this->store->countries()->attach($this->country);
         $this->offer = Offer::factory()->create([
-            'client_id' => $this->store->id, 'title' => ['en' => 'Typed offer', 'ar' => 'عرض الأنواع'],
+            'store_id' => $this->store->id, 'title' => ['en' => 'Typed offer', 'ar' => 'عرض الأنواع'],
             'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
         ]);
         $this->offer->countries()->attach($this->country);
@@ -217,7 +217,7 @@ describe('search result types', function () {
 
     test('ajax full results retain pagination beyond the suggestion limit', function () {
         foreach (range(1, 12) as $number) {
-            $store = Client::factory()->create(['title' => ['en' => "Typed Brand {$number}"]]);
+            $store = Store::factory()->create(['title' => ['en' => "Typed Brand {$number}"]]);
             $store->countries()->attach($this->country);
         }
         $this->withHeaders(['X-Requested-With' => 'XMLHttpRequest', 'X-Search-Results' => '1'])
@@ -243,7 +243,7 @@ describe('search result types', function () {
 
     test('store pagination retains the selected type and type switching resets pagination', function () {
         foreach (range(1, 12) as $number) {
-            $store = Client::factory()->create(['title' => ['en' => "Typed Brand {$number}"]]);
+            $store = Store::factory()->create(['title' => ['en' => "Typed Brand {$number}"]]);
             $store->countries()->attach($this->country);
         }
         $response = $this->get(route('website.search', [
@@ -298,14 +298,14 @@ test('header and hero search default to offers when no type is selected', functi
 });
 
 test('ajax suggestions return at most ten results while full results retain all matches', function (string $type) {
-    $store = Client::factory()->create(['title' => ['en' => 'Limit Brand']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Limit Brand']]);
     $store->countries()->attach($this->country);
     foreach (range(1, 11) as $number) {
         if ($type === 'stores') {
-            $item = Client::factory()->create(['title' => ['en' => "Limited store {$number}"]]);
+            $item = Store::factory()->create(['title' => ['en' => "Limited store {$number}"]]);
         } else {
             $item = Offer::factory()->create([
-                'client_id' => $store->id, 'title' => ['en' => "Limited offer {$number}"],
+                'store_id' => $store->id, 'title' => ['en' => "Limited offer {$number}"],
                 'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
             ]);
         }
@@ -321,10 +321,10 @@ test('ajax suggestions return at most ten results while full results retain all 
 
 test('ajax suggestions without a type still respect the ten-result total limit', function () {
     foreach (range(1, 11) as $number) {
-        $store = Client::factory()->create(['title' => ['en' => "Combined store {$number}"]]);
+        $store = Store::factory()->create(['title' => ['en' => "Combined store {$number}"]]);
         $store->countries()->attach($this->country);
         $offer = Offer::factory()->create([
-            'client_id' => $store->id, 'title' => ['en' => "Combined offer {$number}"],
+            'store_id' => $store->id, 'title' => ['en' => "Combined offer {$number}"],
             'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
         ]);
         $offer->countries()->attach($this->country);
@@ -335,11 +335,11 @@ test('ajax suggestions without a type still respect the ten-result total limit',
 });
 
 test('store suggestions display localized available offer counts including empty stores', function (int $count, string $locale) {
-    $store = Client::factory()->create(['title' => ['en' => 'Count Brand', 'ar' => 'متجر العدد']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Count Brand', 'ar' => 'متجر العدد']]);
     $store->countries()->attach($this->country);
     for ($number = 1; $number <= $count; $number++) {
         $offer = Offer::factory()->create([
-            'client_id' => $store->id, 'title' => ['en' => "Unrelated offer {$number}"],
+            'store_id' => $store->id, 'title' => ['en' => "Unrelated offer {$number}"],
             'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
         ]);
         $offer->countries()->attach($this->country);
@@ -359,7 +359,7 @@ test('store suggestions display localized available offer counts including empty
 })->with([0, 1, 2, 5, 12])->with(['ar', 'en']);
 
 test('suggested store offer counts exclude unavailable and foreign-market offers', function () {
-    $store = Client::factory()->create(['title' => ['en' => 'Availability Counter']]);
+    $store = Store::factory()->create(['title' => ['en' => 'Availability Counter']]);
     $store->countries()->attach($this->country);
     foreach ([
         [],
@@ -372,7 +372,7 @@ test('suggested store offer counts exclude unavailable and foreign-market offers
         $foreign = $attributes['foreign'] ?? false;
         unset($attributes['foreign']);
         $offer = Offer::factory()->create(array_merge([
-            'client_id' => $store->id, 'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
+            'store_id' => $store->id, 'active' => true, 'launch_date' => now()->subDay(), 'expiration_date' => null,
         ], $attributes));
         $offer->countries()->attach($foreign ? Country::where('code', 'sa')->firstOrFail() : $this->country);
     }

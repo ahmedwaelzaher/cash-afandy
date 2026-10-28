@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Cashback;
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Representative;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
 
@@ -28,7 +28,7 @@ class CashbackFactory extends Factory
                 ['category' => $this->faker->word(), 'value' => $this->faker->randomFloat(2, 0, 100)],
                 ['category' => $this->faker->word(), 'value' => $this->faker->randomFloat(2, 0, 100)],
             ],
-            'client_id' => Client::factory(),
+            'store_id' => Store::factory(),
             'representative_id' => Representative::factory(),
             'country_id' => fn () => Arr::random(Country::pluck('id')->all()),
             'terms' => ['en' => $this->faker->sentence()],

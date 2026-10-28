@@ -1,13 +1,13 @@
 <x-layouts::website :title="__('All stores')">
     @include('website.partials.directory', [
-        'directoryRoute' => 'website.clients.index',
+        'directoryRoute' => 'website.stores.index',
         'directoryTitle' => __('All stores'),
         'directorySubtitle' => __('Your favorite stores.') . ' ' . __('Better savings.'),
         'directoryLabel' => __('Stores'),
         'allItemsLabel' => __('All stores'),
         'allItemsCount' => $allStoresCount,
-        'categoryCounts' => $categories->pluck('clients_count', 'id'),
+        'categoryCounts' => $categories->pluck('stores_count', 'id'),
         'searchPlaceholder' => __('Search'),
-        'resultsView' => 'website.clients.partials.results',
+        'resultsView' => 'website.stores.partials.results',
     ])
 </x-layouts::website>

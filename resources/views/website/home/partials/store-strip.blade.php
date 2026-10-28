@@ -8,7 +8,7 @@
 
         <x-marquee :duration="50" :reverse="true">
             @foreach ($stores as $store)
-                <a class="site-store-logo flex-center" href="{{ route('website.clients.show', $store) }}">
+                <a class="site-store-logo flex-center" href="{{ route('website.stores.show', $store) }}">
                     @if ($store->logo)
                         <img src="{{ $store->logo }}" alt="{{ $store->title }}" width="120" height="40" loading="lazy" referrerpolicy="no-referrer">
                     @else
@@ -18,7 +18,7 @@
             @endforeach
         </x-marquee>
 
-        <a href="{{ route('website.clients.index') }}" class="d-inline-flex align-items-center gap-2 text-nowrap">
+        <a href="{{ route('website.stores.index') }}" class="d-inline-flex align-items-center gap-2 text-nowrap">
             {{ __('All stores') }} <x-icon icon="ti ti-arrow-left" class="site-menu-arrow" />
         </a>
     </div>

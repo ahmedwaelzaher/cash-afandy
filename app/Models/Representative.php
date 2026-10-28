@@ -23,7 +23,7 @@ class Representative extends Model
         'email',
         'phone',
         'broker_id',
-        'clients',
+        'stores',
     ];
 
     /**
@@ -32,7 +32,7 @@ class Representative extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'clients' => 'array',
+        'stores' => 'array',
     ];
 
     /**

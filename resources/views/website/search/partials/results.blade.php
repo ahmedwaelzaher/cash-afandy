@@ -21,8 +21,8 @@
                 @foreach ($offers as $offer)
                     <div>
                         @include('website.partials.offer-card', [
-                            'categoryLabel' => $offer->client->categories->first()?->title,
-                            'categorySlug' => $offer->client->categories->first()?->slug,
+                            'categoryLabel' => $offer->store->categories->first()?->title,
+                            'categorySlug' => $offer->store->categories->first()?->slug,
                         ])
                     </div>
                 @endforeach

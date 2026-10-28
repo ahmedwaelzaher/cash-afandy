@@ -2,23 +2,24 @@
 
 namespace App\Livewire\Datatables;
 
-use App\Models\Client;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
 use Redot\Datatables\Datatable;
 use Redot\Datatables\Filters\StringFilter;
 use Redot\Datatables\Filters\TernaryFilter;
 
-class Clients extends Datatable
+class Stores extends Datatable
 {
     /**
      * Get the query source of the datatable.
      */
     public function query(): Builder
     {
-        return Client::query();
+        return Store::query();
     }
 
     /**
@@ -44,9 +45,9 @@ class Clients extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
-            Action::edit('dashboard.clients.edit'),
-            Action::delete('dashboard.clients.destroy'),
+        return ActionGroup::auto([
+            Action::edit('dashboard.stores.edit'),
+            Action::delete('dashboard.stores.destroy'),
         ]);
     }
 

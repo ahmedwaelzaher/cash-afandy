@@ -96,8 +96,8 @@ return Sidebar::make([
                 ->icon('ti ti-tags'),
 
             Item::make()
-                ->title(__('Clients'))
-                ->route('dashboard.clients.index')
+                ->title(__('Stores'))
+                ->route('dashboard.stores.index')
                 ->icon('ti ti-building-store'),
 
             Item::make()

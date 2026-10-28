@@ -5,6 +5,7 @@ namespace App\Livewire\Datatables;
 use App\Models\Cashback;
 use Illuminate\Database\Eloquent\Builder;
 use Redot\Datatables\Actions\Action;
+use Redot\Datatables\Actions\ActionGroup;
 use Redot\Datatables\Columns\NumericColumn;
 use Redot\Datatables\Columns\TernaryColumn;
 use Redot\Datatables\Columns\TextColumn;
@@ -19,7 +20,7 @@ class Cashbacks extends Datatable
      */
     public function query(): Builder
     {
-        return Cashback::query()->with(['client', 'representative', 'country']);
+        return Cashback::query()->with(['store', 'representative', 'country']);
     }
 
     /**
@@ -28,7 +29,7 @@ class Cashbacks extends Datatable
     public function columns(): array
     {
         return [
-            TextColumn::make('client.title', __('Client'))
+            TextColumn::make('store.title', __('Store'))
                 ->sortable(),
             TextColumn::make('country.name', __('Country'))
                 ->sortable(),
@@ -45,7 +46,7 @@ class Cashbacks extends Datatable
      */
     public function actions(): array
     {
-        return Datatable::defaultActionGroup([
+        return ActionGroup::auto([
             Action::edit('dashboard.cashbacks.edit'),
             Action::delete('dashboard.cashbacks.destroy'),
         ]);

@@ -11,7 +11,7 @@
             <section class="site-search-group" id="afandy-search-{{ $group }}" aria-label="{{ $group === 'stores' ? __('Stores') : __('Offers') }}">
                 @foreach ($items as $item)
                     <a class="site-search-result d-flex align-items-center gap-3 text-reset text-decoration-none p-3"
-                        href="{{ $group === 'stores' ? route('website.clients.show', $item) : route('website.offers.show', $item) }}">
+                        href="{{ $group === 'stores' ? route('website.stores.show', $item) : route('website.offers.show', $item) }}">
                         <span class="site-search-result-visual d-flex align-items-center justify-content-center flex-shrink-0">
                             @if ($group === 'stores')
                                 @if ($item->logo)
@@ -31,7 +31,7 @@
                                         ? trans_choice('Offer count', $item->available_offers_count, ['count' => number_format($item->available_offers_count)])
                                         : __('No offers from :store yet', ['store' => $item->title]) }}
                                 @else
-                                    {{ $item->client->title }}
+                                    {{ $item->store->title }}
                                 @endif
                             </small>
                         </span>

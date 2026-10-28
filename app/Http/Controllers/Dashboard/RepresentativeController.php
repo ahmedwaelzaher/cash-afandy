@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Broker;
-use App\Models\Client;
 use App\Models\Country;
 use App\Models\Representative;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Redot\Http\Controllers\Controller;
 
@@ -28,7 +28,7 @@ class RepresentativeController extends Controller
     {
         return view('dashboard.brokers.representatives.create', [
             'broker' => $broker,
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
         ]);
     }
@@ -43,9 +43,9 @@ class RepresentativeController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:30|starts_with:+|phone',
-            'clients' => 'nullable|array',
-            'clients.*.client_id' => 'required|exists:clients,id',
-            'clients.*.country_id' => 'required|exists:countries,id',
+            'stores' => 'nullable|array',
+            'stores.*.store_id' => 'required|exists:stores,id',
+            'stores.*.country_id' => 'required|exists:countries,id',
         ]);
 
         $broker->representatives()->create($validated);
@@ -61,7 +61,7 @@ class RepresentativeController extends Controller
         return view('dashboard.brokers.representatives.edit', [
             'broker' => $broker,
             'representative' => $representative,
-            'clients' => Client::query(),
+            'stores' => Store::query(),
             'countries' => Country::query(),
         ]);
     }
@@ -76,9 +76,9 @@ class RepresentativeController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:30|starts_with:+|phone',
-            'clients' => 'nullable|array',
-            'clients.*.client_id' => 'required|exists:clients,id',
-            'clients.*.country_id' => 'required|exists:countries,id',
+            'stores' => 'nullable|array',
+            'stores.*.store_id' => 'required|exists:stores,id',
+            'stores.*.country_id' => 'required|exists:countries,id',
         ]);
 
         $representative->update($validated);

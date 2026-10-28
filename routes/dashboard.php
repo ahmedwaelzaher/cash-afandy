@@ -7,7 +7,6 @@ use App\Http\Controllers\Dashboard\BackupController;
 use App\Http\Controllers\Dashboard\BrokerController;
 use App\Http\Controllers\Dashboard\CashbackController;
 use App\Http\Controllers\Dashboard\CategoryController;
-use App\Http\Controllers\Dashboard\ClientController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FailedJobController;
 use App\Http\Controllers\Dashboard\LanguageController;
@@ -26,6 +25,7 @@ use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\ShortenedUrlController;
 use App\Http\Controllers\Dashboard\SliderController;
 use App\Http\Controllers\Dashboard\StaticPageController;
+use App\Http\Controllers\Dashboard\StoreController;
 use App\Http\Controllers\Dashboard\SubscriberController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\UserImpersonateController;
@@ -57,7 +57,7 @@ Route::middleware('auth:admins')->group(function () {
 
     /* --------- Cash Afandy --------- */
     Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::resource('clients', ClientController::class)->except(['show']);
+    Route::resource('stores', StoreController::class)->except(['show']);
     Route::resource('brokers', BrokerController::class)->except(['show']);
     Route::resource('brokers.representatives', RepresentativeController::class)->except(['show']);
     Route::resource('offers', OfferController::class)->except(['show']);

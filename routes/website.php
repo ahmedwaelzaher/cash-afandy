@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Website\CashbackController;
 use App\Http\Controllers\Website\CategoryController;
-use App\Http\Controllers\Website\ClientController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\OfferController;
@@ -11,6 +10,7 @@ use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
 use App\Http\Controllers\Website\SocialiteController;
 use App\Http\Controllers\Website\StaticPageController;
+use App\Http\Controllers\Website\StoreController;
 use App\Http\Controllers\Website\StoreSubscriberController;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
@@ -36,8 +36,8 @@ Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.sho
 Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.index');
 Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');
 
-Route::get('stores', [ClientController::class, 'index'])->name('clients.index');
-Route::get('stores/{client}', [ClientController::class, 'show'])->name('clients.show');
+Route::get('stores', [StoreController::class, 'index'])->name('stores.index');
+Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.show');
 
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 

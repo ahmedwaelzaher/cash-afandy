@@ -25,7 +25,7 @@ class Cashback extends Model
         'url',
         'percentage',
         'details',
-        'client_id',
+        'store_id',
         'representative_id',
         'country_id',
         'terms',
@@ -109,16 +109,16 @@ class Cashback extends Model
         $query->where('active', true)
             ->where('launch_date', '<=', now())
             ->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()))
-            ->whereHas('client', fn (Builder $query) => $query->where('active', true))
+            ->whereHas('store', fn (Builder $query) => $query->where('active', true))
             ->when($country, fn (Builder $query) => $query->where('country_id', $country->id));
     }
 
     /**
-     * Get the client that owns the cashback.
+     * Get the store that owns the cashback.
      */
-    public function client(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**

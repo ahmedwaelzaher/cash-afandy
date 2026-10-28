@@ -1,7 +1,7 @@
 @if ($offers->isNotEmpty())
     <div class="site-offers-grid">
         @foreach ($offers as $offer)
-            @php($category = $offer->client->categories->firstWhere('slug', $categorySlug) ?? $offer->client->categories->first())
+            @php($category = $offer->store->categories->firstWhere('slug', $categorySlug) ?? $offer->store->categories->first())
             <div>
                 @include('website.partials.offer-card', [
                     'categoryLabel' => $category?->title,

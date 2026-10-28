@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Client;
 use App\Models\Offer;
 use App\Models\Representative;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +22,7 @@ class OfferFactory extends Factory
         return [
             'title' => ['en' => $this->faker->sentence()],
             'code' => strtoupper($this->faker->unique()->bothify('??###')),
-            'client_id' => Client::factory(),
+            'store_id' => Store::factory(),
             'representative_id' => Representative::factory(),
             'description' => ['en' => $this->faker->sentence()],
             'tips' => ['en' => $this->faker->sentence()],

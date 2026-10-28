@@ -11,11 +11,11 @@
                         <div class="card-body">
                             <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
                                 <span class="site-partners-logo flex-shrink-0">
-                                    <img src="{{ $offer->client->logo }}" alt="{{ $offer->client->title }}">
+                                    <img src="{{ $offer->store->logo }}" alt="{{ $offer->store->title }}">
                                 </span>
 
                                 <div class="flex-fill">
-                                    <div class="text-body-secondary">{{ $offer->client->title }}</div>
+                                    <div class="text-body-secondary">{{ $offer->store->title }}</div>
                                     <h1 class="h2 mb-0">{{ $offer->title }}</h1>
                                 </div>
 
@@ -43,7 +43,7 @@
                                 @include('website.partials.offer-code')
                             </div>
 
-                            <a href="{{ $offer->client->url }}" target="_blank" rel="noopener noreferrer"
+                            <a href="{{ $offer->store->url }}" target="_blank" rel="noopener noreferrer"
                                 class="btn btn-outline-brand w-100 mb-4">
                                 {{ __('Go to store') }}
                             </a>
@@ -98,7 +98,7 @@
         <section class="site-deals pb-5">
             <div class="container">
                 <div class="site-deals-heading mb-4">
-                    <h2 class="mb-1">{{ __('More from :store', ['store' => $offer->client->title]) }}</h2>
+                    <h2 class="mb-1">{{ __('More from :store', ['store' => $offer->store->title]) }}</h2>
                 </div>
 
                 <div class="site-offers-grid">
