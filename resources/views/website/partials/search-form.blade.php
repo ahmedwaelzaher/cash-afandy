@@ -7,9 +7,9 @@
     <input type="hidden" name="afandy_category" value="{{ $searchCategory }}">
     @if ($headerSearch)
         <div class="dropdown site-search-type flex-shrink-0">
-            <button type="button" class="btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Type') }}" aria-controls="{{ $id }}-types">
-                <span class="d-block w-100 text-center" data-search-type-label>{{ $searchCategory === 'stores' ? __('Stores') : __('Offers') }}</span>
-                <x-icon icon="ti ti-chevron-down" class="position-absolute top-50 end-0 translate-middle-y me-1" />
+            <button type="button" class="btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Type') }}" aria-controls="{{ $id }}-types">
+                <span data-search-type-label>{{ $searchCategory === 'stores' ? __('Stores') : __('Offers') }}</span>
+                <x-icon icon="ti ti-chevron-down" class="m-0" />
             </button>
             <div class="dropdown-menu" id="{{ $id }}-types">
                 @foreach (['offers' => ['ti ti-ticket', __('Offers')], 'stores' => ['ti ti-building-store', __('Stores')]] as $type => [$icon, $label])
@@ -30,7 +30,7 @@
         @else
             <button class="btn btn-icon btn-ghost-secondary position-absolute top-50 end-0 translate-middle-y m-0" type="submit" aria-label="{{ __('Search') }}"
                 @if ($headerSearch) data-afandy-search-button data-search-label="{{ __('Search') }}" data-reset-label="{{ __('Reset') }}" @endif>
-                <x-icon icon="ti ti-search" />
+                <x-icon icon="ti ti-search" class="m-0" />
                 <span class="d-flex" data-submit-spinner></span>
             </button>
         @endif

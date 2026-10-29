@@ -467,7 +467,7 @@ Form Check (Radio)
 }
 
 .site-search-type {
-    padding-inline-end: 0.25rem;
+    padding-inline-end: var(--tblr-btn-padding-x, 0.75rem);
 }
 
 .site-search-type::after {
@@ -479,8 +479,7 @@ Form Check (Radio)
 }
 
 .site-search-type > .btn {
-    inline-size: 6.5em;
-    padding-inline: 1.25em;
+    padding-inline: 0;
     border: 0;
     background: transparent;
     color: var(--site-ink);
@@ -505,10 +504,6 @@ Form Check (Radio)
 .site-header-search .site-search .btn-icon {
     inline-size: auto;
     padding-inline: 0;
-}
-
-.site-header-search .site-search-type > .btn {
-    padding-inline: var(--tblr-btn-padding-x, 0.75rem);
 }
 
 .site-search:focus-within,
