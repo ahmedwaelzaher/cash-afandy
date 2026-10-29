@@ -382,6 +382,8 @@ Form Check (Radio)
 }
 
 .site-navbar .dropdown-menu {
+    --tblr-dropdown-padding-x: var(--tblr-dropdown-padding-y);
+    --tblr-dropdown-item-border-radius: max(0px, calc(var(--tblr-dropdown-border-radius) - var(--tblr-dropdown-padding-y)));
     --tblr-dropdown-link-hover-bg: var(--site-soft);
     --tblr-dropdown-link-active-color: var(--site-ink);
     --tblr-dropdown-link-active-bg: var(--site-soft);
@@ -392,7 +394,7 @@ Form Check (Radio)
 }
 
 .site-navbar .dropdown-item {
-    min-inline-size: var(--tblr-dropdown-min-width);
+    min-inline-size: 0;
     padding-block: 0.625rem;
     white-space: normal;
 }
