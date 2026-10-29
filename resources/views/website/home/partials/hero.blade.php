@@ -1,10 +1,33 @@
+@php
+    $heroWords = collect(setting('hero_words'))
+        ->map(fn ($item) => trim($item['word'][app()->getLocale()] ?? ''))
+        ->filter(fn ($word) => $word !== '')
+        ->unique()->values()->all();
+@endphp
+
+@pushOnce('plugins-scripts', 'typedjs-scripts')
+    <script src="{{ hashed_asset('vendor/typesjs/typedjs.min.js') }}"></script>
+@endPushOnce
+
 <section class="site-hero" aria-labelledby="hero-title">
     <div class="container site-container site-hero-content">
         <div class="site-hero-copy">
             <div class="site-hero-heading">
                 <span class="site-hero-label d-inline-flex align-items-center gap-2"><x-icon icon="ti ti-sparkles" /> {{ __('Saving has its ways') }}</span>
                 <h1 class="site-heading" id="hero-title">
-                    <span>{{ __('An offer in hand') }}</span>
+                    @if ($heroWords)
+                        <span>
+                            @lang(':word in hand', [
+                                'word' => '<span class="visually-hidden">' . e($heroWords[0]) . '</span>'
+                                    . '<span typed-js="' . e(json_encode($heroWords, JSON_UNESCAPED_UNICODE)) . '"'
+                                    . ' typed-type-speed="90" typed-back-speed="55" typed-back-delay="2200" typed-start-delay="0"'
+                                    . ' typed-loop="true" typed-show-cursor="true" typed-cursor-char="" aria-hidden="true">'
+                                    . e($heroWords[0]) . '</span>',
+                            ])
+                        </span>
+                    @else
+                        <span>{{ __(':word in hand', ['word' => __('Offer')]) }}</span>
+                    @endif
                     <span>{{ __('No need to ask anyone') }}</span>
                 </h1>
             </div>

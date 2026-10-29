@@ -1,4 +1,20 @@
 // ==================================================
+// Hero heading
+// ==================================================
+$(() => {
+    if (typeof Typed === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    $('[typed-js]').each((index, element) => {
+        const { js: strings, ...selectorOptions } = getOptionsFromSelector(element, 'typed-');
+        if (strings.length < 2) return;
+
+        element.textContent = '';
+
+        new Typed(element, _.merge({ strings, contentType: 'text' }, selectorOptions));
+    });
+});
+
+// ==================================================
 // Offer code decoding
 // ==================================================
 /**

@@ -769,15 +769,25 @@ Form Check (Radio)
     line-height: 1.3;
 }
 
-.site-hero h1 span {
+.site-hero h1 > span {
     display: block;
     inline-size: fit-content;
     max-inline-size: 100%;
     white-space: nowrap;
 }
 
-.site-hero h1 span:last-child {
+.site-hero h1 > span:last-child {
     background: var(--site-highlight);
+}
+
+.site-hero .typed-cursor {
+    display: inline-block;
+    inline-size: 0.1em;
+    block-size: 1em;
+    vertical-align: -0.05em;
+    border-radius: var(--tblr-border-radius);
+    color: var(--site-green);
+    background: currentColor;
 }
 
 .site-hero-actions > p {
@@ -970,7 +980,7 @@ Form Check (Radio)
         font-size: clamp(1.25rem, 8vw, 3.5rem);
     }
 
-    .site-hero h1 span {
+    .site-hero h1 > span {
         margin-inline: auto;
     }
 

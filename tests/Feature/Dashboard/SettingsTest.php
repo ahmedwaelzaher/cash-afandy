@@ -9,6 +9,10 @@ test('admins can view the settings page', function () {
     $response = $this->actingAs($admin, 'admins')->get(route('dashboard.settings.edit'));
 
     $response->assertStatus(200);
+    $response->assertSee('name="hero_words"', false);
+    foreach (array_keys(config('app.locales')) as $locale) {
+        $response->assertSee('name="word[' . $locale . ']"', false);
+    }
 
     foreach (array_keys(config('app.locales')) as $locale) {
         $response->assertSee('name="theme[fonts][' . $locale . ']"', false);
@@ -29,6 +33,7 @@ test('admins can update the settings', function () {
         'dashboard_locales' => ['en'],
         'website_countries' => ['eg'],
         'default_website_country' => 'eg',
+        'hero_words' => setting('hero_words'),
     ]);
 
     $response->assertRedirect();
@@ -49,6 +54,7 @@ test('theme saves locale fonts and removes the obsolete font while preserving ot
             'default_website_country' => 'eg',
             'default_locale' => 'ar',
             'theme' => ['fonts' => $fonts],
+            'hero_words' => setting('hero_words'),
         ])->assertSessionHasNoErrors();
 
     unset($theme['font']);
@@ -69,4 +75,38 @@ test('theme rejects an unavailable font or an undefined locale', function (array
 })->with([
     'unavailable font' => [['ar' => 'missing-font'], 'theme.fonts.ar'],
     'undefined locale' => [['undefined' => 'rubik'], 'theme.fonts'],
+]);
+
+test('theme saves translated hero words and rejects clearing the repeater', function () {
+    $this->actingAs(Admin::factory()->create(), 'admins');
+    $words = [
+        ['word' => ['ar' => 'عرض', 'en' => 'offer']],
+        ['word' => ['ar' => 'كوبون', 'en' => 'coupon']],
+    ];
+    $settings = [
+        'app_name' => setting('app_name'),
+        'website_locales' => ['ar', 'en'],
+        'dashboard_locales' => ['ar', 'en'],
+        'website_countries' => ['eg'],
+        'default_website_country' => 'eg',
+    ];
+
+    $this->put(route('dashboard.settings.update'), $settings + ['hero_words' => $words])
+        ->assertSessionHasNoErrors();
+    expect(Setting::get('hero_words', fresh: true))->toBe($words);
+
+    $this->put(route('dashboard.settings.update'), $settings + ['hero_words' => ''])
+        ->assertSessionHasErrors('hero_words');
+    expect(Setting::get('hero_words', fresh: true))->toBe($words);
+});
+
+test('hero words reject malformed or excessively long translations', function (array $words, string $error) {
+    $this->actingAs(Admin::factory()->create(), 'admins')
+        ->put(route('dashboard.settings.update'), ['hero_words' => $words])
+        ->assertSessionHasErrors($error);
+})->with([
+    'empty repeater' => [[], 'hero_words'],
+    'empty translation' => [[['word' => ['ar' => '', 'en' => 'offer']]], 'hero_words.0.word.ar'],
+    'invalid translation' => [[['word' => ['ar' => ['invalid']]]], 'hero_words.0.word.ar'],
+    'long translation' => [[['word' => ['en' => str_repeat('x', 41)]]], 'hero_words.0.word.en'],
 ]);

@@ -75,6 +75,16 @@ Setting::define('theme')->array()->default([
     'radius' => 1,
 ]);
 
+Setting::define('hero_words')->array()->default([
+    ['word' => ['ar' => 'كوبون', 'en' => 'A Coupon']],
+    ['word' => ['ar' => 'عرض', 'en' => 'An Offer']],
+])->rules([
+    'hero_words' => ['required', 'array', 'min:1', 'max:20'],
+    'hero_words.*' => ['required', 'array:word'],
+    'hero_words.*.word' => ['required', 'array'],
+    'hero_words.*.word.*' => ['required', 'string', 'max:40'],
+]);
+
 Setting::define('social_facebook')->string()->default('https://www.facebook.com/cashafandy');
 
 Setting::define('social_instagram')->string()->default('');

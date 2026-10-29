@@ -42,6 +42,14 @@
 @endforeach
 
 <div class="mb-3">
+    <x-repeater name="hero_words" :title="__('An offer in hand')" :value="old('hero_words', setting('hero_words'))" validation="required|min:1" repeater-initial-items="1">
+        <x-repeater-card>
+            <x-translatable component="input" name="word" :title="__('Value')" maxlength="40" validation="required|max:40" />
+        </x-repeater-card>
+    </x-repeater>
+</div>
+
+<div class="mb-3">
     <x-radios name="theme[radius]" :title="__('Corner Radius')" :value="setting('theme.radius')" :inline="true" :options="[
         '0' => __('None'),
         '0.5' => __('Small'),
