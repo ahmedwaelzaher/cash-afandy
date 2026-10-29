@@ -58,15 +58,18 @@
                 @endif
             </header>
 
-            <div class="row g-4 align-items-start">
-                <div class="col-12 col-lg-8">
-                    <section class="site-offers bg-transparent" aria-labelledby="store-offers-title" data-offer-filter-attribute="data-offer-type">
+            <section class="site-offers bg-transparent" aria-labelledby="store-offers-title" data-offer-filter-attribute="data-offer-type">
+                @if ($offers->isNotEmpty())
+                    <div class="site-offers-filters d-flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('Filter offers') }}">
+                        <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All') }}</button>
+                        <button type="button" class="btn" data-offer-filter="code" aria-pressed="false" @disabled(! $hasCodeOffers)>{{ __('Offers with codes') }}</button>
+                        <button type="button" class="btn" data-offer-filter="link" aria-pressed="false" @disabled(! $hasDirectOffers)>{{ __('Direct offers') }}</button>
+                    </div>
+                @endif
+
+                <div class="row g-4 align-items-start">
+                    <div class="col-12 col-lg-8">
                         @if ($offers->isNotEmpty())
-                            <div class="site-offers-filters d-flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('Filter offers') }}">
-                                <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All') }}</button>
-                                <button type="button" class="btn" data-offer-filter="code" aria-pressed="false" @disabled(! $hasCodeOffers)>{{ __('Offers with codes') }}</button>
-                                <button type="button" class="btn" data-offer-filter="link" aria-pressed="false" @disabled(! $hasDirectOffers)>{{ __('Direct offers') }}</button>
-                            </div>
                             <div class="site-offers-grid">
                                 @php($category = $store->categories->first())
                                 @foreach ($offers as $offer)
@@ -86,35 +89,35 @@
                                 </a>
                             </x-empty>
                         @endif
-                    </section>
-                </div>
-
-                <aside class="col-12 col-lg-4" aria-labelledby="store-about-title">
-                    <div class="card rounded-4">
-                        <div class="card-body p-4">
-                            <h2 class="h3 mb-3" id="store-about-title">{{ __('About :app', ['app' => $store->title]) }}</h2>
-                            @if ($store->description)
-                                <div class="text-secondary text-break">{!! $store->description !!}</div>
-                            @else
-                                <p class="text-secondary mb-0">{{ __('Explore the store and check the offer terms before shopping.') }}</p>
-                            @endif
-
-                            @if ($hasCodeOffers)
-                                <hr>
-                                <h3 class="h3 mb-3">{{ __('How to use an offer?') }}</h3>
-                                <ol class="list-unstyled d-flex flex-column gap-3 mb-0">
-                                    @foreach ([__('Copy code'), __('Go to store'), __('Paste the code at checkout')] as $step)
-                                        <li class="d-flex align-items-center gap-3">
-                                            <span class="avatar avatar-sm rounded-circle bg-primary-lt flex-shrink-0" aria-hidden="true">{{ $loop->iteration }}</span>
-                                            <span class="text-secondary">{{ $step }}</span>
-                                        </li>
-                                    @endforeach
-                                </ol>
-                            @endif
-                        </div>
                     </div>
-                </aside>
-            </div>
+
+                    <aside class="col-12 col-lg-4" aria-labelledby="store-about-title">
+                        <div class="card rounded-4">
+                            <div class="card-body p-4">
+                                <h2 class="h3 mb-3" id="store-about-title">{{ __('About :app', ['app' => $store->title]) }}</h2>
+                                @if ($store->description)
+                                    <div class="text-secondary text-break">{!! $store->description !!}</div>
+                                @else
+                                    <p class="text-secondary mb-0">{{ __('Explore the store and check the offer terms before shopping.') }}</p>
+                                @endif
+
+                                @if ($hasCodeOffers)
+                                    <hr>
+                                    <h3 class="h3 mb-3">{{ __('How to use an offer?') }}</h3>
+                                    <ol class="list-unstyled d-flex flex-column gap-3 mb-0">
+                                        @foreach ([__('Copy code'), __('Go to store'), __('Paste the code at checkout')] as $step)
+                                            <li class="d-flex align-items-center gap-3">
+                                                <span class="avatar avatar-sm rounded-circle bg-primary-lt flex-shrink-0" aria-hidden="true">{{ $loop->iteration }}</span>
+                                                <span class="text-secondary">{{ $step }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ol>
+                                @endif
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
         </div>
     </section>
 </x-layouts::website>
