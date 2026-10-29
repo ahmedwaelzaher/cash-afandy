@@ -689,6 +689,7 @@ $(() => {
                 });
                 if (active) pauseCountdown(id);
                 else startCountdown(id);
+                toastify().success($button.attr(active ? 'data-add-success' : 'data-remove-success'));
             })
             .fail((xhr) => {
                 if (xhr.status === 401) {
