@@ -5,10 +5,6 @@
         ->unique()->values()->all();
 @endphp
 
-@pushOnce('plugins-scripts', 'typedjs-scripts')
-    <script src="{{ hashed_asset('vendor/typesjs/typedjs.min.js') }}"></script>
-@endPushOnce
-
 <section class="site-hero" aria-labelledby="hero-title">
     <div class="container site-container site-hero-content">
         <div class="site-hero-copy">
@@ -19,9 +15,8 @@
                         <span>
                             @lang(':word in hand', [
                                 'word' => '<span class="visually-hidden">' . e($heroWords[0]) . '</span>'
-                                    . '<span typed-js="' . e(json_encode($heroWords, JSON_UNESCAPED_UNICODE)) . '"'
-                                    . ' typed-type-speed="90" typed-back-speed="55" typed-back-delay="2200" typed-start-delay="0"'
-                                    . ' typed-loop="true" typed-show-cursor="true" typed-cursor-char="" aria-hidden="true">'
+                                    . '<span word-rotate rotate-words="' . e(json_encode($heroWords, JSON_UNESCAPED_UNICODE)) . '"'
+                                    . ' rotate-duration="350" rotate-delay="2500" aria-hidden="true">'
                                     . e($heroWords[0]) . '</span>',
                             ])
                         </span>

@@ -2,15 +2,43 @@
 // Hero heading
 // ==================================================
 $(() => {
-    if (typeof Typed === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    $('[typed-js]').each((index, element) => {
-        const { js: strings, ...selectorOptions } = getOptionsFromSelector(element, 'typed-');
-        if (strings.length < 2) return;
+    $('[word-rotate]').each((index, element) => {
+        const { words, duration, delay } = getOptionsFromSelector(element, 'rotate-');
+        if (words.length < 2) return;
 
-        element.textContent = '';
+        const items = words.map((word, index) => {
+            const item = document.createElement('span');
+            item.className = 'site-hero-word' + (index === 0 ? ' is-active' : '');
+            item.textContent = word;
+            return item;
+        });
+        element.replaceChildren(...items);
+        let current = 0;
 
-        new Typed(element, _.merge({ strings, contentType: 'text' }, selectorOptions));
+        window.setInterval(() => {
+            const outgoing = items[current];
+            const previousWidth = outgoing.getBoundingClientRect().width;
+            current = (current + 1) % items.length;
+            const incoming = items[current];
+            outgoing.classList.remove('is-active');
+            incoming.classList.add('is-active');
+
+            const options = { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+            element.animate([
+                { inlineSize: previousWidth + 'px' },
+                { inlineSize: incoming.getBoundingClientRect().width + 'px' },
+            ], options);
+            outgoing.animate([
+                { transform: 'translateY(0)', opacity: 1 },
+                { transform: 'translateY(-100%)', opacity: 0 },
+            ], options);
+            incoming.animate([
+                { transform: 'translateY(100%)', opacity: 0 },
+                { transform: 'translateY(0)', opacity: 1 },
+            ], options);
+        }, delay);
     });
 });
 

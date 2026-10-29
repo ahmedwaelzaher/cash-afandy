@@ -773,14 +773,25 @@ Form Check (Radio)
     background: var(--site-highlight);
 }
 
-.site-hero .typed-cursor {
-    display: inline-block;
-    inline-size: 0.1em;
-    block-size: 1em;
-    vertical-align: -0.05em;
-    border-radius: var(--tblr-border-radius);
-    color: var(--site-green);
-    background: currentColor;
+.site-hero [word-rotate] {
+    position: relative;
+    display: inline-grid;
+    overflow: clip;
+    vertical-align: bottom;
+}
+
+.site-hero-word {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: max-content;
+    grid-area: 1 / 1;
+    opacity: 0;
+}
+
+.site-hero-word.is-active {
+    position: relative;
+    opacity: 1;
 }
 
 .site-hero-actions > p {
