@@ -51,7 +51,6 @@
 .login-split .form-control:focus {
     background-color: var(--White);
     border-color: var(--Green-Dark);
-    box-shadow: none;
 }
 
 .login-split .input-group-flat .input-group-text {

@@ -93,7 +93,6 @@ Form Check (Radio)
 
 .form-check-input[type='radio']:focus {
     border-color: var(--Green-Dark);
-    box-shadow: 0 0 0 0.25rem rgba(8, 114, 59, 0.25);
 }
 
 /* Shared design tokens for the navbar and subsequent sections. */
@@ -109,8 +108,23 @@ Form Check (Radio)
     --site-line: #dce3d0;
     --site-radius: 1.25rem;
     --site-shadow: 0 12px 32px #243b1710;
+    --site-input-focus-shadow: var(--tblr-shadow-input), 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
     --site-highlight: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
     --tblr-body-bg: var(--site-paper);
+}
+
+/* Compound controls share one focus shadow around their outer edge. */
+.website-layout :is(.form-control, .form-select, .form-check-input):focus,
+.website-layout .input-group:focus-within,
+.website-layout .site-search:focus-within,
+.website-layout .site-store-search .input-icon:focus-within {
+    box-shadow: var(--site-input-focus-shadow);
+}
+
+.website-layout .input-group .form-control:focus,
+.website-layout .site-search .form-control:focus,
+.website-layout .site-store-search .form-control:focus {
+    box-shadow: none;
 }
 
 .website-layout,
@@ -431,6 +445,7 @@ Form Check (Radio)
     border: 1px solid #cfd9c1;
     border-radius: 1rem;
     background: var(--site-surface);
+    box-shadow: var(--tblr-shadow-input);
 }
 
 .site-search .form-control,
@@ -501,7 +516,6 @@ Form Check (Radio)
 .site-search:focus-within,
 .site-store-search .input-icon:focus-within {
     border-color: #75985d;
-    box-shadow: 0 0 0 4px #92b37822;
 }
 
 .site-header-search-panel {
@@ -614,11 +628,9 @@ Form Check (Radio)
         box-shadow: var(--site-shadow);
     }
 
-    .site-header-search .site-search,
-    .site-header-search .site-search:focus-within {
+    .site-header-search .site-search {
         border-color: var(--site-line);
         background: var(--site-surface);
-        box-shadow: none;
     }
 
     .site-header-search .btn {
@@ -1281,7 +1293,6 @@ Footer
 
 .site-footer-subscribe .form-control:focus {
     background-color: var(--White);
-    box-shadow: none;
 }
 
 [dir='rtl'] .site-footer-subscribe .form-control::placeholder {
