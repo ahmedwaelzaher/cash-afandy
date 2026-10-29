@@ -2,7 +2,7 @@
     $headerSearch = $id === 'navbar-search';
     $searchCategory = in_array(request('afandy_category'), ['stores', 'offers'], true) ? request('afandy_category') : 'offers';
 @endphp
-<form action="{{ route('website.search') }}" method="GET" role="search" @class(['site-search position-relative d-flex align-items-center gap-2', 'p-1' => ! $headerSearch])
+<form action="{{ route('website.search') }}" method="GET" role="search" class="site-search position-relative d-flex align-items-center gap-2 p-1"
     @if ($headerSearch) data-afandy-search disable-validation @endif>
     <input type="hidden" name="afandy_category" value="{{ $searchCategory }}">
     @if ($headerSearch)
@@ -22,23 +22,22 @@
             </div>
         </div>
     @endif
-    <div class="site-search-field position-relative flex-fill">
+    <div class="site-search-field d-flex align-items-center gap-2 flex-fill">
         @if (! empty($submitLabel))
-            <span class="input-icon-addon ms-3" aria-hidden="true"><x-icon icon="ti ti-search" /></span>
+            <span class="d-flex align-items-center flex-shrink-0 text-secondary" aria-hidden="true"><x-icon icon="ti ti-search" class="m-0" /></span>
         @endif
         <x-input :id="$id" type="search" name="afandy_search" :value="is_string(request('afandy_search')) ? request('afandy_search') : ''" :aria-label="__('Search')" :placeholder="__('Type to search...')" maxlength="255" minlength="2" required validation="required"
-            :autocomplete="$headerSearch ? 'off' : null" :role="$headerSearch ? 'combobox' : null" :aria-haspopup="$headerSearch ? 'dialog' : null" :aria-controls="$headerSearch ? 'afandy-search-results' : null" :aria-expanded="$headerSearch ? 'false' : null" />
-        @if (empty($submitLabel))
-            <button class="btn btn-icon btn-ghost-secondary position-absolute top-50 end-0 translate-middle-y m-0" type="submit" aria-label="{{ __('Search') }}"
-                @if ($headerSearch) data-afandy-search-button data-search-label="{{ __('Search') }}" data-reset-label="{{ __('Reset') }}" @endif>
-                <x-icon icon="ti ti-search" class="m-0" />
-                <span class="d-flex" data-submit-spinner></span>
-            </button>
-        @endif
+            class="px-0" :autocomplete="$headerSearch ? 'off' : null" :role="$headerSearch ? 'combobox' : null" :aria-haspopup="$headerSearch ? 'dialog' : null" :aria-controls="$headerSearch ? 'afandy-search-results' : null" :aria-expanded="$headerSearch ? 'false' : null" />
     </div>
-    @if (! empty($submitLabel))
-        <button class="btn btn-primary flex-shrink-0" type="submit">{{ $submitLabel }}</button>
-    @endif
+    <button @class(['btn flex-shrink-0 align-self-stretch', 'btn-primary' => ! empty($submitLabel), 'btn-icon btn-ghost-secondary' => empty($submitLabel)]) type="submit" aria-label="{{ $submitLabel ?? __('Search') }}"
+        @if ($headerSearch) data-afandy-search-button data-search-label="{{ __('Search') }}" data-reset-label="{{ __('Reset') }}" @endif>
+        @if (! empty($submitLabel))
+            {{ $submitLabel }}
+        @else
+            <x-icon icon="ti ti-search" class="m-0" />
+        @endif
+        <span class="d-flex" data-submit-spinner></span>
+    </button>
 </form>
 @if ($headerSearch)
     <div class="site-search-results" id="afandy-search-results" role="dialog" aria-label="{{ __('Search') }}" aria-busy="false" hidden></div>
