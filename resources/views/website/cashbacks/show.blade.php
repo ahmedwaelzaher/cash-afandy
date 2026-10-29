@@ -1,3 +1,5 @@
+@php($percentage = '<bdi dir="ltr">' . e($cashback->percentage) . '%</bdi>')
+
 <x-layouts::website :title="$cashback->store->title">
     <section class="py-5">
         <div class="container">
@@ -16,7 +18,7 @@
                                 </div>
 
                                 <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2">
-                                    {{ __('Up to :percentage%', ['percentage' => $cashback->percentage]) }}
+                                    @lang('Up to :percentage', ['percentage' => $percentage])
                                 </span>
                             </div>
 
@@ -71,7 +73,7 @@
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">{{ __('Cashback') }}</div>
                                     <div class="datagrid-content">
-                                        {{ __('Up to :percentage%', ['percentage' => $cashback->percentage]) }}
+                                        @lang('Up to :percentage', ['percentage' => $percentage])
                                     </div>
                                 </div>
 

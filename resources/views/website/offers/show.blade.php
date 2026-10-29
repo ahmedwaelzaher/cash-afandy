@@ -19,7 +19,7 @@
                                     <h1 class="h2 mb-0">{{ $offer->title }}</h1>
                                 </div>
 
-                                <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2">{{ $discount }}</span>
+                                <span class="badge bg-primary text-primary-fg fs-3 px-3 py-2" dir="{{ $offer->fixed_discount ? 'auto' : 'ltr' }}">{{ $discount }}</span>
                             @include('website.partials.offer-favorite')
                             </div>
 
@@ -52,7 +52,7 @@
                             <div class="datagrid">
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">{{ __('Discount') }}</div>
-                                    <div class="datagrid-content">{{ $discount }}</div>
+                                    <div class="datagrid-content" dir="{{ $offer->fixed_discount ? 'auto' : 'ltr' }}">{{ $discount }}</div>
                                 </div>
 
                                 @if ($offer->minimum_amount)

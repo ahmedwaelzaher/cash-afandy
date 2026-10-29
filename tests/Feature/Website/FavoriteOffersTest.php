@@ -67,6 +67,8 @@ test('favorite lists show only the current users saved offers and include their 
     $this->get(route('website.favorites.index', ['locale' => $locale]))
         ->assertOk()->assertSee($this->offer->getTranslation('title', $locale))
         ->assertSee('data-favorite-item="' . $this->offer->id . '"', false)
+        ->assertSee('data-add-success="' . e(__('Added to favorites successfully')) . '"', false)
+        ->assertSee('data-remove-success="' . e(__('Removed from favorites successfully')) . '"', false)
         ->assertSee('data-favorite-removed hidden', false)
         ->assertSee('data-countdown-seconds="10"', false)
         ->assertSee('role="timer" aria-live="off"', false)

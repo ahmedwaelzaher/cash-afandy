@@ -1,5 +1,5 @@
 <div class="border-top site-footer">
-    <footer class="container py-5">
+    <footer class="container site-container py-5">
         <div class="row">
             <div class="col-12 col-lg-4 mb-4 mb-lg-0">
                 <h3>{{ __('About :app', ['app' => app()->isLocale('ar') ? 'الأفندي' : 'Afandy']) }}</h3>

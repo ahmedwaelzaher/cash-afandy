@@ -152,6 +152,8 @@ Form Check (Radio)
 /* Shared design tokens for the navbar and subsequent sections. */
 .website-layout {
     --site-paper: #fcfaf5;
+    --site-gutter: clamp(1rem, 2.5vw, 2rem);
+    --site-content-width: 100rem;
     --site-background: linear-gradient(110deg, #f1f4e8, var(--site-paper) 65%);
     --site-surface: #fffefa;
     --site-soft: #e9efdf;
@@ -350,8 +352,6 @@ Form Check (Radio)
 .site-error-content,
 .site-offer-reveal,
 .site-static-page {
-    --site-gutter: clamp(1rem, 2.5vw, 2rem);
-    --site-content-width: 100rem;
     --tblr-primary: var(--site-ink);
     --tblr-primary-fg: var(--site-surface);
     --tblr-primary-darken: #365635;
@@ -370,8 +370,10 @@ Form Check (Radio)
     transition: top 0.25s ease;
 }
 
-.site-navbar.is-hidden {
-    top: calc(-1 * var(--site-navbar-height));
+@media (max-width: 767.98px) {
+    .site-navbar.is-hidden {
+        top: calc(-1 * var(--site-navbar-height));
+    }
 }
 
 .site-navbar.is-scrolled {
@@ -514,6 +516,11 @@ Form Check (Radio)
 
 .site-search-field {
     min-inline-size: 0;
+}
+
+.website-layout .site-search .form-control {
+    caret-color: var(--site-ink);
+    font-size: 1.0625em;
 }
 
 .site-search [data-submit-spinner]:empty {
@@ -1115,6 +1122,11 @@ Form Check (Radio)
         pointer-events: none;
     }
 
+    .website-layout {
+        --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
+        --site-content-width: 75rem;
+    }
+
     .site-navbar,
     .site-hero,
     .site-store-strip,
@@ -1123,8 +1135,6 @@ Form Check (Radio)
     .site-offers,
     .site-categories,
     .site-static-page {
-        --site-gutter: clamp(0.75rem, 2.5vw, 1.5rem);
-        --site-content-width: 75rem;
         --site-nav-link-padding: 0.75rem;
         --tblr-border-radius: 0.5625rem;
         font-size: 0.65625rem;
@@ -1334,10 +1344,21 @@ Footer
     background-color: var(--White);
     border: 1px solid var(--Light-Gray);
     border-radius: var(--tblr-border-radius);
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
 }
 
 .site-footer-subscribe .form-control:focus {
     background-color: var(--White);
+}
+
+.site-footer-subscribe .form-control.is-invalid {
+    padding-inline: 0.75rem 2rem;
+    background-position: right 0.375rem center;
+}
+
+.site-footer-subscribe .form-control.is-invalid:dir(rtl) {
+    background-position: left 0.375rem center;
 }
 
 [dir='rtl'] .site-footer-subscribe .form-control::placeholder {

@@ -1,6 +1,6 @@
 <div class="site-deals-card card h-100">
     <div class="site-deals-image">
-        <span class="site-deals-badge">{{ $cashback->percentage }}%</span>
+        <span class="site-deals-badge" dir="ltr">{{ $cashback->percentage }}%</span>
     </div>
 
     <span class="site-deals-logo">
