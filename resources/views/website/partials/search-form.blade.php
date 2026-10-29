@@ -2,7 +2,7 @@
     $headerSearch = $id === 'navbar-search';
     $searchCategory = in_array(request('afandy_category'), ['stores', 'offers'], true) ? request('afandy_category') : 'offers';
 @endphp
-<form action="{{ route('website.search') }}" method="GET" role="search" class="site-search position-relative d-flex align-items-center gap-2 p-1"
+<form action="{{ route('website.search') }}" method="GET" role="search" @class(['site-search position-relative d-flex align-items-center gap-2', 'p-1' => ! $headerSearch])
     @if ($headerSearch) data-afandy-search disable-validation @endif>
     <input type="hidden" name="afandy_category" value="{{ $searchCategory }}">
     @if ($headerSearch)

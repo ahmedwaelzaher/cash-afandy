@@ -358,6 +358,7 @@ Form Check (Radio)
 
 .site-navbar .nav-link,
 .site-navbar .btn,
+.site-header-search .site-search,
 .site-search .form-control,
 .site-hero .btn,
 .site-hero .form-control {
@@ -471,8 +472,28 @@ Form Check (Radio)
     white-space: nowrap;
 }
 
+.site-header-search .site-search {
+    padding: var(--tblr-btn-padding-y, 0.375rem) var(--tblr-btn-padding-x, 0.75rem);
+    line-height: var(--tblr-btn-line-height, 1.25rem);
+}
+
+.site-header-search .site-search :is(.form-control, .btn) {
+    min-block-size: 0;
+    padding-block: 0;
+    line-height: inherit;
+}
+
 .site-header-search .site-search .form-control {
-    padding-inline: 0.5rem 3rem;
+    padding-inline: 0 2rem;
+}
+
+.site-header-search .site-search .btn-icon {
+    inline-size: auto;
+    padding-inline: 0;
+}
+
+.site-header-search .site-search-type > .btn {
+    padding-inline: var(--tblr-btn-padding-x, 0.75rem);
 }
 
 .site-search:focus-within,
@@ -1042,7 +1063,8 @@ Form Check (Radio)
         font-size: 0.65625rem;
     }
 
-    :is(.site-navbar, .site-hero) .btn {
+    :is(.site-navbar, .site-hero) .btn,
+    .site-header-search .site-search {
         --tblr-btn-padding-x: 0.5625rem;
         --tblr-btn-padding-y: 0.28125rem;
         --tblr-btn-line-height: 0.9375rem;
@@ -1113,6 +1135,7 @@ Form Check (Radio)
 
     .site-navbar .nav-link,
     .site-navbar .btn,
+    .site-header-search .site-search,
     .site-search .form-control,
     .site-hero .btn,
     .site-hero .form-control {
