@@ -127,14 +127,12 @@ Form Check (Radio)
     box-shadow: none;
 }
 
-.website-layout,
-.site-hero,
-.site-store,
-.site-stores,
-.site-offers,
-.site-categories,
-.site-static-page {
+.website-layout {
     background: var(--site-background);
+}
+
+.website-layout > .page {
+    background: transparent;
 }
 
 /* Website page loader; the dashboard keeps its existing loader. */
