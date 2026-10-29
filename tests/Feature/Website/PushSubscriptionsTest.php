@@ -194,3 +194,14 @@ test('the website retains its push worker when asset caching is disabled', funct
         ->assertDontSee('registration.unregister()', false)
         ->assertDontSee('service-account.json', false);
 });
+
+test('the browser invitation is available only to authenticated website users when push is enabled', function () {
+    $this->get(route('website.index'))->assertOk()->assertDontSee('data-push-prompt hidden', false);
+
+    $this->actingAs(User::factory()->create(), 'users')->get(route('website.index'))
+        ->assertOk()->assertSee('data-push-prompt hidden', false)
+        ->assertSee('data-push-dismiss', false)->assertSee('data-push-enable', false);
+
+    config(['redot.notifications.push_enabled' => false]);
+    $this->get(route('website.index'))->assertOk()->assertDontSee('data-push-prompt hidden', false);
+});

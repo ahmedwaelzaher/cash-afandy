@@ -41,6 +41,12 @@
         @endif
     </main>
 
+    @if (! $inline && config('redot.notifications.push_enabled', false))
+        @auth('users')
+            @include('website.partials.push-prompt')
+        @endauth
+    @endif
+
     @if (! request()->routeIs('website.login'))
         @include('website.auth.partials.login-modal')
     @endif

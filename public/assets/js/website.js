@@ -916,12 +916,15 @@ $(() => {
     if (!config?.enabled || !endpoints) return;
 
     const $panel = $('[data-browser-notifications]').prop('hidden', false);
-    const $enable = $panel.find('[data-push-enable]');
+    const $prompt = $('[data-push-prompt]');
+    const $enable = $panel.add($prompt).find('[data-push-enable]');
     const $disable = $panel.find('[data-push-disable]');
     const preferenceKey = 'cash-afandy:browser-push-enabled';
     const messageKey = 'cash-afandy:last-push-message';
+    const dismissedKey = 'cash-afandy:push-prompt-dismissed-until';
     let clientPromise;
     let busy = false;
+    let requestingPermission = false;
     let lastSync = 0;
 
     const render = (message, enabled = false) => {
@@ -931,6 +934,20 @@ $(() => {
     };
     const wanted = () => localStorage.getItem(preferenceKey) === 'true';
     const remember = (enabled) => localStorage.setItem(preferenceKey, String(enabled));
+    const dismissPrompt = () => {
+        $prompt.prop('hidden', true);
+        try {
+            localStorage.setItem(dismissedKey, String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+        } catch {
+            /* The invitation stays closed for this page when storage is unavailable. */
+        }
+    };
+    const updatePrompt = () => {
+        const hidden = wanted() || localStorage.getItem(preferenceKey) === 'false'
+            || Notification.permission === 'denied'
+            || Number(localStorage.getItem(dismissedKey)) > Date.now();
+        $prompt.prop('hidden', hidden);
+    };
     const removeSubscription = () =>
         $.ajax({
             url: endpoints.destroyUrl,
@@ -977,6 +994,7 @@ $(() => {
         } catch {
             render(__('Unable to update browser notifications. Please try again.'), wanted());
             $enable.prop('hidden', false);
+            $prompt.find('[data-push-prompt-status]').text(__('Unable to update browser notifications. Please try again.')).prop('hidden', false);
         } finally {
             busy = false;
             $enable.add($disable).prop('disabled', false);
@@ -1021,6 +1039,7 @@ $(() => {
         }
         lastSync = Date.now();
         render(__('Notifications are enabled for this browser.'), true);
+        $prompt.prop('hidden', true);
     };
     const disable = async () => {
         try {
@@ -1047,6 +1066,7 @@ $(() => {
         render(wanted() ? __('Updating browser notifications…') : __('Browser notifications are disabled.'), wanted());
         if (wanted()) run(synchronize);
         else if (localStorage.getItem(preferenceKey) === 'false') run(disable);
+        updatePrompt();
     } catch {
         render(__('Browser notifications are not supported on this device.'));
         $enable.prop('disabled', true);
@@ -1054,11 +1074,14 @@ $(() => {
     }
 
     $enable.on('click', async () => {
-        if (busy) return;
+        if (busy || requestingPermission) return;
+        requestingPermission = true;
         $enable.prop('disabled', true);
+        $prompt.find('[data-push-prompt-status]').prop('hidden', true);
         try {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') {
+                dismissPrompt();
                 render(__('Allow notifications in your browser settings to enable them.'));
                 return;
             }
@@ -1066,16 +1089,25 @@ $(() => {
             await run(synchronize);
         } catch {
             render(__('Unable to update browser notifications. Please try again.'));
+            $prompt.find('[data-push-prompt-status]').text(__('Unable to update browser notifications. Please try again.')).prop('hidden', false);
         } finally {
+            requestingPermission = false;
             $enable.prop('disabled', false);
         }
     });
+    $prompt.find('[data-push-dismiss]').on('click', dismissPrompt);
+    $prompt.on('keydown', (event) => {
+        if (event.key === 'Escape') dismissPrompt();
+    });
     $disable.on('click', () => {
+        dismissPrompt();
         remember(false);
         run(disable);
     });
     $(window).on('storage.browserPush', (event) => {
+        if (event.originalEvent.key === dismissedKey) updatePrompt();
         if (event.originalEvent.key !== preferenceKey) return;
+        updatePrompt();
         if (wanted()) run(synchronize);
         else render(__('Browser notifications are disabled.'));
     });

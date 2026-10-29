@@ -11,6 +11,60 @@
     --Blue: #0B99FFFF;
 }
 
+/* Browser notification invitation */
+.site-push-prompt {
+    --tblr-primary: var(--site-green);
+    --tblr-primary-darken: var(--site-ink);
+    --tblr-primary-fg: var(--site-surface);
+    position: fixed;
+    inset-block-end: max(1rem, env(safe-area-inset-bottom));
+    inset-inline-end: 1rem;
+    inline-size: min(30rem, calc(100% - 2rem));
+    max-block-size: calc(100dvh - 2rem);
+    overflow-y: auto;
+    z-index: 1025;
+    background: var(--site-surface);
+    color: var(--site-ink);
+    border: 1px solid var(--site-line);
+    border-radius: var(--site-radius);
+    box-shadow: var(--site-shadow);
+}
+
+.site-push-prompt p {
+    color: var(--site-text);
+}
+
+.site-push-prompt .btn {
+    min-block-size: 2.75rem;
+    white-space: normal;
+}
+
+.site-push-prompt .btn-outline-secondary {
+    background: var(--site-paper);
+    border-color: var(--site-line);
+    color: var(--site-text);
+}
+
+.site-push-prompt .btn-outline-secondary:hover {
+    background: var(--site-soft);
+}
+
+.site-push-prompt-icon {
+    position: relative;
+    inline-size: 4rem;
+    block-size: 4rem;
+    background: var(--site-soft);
+    font-size: 2rem;
+}
+
+.site-push-prompt-sparkle {
+    position: absolute;
+    inset-block-start: 0.375rem;
+    inset-inline-end: 0.375rem;
+    color: var(--site-gold);
+    font-size: 1rem;
+}
+
 /* ============================================================
 Forms
 ============================================================ */
@@ -115,13 +169,13 @@ Form Check (Radio)
 
 /* Compound controls share one focus shadow around their outer edge. */
 .website-layout :is(.form-control, .form-select, .form-check-input):focus,
-.website-layout .input-group:focus-within,
+.website-layout .input-group-flat:focus-within,
 .website-layout .site-search:focus-within,
 .website-layout .site-store-search .input-icon:focus-within {
     box-shadow: var(--site-input-focus-shadow);
 }
 
-.website-layout .input-group .form-control:focus,
+.website-layout .input-group-flat .form-control:focus,
 .website-layout .site-search .form-control:focus,
 .website-layout .site-store-search .form-control:focus {
     box-shadow: none;
