@@ -23,11 +23,12 @@
         </div>
     @endif
     <div class="site-search-field position-relative flex-fill">
+        @if (! empty($submitLabel))
+            <span class="input-icon-addon ms-3" aria-hidden="true"><x-icon icon="ti ti-search" /></span>
+        @endif
         <x-input :id="$id" type="search" name="afandy_search" :value="is_string(request('afandy_search')) ? request('afandy_search') : ''" :aria-label="__('Search')" :placeholder="__('Type to search...')" maxlength="255" minlength="2" required validation="required"
             :autocomplete="$headerSearch ? 'off' : null" :role="$headerSearch ? 'combobox' : null" :aria-haspopup="$headerSearch ? 'dialog' : null" :aria-controls="$headerSearch ? 'afandy-search-results' : null" :aria-expanded="$headerSearch ? 'false' : null" />
-        @if (! empty($submitLabel))
-            <span class="input-icon-addon start-0 ms-3" aria-hidden="true"><x-icon icon="ti ti-search" /></span>
-        @else
+        @if (empty($submitLabel))
             <button class="btn btn-icon btn-ghost-secondary position-absolute top-50 end-0 translate-middle-y m-0" type="submit" aria-label="{{ __('Search') }}"
                 @if ($headerSearch) data-afandy-search-button data-search-label="{{ __('Search') }}" data-reset-label="{{ __('Reset') }}" @endif>
                 <x-icon icon="ti ti-search" class="m-0" />
