@@ -42,16 +42,24 @@ class AuthServiceProvider extends ServiceProvider
 
         Event::listen(AuthLogin::class, function (AuthLogin $event) {
             if ($event->guard === 'users' && $event->user instanceof User && request()->hasSession()) {
+                $hash = request()->session()->get('push_subscription_token_hash');
+                if ($hash) {
+                    PushSubscription::query()->whereMorphedTo('notifiable', null)
+                        ->where('token_hash', $hash)->whereNull('disabled_at')
+                        ->update(['notifiable_type' => $event->user->getMorphClass(), 'notifiable_id' => $event->user->getKey()]);
+                }
                 app(PendingAction::class)->complete(request(), $event->user);
             }
         });
 
         Event::listen(AuthLogout::class, function (AuthLogout $event) {
             if ($event->guard === 'users' && $event->user && request()->hasSession()) {
-                PushSubscription::disableFor(
-                    $event->user,
-                    request()->session()->pull('push_subscription_token_hash'),
-                );
+                $hash = request()->session()->get('push_subscription_token_hash');
+                if ($hash) {
+                    PushSubscription::query()->whereMorphedTo('notifiable', $event->user)
+                        ->where('token_hash', $hash)
+                        ->update(['notifiable_type' => null, 'notifiable_id' => null]);
+                }
             }
         });
     }

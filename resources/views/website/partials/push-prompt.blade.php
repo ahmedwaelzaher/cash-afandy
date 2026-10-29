@@ -21,7 +21,7 @@
         </div>
         <p class="small text-center mb-0 mt-3 d-flex align-items-center justify-content-center gap-2">
             <x-icon icon="ti ti-settings" />
-            {{ __('You can turn them off anytime from your profile.') }}
+            {{ __('You can turn them off anytime from your browser settings.') }}
         </p>
     </div>
 </aside>

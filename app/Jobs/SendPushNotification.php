@@ -17,11 +17,15 @@ class SendPushNotification implements ShouldQueue
 
     public int $timeout = 30;
 
+    public bool $forBrowser = false;
+
     public function __construct(
         public string $notificationId,
         public int $subscriptionId,
         public string $tokenHash,
+        bool $forBrowser = false,
     ) {
+        $this->forBrowser = $forBrowser;
         $this->afterCommit();
     }
 
@@ -44,7 +48,8 @@ class SendPushNotification implements ShouldQueue
             return;
         }
 
-        $notification = $subscription->notifiable?->notifications()->whereKey($this->notificationId)->first();
+        $recipient = $this->forBrowser ? $subscription : $subscription->notifiable;
+        $notification = $recipient?->notifications()->whereKey($this->notificationId)->first();
 
         if (! $notification) return;
 

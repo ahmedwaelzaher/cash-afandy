@@ -42,9 +42,7 @@
     </main>
 
     @if (! $inline && config('redot.notifications.push_enabled', false))
-        @auth('users')
-            @include('website.partials.push-prompt')
-        @endauth
+        @include('website.partials.push-prompt')
     @endif
 
     @if (! request()->routeIs('website.login'))
@@ -55,14 +53,12 @@
     @include('components.facebook-pixel')
 
     @pushOnce('scripts')
-        @auth('users')
-            <script>
-                window.WebsitePush = @json([
-                    'storeUrl' => route('website.push-subscriptions.store'),
-                    'destroyUrl' => route('website.push-subscriptions.destroy'),
-                ]);
-            </script>
-        @endauth
+        <script>
+            window.WebsitePush = @json([
+                'storeUrl' => route('website.push-subscriptions.store'),
+                'destroyUrl' => route('website.push-subscriptions.destroy'),
+            ]);
+        </script>
         <script src="{{ hashed_asset('assets/js/website.js') }}"></script>
 
         {!! setting('body_code') !!}

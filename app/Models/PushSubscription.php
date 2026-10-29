@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Notifications\Notifiable;
 
 class PushSubscription extends Model
 {
+    use Notifiable;
+
     protected $fillable = [
         'token',
         'last_seen_at',
@@ -36,7 +39,7 @@ class PushSubscription extends Model
         return $this->morphTo();
     }
 
-    public static function disableFor(Model $notifiable, ?string $tokenHash): void
+    public static function disableFor(?Model $notifiable, ?string $tokenHash): void
     {
         if (! $tokenHash) return;
 

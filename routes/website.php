@@ -32,6 +32,8 @@ Route::get('up', HealthCheckController::class)->name('health-check');
 Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
 Route::get('static-pages/{staticPage}', [StaticPageController::class, 'show'])->name('static-pages.show');
 Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
+Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:30,1')->name('push-subscriptions.store');
+Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:30,1')->name('push-subscriptions.destroy');
 
 Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
 Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
@@ -55,9 +57,6 @@ Route::middleware('guest:users')->group(function () {
 });
 
 Route::middleware('auth:users')->group(function () {
-    Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:30,1')->name('push-subscriptions.store');
-    Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:30,1')->name('push-subscriptions.destroy');
-
     Route::get('favorites', [FavoriteOfferController::class, 'index'])->name('favorites.index');
     Route::put('favorites/{offer}', [FavoriteOfferController::class, 'store'])->name('favorites.store');
     Route::delete('favorites/{offer}', [FavoriteOfferController::class, 'destroy'])->name('favorites.destroy');

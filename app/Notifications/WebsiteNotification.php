@@ -41,6 +41,12 @@ class WebsiteNotification extends DashboardNotification implements ShouldQueue
         }
 
         // Push is queued only after the database channel has stored the notification.
+        if ($notifiable instanceof PushSubscription) {
+            SendPushNotification::dispatch($response->getKey(), $notifiable->getKey(), $notifiable->token_hash, forBrowser: true);
+
+            return;
+        }
+
         PushSubscription::query()
             ->where('notifiable_type', $response->notifiable_type)
             ->where('notifiable_id', $response->notifiable_id)
