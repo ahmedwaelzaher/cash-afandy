@@ -6,9 +6,11 @@ use App\Actions\Auth\CreateUser;
 use App\Actions\Auth\PendingAction;
 use App\Http\Responses\LoginResponse;
 use App\Models\Admin;
+use App\Models\PushSubscription;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Login as AuthLogin;
+use Illuminate\Auth\Events\Logout as AuthLogout;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -41,6 +43,15 @@ class AuthServiceProvider extends ServiceProvider
         Event::listen(AuthLogin::class, function (AuthLogin $event) {
             if ($event->guard === 'users' && $event->user instanceof User && request()->hasSession()) {
                 app(PendingAction::class)->complete(request(), $event->user);
+            }
+        });
+
+        Event::listen(AuthLogout::class, function (AuthLogout $event) {
+            if ($event->guard === 'users' && $event->user && request()->hasSession()) {
+                PushSubscription::disableFor(
+                    $event->user,
+                    request()->session()->pull('push_subscription_token_hash'),
+                );
             }
         });
     }

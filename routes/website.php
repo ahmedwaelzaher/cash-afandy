@@ -8,6 +8,7 @@ use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\PendingActionController;
 use App\Http\Controllers\Website\ProfileController;
+use App\Http\Controllers\Website\PushSubscriptionController;
 use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
 use App\Http\Controllers\Website\SocialiteController;
@@ -54,6 +55,9 @@ Route::middleware('guest:users')->group(function () {
 });
 
 Route::middleware('auth:users')->group(function () {
+    Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:30,1')->name('push-subscriptions.store');
+    Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:30,1')->name('push-subscriptions.destroy');
+
     Route::get('favorites', [FavoriteOfferController::class, 'index'])->name('favorites.index');
     Route::put('favorites/{offer}', [FavoriteOfferController::class, 'store'])->name('favorites.store');
     Route::delete('favorites/{offer}', [FavoriteOfferController::class, 'destroy'])->name('favorites.destroy');

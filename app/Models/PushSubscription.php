@@ -35,4 +35,12 @@ class PushSubscription extends Model
     {
         return $this->morphTo();
     }
+
+    public static function disableFor(Model $notifiable, ?string $tokenHash): void
+    {
+        if (! $tokenHash) return;
+
+        static::query()->whereMorphedTo('notifiable', $notifiable)
+            ->where('token_hash', $tokenHash)->update(['disabled_at' => now()]);
+    }
 }

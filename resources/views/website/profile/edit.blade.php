@@ -48,4 +48,5 @@
             </div>
         </div>
     </x-form>
+    @include('website.profile.partials.browser-notifications')
 </x-layouts::website.auth>

@@ -29,6 +29,26 @@ class Scaffold extends Component
             $this->title = app_name();
         }
 
-        return view('layouts.scaffold');
+        $firebase = config('redot.notifications.firebase', []);
+        $pushEnabled = config('redot.notifications.push_enabled', false)
+            && filled(config('redot.notifications.vapid_key'))
+            && collect(['apiKey', 'projectId', 'messagingSenderId', 'appId'])->every(fn ($key) => filled($firebase[$key] ?? null));
+        $cacheEnabled = app()->environment('production') && setting('service_worker_enabled');
+        $parameters = ['cache' => (int) $cacheEnabled];
+        if ($pushEnabled) {
+            $parameters['firebase'] = json_encode($firebase);
+            $parameters['sdk'] = config('redot.notifications.sdk_version');
+        }
+
+        return view('layouts.scaffold', [
+            'pushConfig' => [
+                'enabled' => (bool) $pushEnabled,
+                'firebase' => $firebase,
+                'vapidKey' => config('redot.notifications.vapid_key'),
+                'sdkVersion' => config('redot.notifications.sdk_version'),
+            ],
+            'serviceWorkerEnabled' => $pushEnabled || $cacheEnabled,
+            'serviceWorkerUrl' => '/service-worker.js?' . http_build_query($parameters),
+        ]);
     }
 }

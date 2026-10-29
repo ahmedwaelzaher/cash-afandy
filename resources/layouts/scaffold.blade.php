@@ -20,23 +20,21 @@
 
     <link rel="icon" href="{{ hashed_asset('/favicon.ico') }}" type="image/x-icon" />
 
-    {{-- Caching using Service Worker --}}
-    @if (config('app.env') === 'production' && setting('service_worker_enabled'))
-        <script>
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js');
-                });
-            }
-        </script>
-    @else
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(e => e.forEach(e => e.unregister()));
-                caches.keys().then(e => e.forEach(e => caches.delete(e)));
-            }
-        </script>
-    @endif
+    <script>
+        window.AppPushConfig = @json($pushConfig);
+        window.AppServiceWorker = null;
+        if ('serviceWorker' in navigator) {
+            @if ($serviceWorkerEnabled)
+                window.AppServiceWorker = navigator.serviceWorker.register(@json($serviceWorkerUrl)).catch(() => null);
+            @else
+                navigator.serviceWorker.getRegistrations().then(registrations => registrations.forEach(registration => {
+                    const worker = registration.active || registration.waiting || registration.installing;
+                    if (worker && new URL(worker.scriptURL).pathname === '/service-worker.js') registration.unregister();
+                }));
+                if ('caches' in window) caches.delete('v1');
+            @endif
+        }
+    </script>
 
     <link rel="stylesheet" href="{{ hashed_asset("/vendor/tabler/css/tabler.$direction.min.css") }}" />
     <link rel="stylesheet" href="{{ hashed_asset('/vendor/fontawesome/css/all.min.css') }}" />

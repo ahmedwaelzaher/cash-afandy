@@ -862,3 +862,181 @@ $(() => {
     $(document).on('visibilitychange.marquee', updateMarquees);
     updateMarquees();
 });
+
+// ==================================================
+// Browser push subscriptions
+// ==================================================
+$(() => {
+    const config = window.AppPushConfig;
+    const endpoints = window.WebsitePush;
+    if (!config?.enabled || !endpoints) return;
+
+    const $panel = $('[data-browser-notifications]').prop('hidden', false);
+    const $enable = $panel.find('[data-push-enable]');
+    const $disable = $panel.find('[data-push-disable]');
+    const preferenceKey = 'cash-afandy:browser-push-enabled';
+    const messageKey = 'cash-afandy:last-push-message';
+    let clientPromise;
+    let busy = false;
+    let lastSync = 0;
+
+    const render = (message, enabled = false) => {
+        $panel.find('[data-push-status]').text(message);
+        $enable.prop('hidden', enabled).prop('disabled', busy);
+        $disable.prop('hidden', !enabled).prop('disabled', busy);
+    };
+    const wanted = () => localStorage.getItem(preferenceKey) === 'true';
+    const remember = (enabled) => localStorage.setItem(preferenceKey, String(enabled));
+    const removeSubscription = () =>
+        $.ajax({
+            url: endpoints.destroyUrl,
+            method: 'DELETE',
+            dataType: 'json',
+            loginRequiredHandled: true,
+        });
+    const client = () => {
+        if (!clientPromise) {
+            clientPromise = (async () => {
+                const prefix = `https://www.gstatic.com/firebasejs/${config.sdkVersion}`;
+                const [{ initializeApp }, sdk] = await Promise.all([
+                    import(`${prefix}/firebase-app.js`),
+                    import(`${prefix}/firebase-messaging.js`),
+                ]);
+                if (!(await sdk.isSupported())) throw new Error('unsupported');
+                const messaging = sdk.getMessaging(initializeApp(config.firebase));
+                sdk.onMessage(messaging, (payload) => {
+                    if (!wanted()) return;
+                    $(document).trigger('website:notification-received', [payload.data?.notification_id]);
+                    if (document.hidden) return;
+                    const id = payload.data?.notification_id || payload.messageId;
+                    if (id && localStorage.getItem(messageKey) === id) return;
+                    if (id) localStorage.setItem(messageKey, id);
+                    const text = [payload.notification?.title, payload.notification?.body].filter(Boolean).join(' — ');
+                    if (text) toastify().info($('<span>').text(text).html());
+                });
+                return { sdk, messaging };
+            })().catch((error) => {
+                clientPromise = null;
+                throw error;
+            });
+        }
+        return clientPromise;
+    };
+    const run = async (action) => {
+        if (busy) return;
+        busy = true;
+        $enable.add($disable).prop('disabled', true);
+        try {
+            // Coordinate registration and opt-out across tabs in the same browser.
+            if (navigator.locks) await navigator.locks.request('cash-afandy:push-subscription', action);
+            else await action();
+        } catch {
+            render(__('Unable to update browser notifications. Please try again.'), wanted());
+            $enable.prop('hidden', false);
+        } finally {
+            busy = false;
+            $enable.add($disable).prop('disabled', false);
+        }
+    };
+    const synchronize = async () => {
+        if (!wanted()) return;
+        if (Notification.permission !== 'granted') {
+            await removeSubscription();
+            localStorage.removeItem(preferenceKey);
+            render(__('Allow notifications in your browser settings to enable them.'));
+            return;
+        }
+        const { sdk, messaging } = await client();
+        const registration = await window.AppServiceWorker;
+        if (!registration) throw new Error('worker unavailable');
+        const worker = registration.installing || registration.waiting || registration.active;
+        if (!worker) throw new Error('worker unavailable');
+        if (worker.state !== 'activated') {
+            await new Promise((resolve, reject) => {
+                worker.addEventListener('statechange', () => {
+                    if (worker.state === 'activated') resolve();
+                    if (worker.state === 'redundant') reject(new Error('worker unavailable'));
+                });
+            });
+        }
+        const token = await sdk.getToken(messaging, {
+            vapidKey: config.vapidKey,
+            serviceWorkerRegistration: registration,
+        });
+        if (!token || !wanted()) return;
+        await $.ajax({
+            url: endpoints.storeUrl,
+            method: 'POST',
+            data: { token },
+            dataType: 'json',
+            loginRequiredHandled: true,
+        });
+        if (!wanted()) {
+            await removeSubscription();
+            return;
+        }
+        lastSync = Date.now();
+        render(__('Notifications are enabled for this browser.'), true);
+    };
+    const disable = async () => {
+        try {
+            await removeSubscription();
+            localStorage.removeItem(preferenceKey);
+        } finally {
+            // Revoke the browser token even if the application server is temporarily unreachable.
+            try {
+                const { sdk, messaging } = await client();
+                await sdk.deleteToken(messaging);
+            } catch {
+                /* Server-side detachment remains sufficient when Firebase is unreachable. */
+            }
+        }
+        render(__('Browser notifications are disabled.'));
+    };
+
+    if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
+        render(__('Browser notifications are not supported on this device.'));
+        $enable.prop('disabled', true);
+        return;
+    }
+    try {
+        render(wanted() ? __('Updating browser notifications…') : __('Browser notifications are disabled.'), wanted());
+        if (wanted()) run(synchronize);
+        else if (localStorage.getItem(preferenceKey) === 'false') run(disable);
+    } catch {
+        render(__('Browser notifications are not supported on this device.'));
+        $enable.prop('disabled', true);
+        return;
+    }
+
+    $enable.on('click', async () => {
+        if (busy) return;
+        $enable.prop('disabled', true);
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                render(__('Allow notifications in your browser settings to enable them.'));
+                return;
+            }
+            remember(true);
+            await run(synchronize);
+        } catch {
+            render(__('Unable to update browser notifications. Please try again.'));
+        } finally {
+            $enable.prop('disabled', false);
+        }
+    });
+    $disable.on('click', () => {
+        remember(false);
+        run(disable);
+    });
+    $(window).on('storage.browserPush', (event) => {
+        if (event.originalEvent.key !== preferenceKey) return;
+        if (wanted()) run(synchronize);
+        else render(__('Browser notifications are disabled.'));
+    });
+    $(document).on('visibilitychange.browserPush', () => {
+        if (!document.hidden && wanted() && Date.now() - lastSync > 300000) run(synchronize);
+        else if (!document.hidden && localStorage.getItem(preferenceKey) === 'false') run(disable);
+    });
+});

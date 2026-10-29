@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamp('last_seen_at')->nullable();
             $table->timestamp('disabled_at')->nullable();
             $table->timestamps();
-            $table->index(['notifiable_type', 'notifiable_id', 'disabled_at']);
+            $table->index(['notifiable_type', 'notifiable_id', 'disabled_at'], 'push_subscriptions_recipient_active_index');
         });
     }
 
