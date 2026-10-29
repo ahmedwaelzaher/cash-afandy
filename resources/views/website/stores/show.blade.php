@@ -1,6 +1,5 @@
 @php
     $hasCodeOffers = $offers->contains(fn ($offer) => filled($offer->code));
-    $hasDirectOffers = $offers->contains(fn ($offer) => blank($offer->code));
 @endphp
 
 <x-layouts::website :title="$store->title">
@@ -58,22 +57,14 @@
                 @endif
             </header>
 
-            <section class="site-offers bg-transparent" aria-labelledby="store-offers-title" data-offer-filter-attribute="data-offer-type">
-                @if ($offers->isNotEmpty())
-                    <div class="site-offers-filters d-flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('Filter offers') }}">
-                        <button type="button" class="btn btn-primary" data-offer-filter="all" aria-pressed="true">{{ __('All') }}</button>
-                        <button type="button" class="btn" data-offer-filter="code" aria-pressed="false" @disabled(! $hasCodeOffers)>{{ __('Offers with codes') }}</button>
-                        <button type="button" class="btn" data-offer-filter="link" aria-pressed="false" @disabled(! $hasDirectOffers)>{{ __('Direct offers') }}</button>
-                    </div>
-                @endif
-
+            <section class="site-offers bg-transparent" aria-labelledby="store-offers-title">
                 <div class="row g-4 align-items-start">
                     <div class="col-12 col-lg-8">
                         @if ($offers->isNotEmpty())
                             <div class="site-offers-grid">
                                 @php($category = $store->categories->first())
                                 @foreach ($offers as $offer)
-                                    <div data-offer-type="{{ filled($offer->code) ? 'code' : 'link' }}">
+                                    <div>
                                         @include('website.partials.offer-card', [
                                             'categoryLabel' => $category?->title,
                                             'categorySlug' => $category?->slug,
