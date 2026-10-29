@@ -22,7 +22,8 @@
 2. **Reuse before you add.**
     - Before implementation, inspect the system's available assets and capabilities, including shared and core components, layouts, helpers, theme variables, CSS utilities, JS initializers, loaded libraries, icons, fonts, and images. Read actual usage examples rather than checking filenames alone.
     - If a helper, component, CSS class, route pattern, or JS initializer already exists, use it.
-    - Prefer a suitable existing implementation, then a small compatible extension or variant. Add something new only when no suitable alternative exists; don't force an unsuitable component into the design.
+    - Inspect and try suitable existing generic solutions and utilities before proposing custom code or a hotfix. Read their actual usage and verify whether they solve the need; don't force an unsuitable component into the design.
+    - Never implement a hotfix, special-case workaround, or custom code without the user's explicit approval for that specific approach. If existing generic solutions and utilities are insufficient, first explain what was tried, why it falls short, the proposed approach, and its side effects, then wait for approval. A general request to implement a feature or fix a bug is not approval for a custom workaround.
     - Don't create a parallel version under a new name.
     - No duplicates: never define the same style, value, or logic twice. If the website and the dashboard both need it, keep it once in the shared file (e.g. `overrides.css`) and delete the other copy.
 3. **Make the smallest safe change.**
@@ -134,6 +135,7 @@ When asking:
 
 **Don't ask** when the change is:
 
+- Reuses existing generic solutions or utilities without introducing custom code or a hotfix
 - Small
 - Isolated
 - Low-risk
