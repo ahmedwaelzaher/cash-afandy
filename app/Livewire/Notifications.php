@@ -8,11 +8,25 @@ use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Notifications extends Component
 {
+    use WithPagination;
+
     #[Locked]
     public bool $website = false;
+
+    #[Locked]
+    public bool $fullPage = false;
+
+    public string $status = 'all';
+
+    public function updatedStatus(): void
+    {
+        if (! in_array($this->status, ['all', 'unread'], true)) $this->status = 'all';
+        $this->resetPage('notificationsPage');
+    }
 
     public function markAsRead(string $id): void
     {
@@ -66,7 +80,7 @@ class Notifications extends Component
     }
 
     /**
-     * Refresh the dropdown when notifications change elsewhere on the page.
+     * Refresh notifications when they change elsewhere on the page.
      */
     #[On('notifications-updated')]
     #[On('website-notifications-updated')]
@@ -76,19 +90,21 @@ class Notifications extends Component
     }
 
     /**
-     * Render the notifications dropdown.
+     * Render notifications for the current panel and display mode.
      */
     public function render()
     {
         if ($this->website) {
             $query = $this->websiteQuery();
             $unreadCount = (clone $query)->whereNull('read_at')->count();
+            $totalCount = $this->fullPage ? (clone $query)->count() : null;
+            if ($this->status === 'unread') $query->whereNull('read_at');
             $query->latest();
+            $notifications = $this->fullPage
+                ? $query->paginate(15, pageName: 'notificationsPage', total: $this->status === 'unread' ? $unreadCount : $totalCount)
+                : $query->limit(10)->get();
 
-            return view('livewire.website-notifications', [
-                'notifications' => $query->limit(10)->get(),
-                'unreadCount' => $unreadCount,
-            ]);
+            return view('livewire.website-notifications', compact('notifications', 'unreadCount', 'totalCount'));
         }
 
         $notifications = current_admin()->unreadNotifications()->latest()->limit(5)->get();

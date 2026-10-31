@@ -8,14 +8,16 @@
                 </li>
             @else
                 <li class="page-item">
-                    <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">@lang('pagination.previous')</a>
+                    <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev"
+                        @if ($livewirePagination ?? false) wire:click.prevent="previousPage('{{ $paginator->getPageName() }}')" @endif>@lang('pagination.previous')</a>
                 </li>
             @endif
 
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
                 <li class="page-item">
-                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">@lang('pagination.next')</a>
+                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next"
+                        @if ($livewirePagination ?? false) wire:click.prevent="nextPage('{{ $paginator->getPageName() }}')" @endif>@lang('pagination.next')</a>
                 </li>
             @else
                 <li class="page-item disabled" aria-disabled="true">
@@ -48,6 +50,7 @@
                 @else
                     <li class="page-item">
                         <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev"
+                            @if ($livewirePagination ?? false) wire:click.prevent="previousPage('{{ $paginator->getPageName() }}')" @endif
                             aria-label="@lang('pagination.previous')">&lsaquo;</a>
                     </li>
                 @endif
@@ -70,7 +73,8 @@
                                 </li>
                             @else
                                 <li class="page-item">
-                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                    <a class="page-link" href="{{ $url }}"
+                                        @if ($livewirePagination ?? false) wire:click.prevent="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')" @endif>{{ $page }}</a>
                                 </li>
                             @endif
                         @endforeach
@@ -81,6 +85,7 @@
                 @if ($paginator->hasMorePages())
                     <li class="page-item">
                         <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next"
+                            @if ($livewirePagination ?? false) wire:click.prevent="nextPage('{{ $paginator->getPageName() }}')" @endif
                             aria-label="@lang('pagination.next')">&rsaquo;</a>
                     </li>
                 @else

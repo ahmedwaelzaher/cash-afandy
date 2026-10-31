@@ -345,11 +345,28 @@ test('a stale browser session cannot expose an earlier accounts personal or brow
         ->assertDontSee('Earlier personal message')->assertDontSee('Earlier browser message');
 });
 
+test('the unread filter and visit action keep notification links and ownership scoped', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user, 'users');
+    $url = route('website.offers.index');
+    $read = storedWebsiteNotification($user, 'Already read');
+    $read->markAsRead();
+    $unread = storedWebsiteNotification($user, 'New offer', $url);
+
+    Livewire::test(Notifications::class, ['website' => true, 'fullPage' => true])->set('status', 'unread')
+        ->assertDontSee('Already read')->assertSee('New offer')->call('visit', $unread->id)->assertRedirect($url);
+    expect($unread->fresh()->read_at)->not->toBeNull();
+});
+
 test('the website notification visit cannot execute a non web URL scheme', function () {
     $user = User::factory()->create();
     $this->actingAs($user, 'users');
     $notification = storedWebsiteNotification($user, 'Unsafe link', 'javascript:alert(1)');
     Livewire::test(Notifications::class, ['website' => true])->call('visit', $notification->id)->assertNoRedirect();
+});
+
+test('the website inbox is available to guests', function () {
+    $this->get(route('website.notifications.index'))->assertOk()->assertSee(__('No notifications yet'));
 });
 
 test('dashboard notification rendering retains its existing admin scope', function () {

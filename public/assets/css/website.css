@@ -11,9 +11,29 @@
     --Blue: #0B99FFFF;
 }
 
-/* Browser notification invitation */
+/* Website notifications and browser invitation */
 .site-notifications .dropdown-menu {
     inline-size: 22rem;
+}
+
+.site-notifications-page {
+    --tblr-primary: var(--site-green);
+    --tblr-primary-fg: var(--site-surface);
+    --tblr-primary-lt: var(--site-soft);
+}
+
+.site-notifications-page .nav-segmented {
+    --tblr-nav-bg: var(--site-surface);
+    --tblr-nav-active-bg: var(--site-soft);
+    --tblr-nav-radius: var(--site-control-radius);
+}
+
+.site-notification-card {
+    border-inline-start-width: 3px;
+}
+
+.site-notification-card.bg-primary-lt {
+    border-inline-start-color: var(--tblr-primary);
 }
 
 .website-layout button.status-dot.bg-transparent:hover {

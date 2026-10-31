@@ -5,6 +5,7 @@ use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\FavoriteOfferController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
+use App\Http\Controllers\Website\NotificationController;
 use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\PendingActionController;
 use App\Http\Controllers\Website\ProfileController;
@@ -47,6 +48,7 @@ Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.sho
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('search', SearchController::class)->name('search');
+Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
 Route::post('auth/pending-action', [PendingActionController::class, 'store'])->middleware('throttle:30,1')->name('pending-action.store');
 Route::delete('auth/pending-action', [PendingActionController::class, 'destroy'])->middleware('throttle:30,1')->name('pending-action.destroy');
