@@ -12,6 +12,14 @@
 }
 
 /* Browser notification invitation */
+.site-notifications .dropdown-menu {
+    inline-size: 22rem;
+}
+
+.website-layout button.status-dot.bg-transparent:hover {
+    background-color: var(--tblr-primary) !important;
+}
+
 .site-push-prompt {
     --tblr-primary: var(--site-green);
     --tblr-primary-darken: var(--site-ink);
@@ -2030,7 +2038,8 @@ Offer Code
     color: var(--site-ink);
 }
 
-.site-store-filter.active .badge {
+.site-store-filter.active .badge,
+.site-notifications > .btn .badge {
     background: var(--site-green);
     color: var(--site-surface);
 }

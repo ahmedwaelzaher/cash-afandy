@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\SendPushNotification;
+use App\Livewire\Notifications;
 use App\Models\Admin;
 use App\Models\PushSubscription;
 use App\Models\User;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
+use Livewire\Livewire;
 
 trait SupportsPushSubscriptionSqliteTests
 {
@@ -25,6 +28,14 @@ trait SupportsPushSubscriptionSqliteTests
 }
 
 uses(SupportsPushSubscriptionSqliteTests::class);
+
+function storedWebsiteNotification($recipient, string $title, ?string $url = null)
+{
+    return $recipient->notifications()->create([
+        'id' => (string) Str::uuid(), 'type' => WebsiteNotification::class,
+        'data' => ['title' => $title, 'body' => 'Notification body', 'url' => $url],
+    ]);
+}
 
 beforeEach(function () {
     config(['redot.notifications.push_enabled' => true]);
@@ -279,4 +290,78 @@ test('logging out blocks pending personal delivery while preserving public brows
     (new SendPushNotification($private->id, $subscription->id, $subscription->token_hash))->handle();
     (new SendPushNotification($private->id, $subscription->id, $subscription->token_hash, forBrowser: true))->handle();
     (new SendPushNotification($public->id, $subscription->id, $subscription->token_hash, forBrowser: true))->handle();
+});
+
+test('the website inbox combines only the account and its current browser notifications', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+    $this->actingAs($user, 'users')->postJson(route('website.push-subscriptions.store'), ['token' => 'inbox-browser'])->assertNoContent();
+    $browser = PushSubscription::firstOrFail();
+    $private = storedWebsiteNotification($user, 'Account message');
+    $public = storedWebsiteNotification($browser, 'Browser message');
+    $foreign = storedWebsiteNotification($other, 'Other account message');
+
+    Livewire::test(Notifications::class, ['website' => true])->assertSee('Account message')
+        ->assertSee('Browser message')->assertDontSee('Other account message')->assertViewHas('unreadCount', 2)
+        ->call('markAllAsRead')->assertDispatched('website-notifications-updated')->assertViewHas('unreadCount', 0);
+    expect($private->fresh()->read_at)->not->toBeNull()->and($public->fresh()->read_at)->not->toBeNull()
+        ->and($foreign->fresh()->read_at)->toBeNull();
+});
+
+test('guests can read and mark only notifications of the browser stored in their session', function () {
+    $this->postJson(route('website.push-subscriptions.store'), ['token' => 'guest-inbox'])->assertNoContent();
+    $browser = PushSubscription::firstOrFail();
+    $own = storedWebsiteNotification($browser, 'Guest browser message');
+    $other = PushSubscription::create(['token' => 'another-guest']);
+    $foreign = storedWebsiteNotification($other, 'Another browser message');
+
+    Livewire::test(Notifications::class, ['website' => true])->assertSee('Guest browser message')
+        ->assertDontSee('Another browser message')->call('markAsRead', $own->id)->assertViewHas('unreadCount', 0);
+    Livewire::test(Notifications::class, ['website' => true])->call('markAsRead', $foreign->id)->assertStatus(404);
+    expect($foreign->fresh()->read_at)->toBeNull();
+});
+
+test('an anonymous inbox without a browser session cannot expose or modify saved notifications', function () {
+    $browser = PushSubscription::create(['token' => 'unbound-browser']);
+    $notification = storedWebsiteNotification($browser, 'Unbound message');
+
+    Livewire::test(Notifications::class, ['website' => true])->assertDontSee('Unbound message')
+        ->assertViewHas('unreadCount', 0)->call('markAllAsRead');
+    expect($notification->fresh()->read_at)->toBeNull();
+});
+
+test('a stale browser session cannot expose an earlier accounts personal or browser messages', function () {
+    $previous = User::factory()->create();
+    $current = User::factory()->create();
+    $browser = new PushSubscription(['token' => 'previous-account-browser']);
+    $browser->notifiable()->associate($previous);
+    $browser->save();
+    storedWebsiteNotification($previous, 'Earlier personal message');
+    storedWebsiteNotification($browser, 'Earlier browser message');
+    storedWebsiteNotification($current, 'Current account message');
+    $this->actingAs($current, 'users')->withSession(['push_subscription_token_hash' => $browser->token_hash]);
+
+    Livewire::test(Notifications::class, ['website' => true])->assertSee('Current account message')
+        ->assertDontSee('Earlier personal message')->assertDontSee('Earlier browser message');
+});
+
+test('the website notification visit cannot execute a non web URL scheme', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user, 'users');
+    $notification = storedWebsiteNotification($user, 'Unsafe link', 'javascript:alert(1)');
+    Livewire::test(Notifications::class, ['website' => true])->call('visit', $notification->id)->assertNoRedirect();
+});
+
+test('dashboard notification rendering retains its existing admin scope', function () {
+    $admin = Admin::factory()->create();
+    $user = User::factory()->create();
+    storedWebsiteNotification($admin, 'Administrator message');
+    storedWebsiteNotification($user, 'Website only message');
+    $this->actingAs($admin, 'admins');
+    Livewire::test(Notifications::class)->assertSee('Administrator message')->assertDontSee('Website only message');
+});
+
+test('the notification component scope cannot be changed by a Livewire property update', function () {
+    expect(fn () => Livewire::test(Notifications::class, ['website' => true])->set('website', false))
+        ->toThrow(CannotUpdateLockedPropertyException::class);
 });

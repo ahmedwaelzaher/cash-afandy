@@ -11,6 +11,9 @@
         </a>
 
         <div class="site-header-actions d-flex gap-2">
+            <div class="d-xl-none">
+                <livewire:notifications :website="true" key="website-notifications-mobile" />
+            </div>
             <div class="dropdown site-header-search">
                 <button type="button" class="btn btn-icon btn-ghost-secondary d-xl-none" data-bs-toggle="dropdown" data-bs-display="static"
                     data-bs-auto-close="outside" aria-expanded="false" aria-controls="site-header-search" aria-label="{{ __('Search') }}">
@@ -58,6 +61,9 @@
                 </nav>
 
                 <div class="site-navbar-settings d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center">
+                    <div class="d-none d-xl-block">
+                        <livewire:notifications :website="true" key="website-notifications-desktop" />
+                    </div>
                     @if (($currentCountry && setting('show_website_countries_dropdown')) || count($otherLocales))
                         <p class="d-xl-none mb-1 fw-medium text-secondary">{{ __('Preferences') }}</p>
                     @endif
