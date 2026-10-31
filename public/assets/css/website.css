@@ -27,12 +27,13 @@
     position: fixed;
     inset-block-end: max(1rem, env(safe-area-inset-bottom));
     inset-inline-end: 1rem;
-    inline-size: min(30rem, calc(100% - 2rem));
+    inline-size: min(22rem, calc(100% - 2rem));
     max-block-size: calc(100dvh - 2rem);
     overflow-y: auto;
     z-index: 1025;
     background: var(--site-surface);
     color: var(--site-ink);
+    font-size: 0.8125rem;
     border: 1px solid var(--site-line);
     border-radius: var(--site-radius);
     box-shadow: var(--site-shadow);
@@ -43,34 +44,15 @@
 }
 
 .site-push-prompt .btn {
-    min-block-size: 2.75rem;
+    min-block-size: 2rem;
     white-space: normal;
 }
 
-.site-push-prompt .btn-outline-secondary {
-    background: var(--site-paper);
-    border-color: var(--site-line);
-    color: var(--site-text);
-}
-
-.site-push-prompt .btn-outline-secondary:hover {
-    background: var(--site-soft);
-}
-
 .site-push-prompt-icon {
-    position: relative;
-    inline-size: 4rem;
-    block-size: 4rem;
+    inline-size: 2rem;
+    block-size: 2rem;
     background: var(--site-soft);
-    font-size: 2rem;
-}
-
-.site-push-prompt-sparkle {
-    position: absolute;
-    inset-block-start: 0.375rem;
-    inset-inline-end: 0.375rem;
-    color: var(--site-gold);
-    font-size: 1rem;
+    font-size: 1.125rem;
 }
 
 /* ============================================================
@@ -171,6 +153,7 @@ Form Check (Radio)
     --site-text: #53634a;
     --site-line: #dce3d0;
     --site-radius: 1.25rem;
+    --site-control-radius: 0.75rem;
     --site-shadow: 0 12px 32px #243b1710;
     --site-input-focus-shadow: var(--tblr-shadow-input), 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
     --site-highlight: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
@@ -359,14 +342,15 @@ Form Check (Radio)
 .site-offers-grid,
 .site-error-content,
 .site-offer-reveal,
-.site-static-page {
+.site-static-page,
+.site-push-prompt .nav-link {
     --tblr-primary: var(--site-ink);
     --tblr-primary-fg: var(--site-surface);
     --tblr-primary-darken: #365635;
     --tblr-body-color: var(--site-ink);
     --tblr-bg-surface: var(--site-surface);
     --tblr-border-color-translucent: var(--site-line);
-    --tblr-border-radius: 0.75rem;
+    --tblr-border-radius: var(--site-control-radius);
     --tblr-secondary: var(--site-text);
     --tblr-secondary-rgb: 83, 99, 74;
     --tblr-tertiary: var(--site-text);
@@ -442,7 +426,8 @@ Form Check (Radio)
     font-size: 1rem;
 }
 
-.site-navbar .nav-link {
+.site-navbar .nav-link,
+.site-push-prompt .nav-link {
     display: flex;
     align-items: center;
     padding: 0.5rem;
@@ -452,7 +437,8 @@ Form Check (Radio)
     white-space: nowrap;
 }
 
-.site-navbar .nav-link:hover {
+.site-navbar .nav-link:hover,
+.site-push-prompt .nav-link:is(:hover, :active, :focus-visible) {
     color: var(--tblr-primary-darken);
     background: var(--site-soft);
 }
@@ -476,7 +462,8 @@ Form Check (Radio)
 }
 
 .site-navbar :is(a, button):focus-visible,
-.site-hero :is(a, button):focus-visible {
+.site-hero :is(a, button):focus-visible,
+.site-push-prompt .nav-link:focus-visible {
     outline: 3px solid #a77b20;
     outline-offset: 3px;
 }
@@ -1142,9 +1129,20 @@ Form Check (Radio)
     .site-stores,
     .site-offers,
     .site-categories,
+    .site-static-page,
+    .site-push-prompt .nav-link {
+        --site-control-radius: 0.5625rem;
+    }
+
+    .site-navbar,
+    .site-hero,
+    .site-store-strip,
+    .site-store,
+    .site-stores,
+    .site-offers,
+    .site-categories,
     .site-static-page {
         --site-nav-link-padding: 0.75rem;
-        --tblr-border-radius: 0.5625rem;
         font-size: 0.65625rem;
     }
 
@@ -1220,7 +1218,8 @@ Form Check (Radio)
         font-size: 0.75rem;
     }
 
-    .site-navbar .nav-link {
+    .site-navbar .nav-link,
+    .site-push-prompt .nav-link {
         padding: 0.375rem;
     }
 

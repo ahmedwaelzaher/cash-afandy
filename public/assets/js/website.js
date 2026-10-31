@@ -1,5 +1,5 @@
 // ==================================================
-// Hero heading
+// Hero heading: rotate words while respecting reduced-motion preferences
 // ==================================================
 $(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -43,25 +43,7 @@ $(() => {
 });
 
 // ==================================================
-// Offer code decoding
-// ==================================================
-/**
- * Decode an offer code that was encoded with AES-GCM and base64.
- *
- * @param {string} encoded - The base64-encoded offer code.
- * @returns {Promise<string>} - The decoded offer code.
- */
-async function decodeOfferCode(encoded) {
-    let bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
-    let keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cashafandy'));
-    let key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
-    let decoded = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, key, bytes.slice(12));
-
-    return new TextDecoder().decode(decoded);
-}
-
-// ==================================================
-// Header search suggestions
+// Header search suggestions: requests, result cache and keyboard navigation
 // ==================================================
 $(() => {
     $('[data-afandy-search]').each((index, element) => {
@@ -70,6 +52,7 @@ $(() => {
         const $input = $form.find('[name="afandy_search"]');
         const $category = $form.find('[name="afandy_category"]');
         const $button = $form.find('[data-afandy-search-button]');
+        const $icon = $button.find('.ti');
         const $spinner = $form.find('[data-submit-spinner]');
         const $results = $panel.find('#afandy-search-results');
         let request;
@@ -80,6 +63,7 @@ $(() => {
         let loadedCategory = null;
         let dismissed = false;
 
+        // Keep the category menu, result visibility and submit/reset button in sync.
         const syncCategory = () => {
             const selected = $category.val();
             $form.find('[data-search-category]').each((_, option) => {
@@ -100,17 +84,25 @@ $(() => {
             completed = clear;
             $button.attr('type', clear ? 'button' : 'submit')
                 .attr('aria-label', $button.attr(clear ? 'data-reset-label' : 'data-search-label'));
-            $button.find('.ti').toggleClass('ti-search', !clear).toggleClass('ti-x', clear);
-            $button.find('.ti').prop('hidden', false);
+            $icon.toggleClass('ti-search', !clear).toggleClass('ti-x', clear).prop('hidden', false);
         };
+        const resetResults = (clear) => {
+            loadedSearch = null;
+            loadedCategory = null;
+            $results.empty();
+            buttonState(clear);
+            show(false);
+        };
+        // Abort obsolete requests before another query or keyboard action changes the results.
         const cancel = () => {
             revision++;
             if (request) request.abort();
             request = null;
             $spinner.empty();
-            $button.find('.ti').prop('hidden', false);
+            $icon.prop('hidden', false);
             $results.attr('aria-busy', 'false');
         };
+        // Preserve the header search when directory filters or pagination links are followed.
         const updateUrl = (search) => {
             const url = new URL(window.location.href);
             if (search) url.searchParams.set('afandy_search', search);
@@ -136,6 +128,7 @@ $(() => {
                 link.href = target.href;
             });
         };
+        // Only the latest request may update the suggestions or their loading state.
         const load = () => {
             cancel();
             const search = $input.val().trim();
@@ -159,7 +152,7 @@ $(() => {
             $results.empty().attr('aria-busy', 'true');
             show(false);
             $spinner.append($('<span class="spinner-border spinner-border-sm" role="status"></span>').attr('aria-label', $button.attr('data-search-label')));
-            $button.find('.ti').prop('hidden', true);
+            $icon.prop('hidden', true);
             request = $.ajax({ url: url.href, dataType: 'json' })
                 .done((response) => {
                     if (currentRevision !== revision) return;
@@ -188,15 +181,12 @@ $(() => {
             debounced.cancel();
             cancel();
             $input.val('');
-            loadedSearch = null;
-            loadedCategory = null;
-            $results.empty();
-            buttonState(false);
-            show(false);
+            resetResults(false);
             updateUrl('');
             $input.trigger('focus');
         };
 
+        // Handle explicit searches, category changes and IME composition separately from typing.
         $form.on('submit', (event) => {
             event.preventDefault();
             debounced.cancel();
@@ -238,6 +228,7 @@ $(() => {
             else if (Array.from($input.val().trim()).length >= 2 && !request) load();
         });
 
+        // Keep keyboard navigation inside the suggestions and respect deliberate dismissal.
         $panel.on('keydown', (event) => {
             if (composing || event.isComposing) return;
             if ($(event.target).closest('.site-search-type').length) return;
@@ -276,10 +267,12 @@ $(() => {
                 show(false);
             }
         });
+        // Restore the form after browser navigation or full directory results change.
         $(window).on('popstate.afandySearch', () => {
             debounced.cancel();
-            $input.val(new URL(window.location.href).searchParams.get('afandy_search') || '');
-            const category = new URL(window.location.href).searchParams.get('afandy_category');
+            const url = new URL(window.location.href);
+            $input.val(url.searchParams.get('afandy_search') || '');
+            const category = url.searchParams.get('afandy_category');
             $category.val(['offers', 'stores'].includes(category) ? category : 'offers');
             syncCategory();
             load();
@@ -294,11 +287,7 @@ $(() => {
             cancel();
             $category.val(category);
             $input.val(search);
-            loadedSearch = null;
-            loadedCategory = null;
-            $results.empty();
-            buttonState(Boolean(search));
-            show(false);
+            resetResults(Boolean(search));
             syncCategory();
         });
         if ($input.val().trim()) load();
@@ -314,6 +303,7 @@ $(() => {
         const isSearch = $section.attr('data-directory-mode') === 'search';
         const searchKey = isSearch ? 'afandy_search' : 'search';
         const categoryKey = isSearch ? 'afandy_category' : 'category';
+        const pageKeys = ['page', 'stores_page', 'offers_page'];
         const $input = $section.find('[data-directory-search] [name="search"]');
         const $clear = $section.find('[data-clear-directory-search]');
         const $results = $section.find('[data-directory-results]');
@@ -322,6 +312,7 @@ $(() => {
         let revision = 0;
         let composing = false;
 
+        // Discard stale responses and preserve header-search parameters on directory links.
         const cancelRequest = () => {
             revision++;
             if (request) request.abort();
@@ -344,6 +335,7 @@ $(() => {
                 link.href = target.href;
             });
         };
+        // Replace only the result area and record history after a successful request.
         const load = (url, historyMode = 'replace') => {
             cancelRequest();
             const currentRevision = revision;
@@ -378,6 +370,7 @@ $(() => {
                     $results.attr('aria-busy', 'false');
                 });
         };
+        // Debounce typing without interrupting composition of Arabic or other IME text.
         const searchDirectory = () => {
             const url = new URL(window.location.href);
             const search = $input.val().trim();
@@ -402,6 +395,7 @@ $(() => {
             composing = false;
             searchDebounced();
         });
+        // Keep modified clicks as normal links; update same-page filters and pagination via AJAX.
         $section.on('click', '.site-store-filter, [data-directory-pagination] a, [data-search-pagination] a', (event) => {
             const link = event.currentTarget;
             if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0 || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
@@ -413,9 +407,9 @@ $(() => {
             if ($(link).hasClass('site-store-filter')) {
                 if (target.searchParams.has(categoryKey)) url.searchParams.set(categoryKey, target.searchParams.get(categoryKey));
                 else url.searchParams.delete(categoryKey);
-                for (const key of ['page', 'stores_page', 'offers_page']) url.searchParams.delete(key);
+                for (const key of pageKeys) url.searchParams.delete(key);
             } else {
-                for (const key of ['page', 'stores_page', 'offers_page']) {
+                for (const key of pageKeys) {
                     if (target.searchParams.has(key)) url.searchParams.set(key, target.searchParams.get(key));
                     else url.searchParams.delete(key);
                 }
@@ -423,7 +417,7 @@ $(() => {
             // Keep a newly typed search when navigating before its debounce has fired.
             if ($input.length) {
                 const search = $input.val().trim();
-                if (search !== currentSearch) for (const key of ['page', 'stores_page', 'offers_page']) url.searchParams.delete(key);
+                if (search !== currentSearch) for (const key of pageKeys) url.searchParams.delete(key);
                 if (search) url.searchParams.set(searchKey, search);
                 else url.searchParams.delete(searchKey);
             }
@@ -443,7 +437,7 @@ $(() => {
 });
 
 // ==================================================
-// Sharing
+// Sharing: native share sheet with clipboard fallback
 // ==================================================
 $(() => {
     $(document).on('click', '[data-share-url]', async function () {
@@ -466,7 +460,6 @@ $(() => {
             toastify().error($button.attr('data-share-error'));
         }
     });
-
 });
 
 // ==================================================
@@ -617,6 +610,7 @@ $(() => {
     const pending = new Set();
     const countdowns = new Map();
     const favoriteItems = (id) => $('[data-favorite-item]').filter((_, element) => element.getAttribute('data-favorite-item') === id);
+    // Preserve the remaining undo time while a restore request is in flight.
     const pauseCountdown = (id) => {
         const countdown = countdowns.get(id);
         if (!countdown) return;
@@ -649,6 +643,7 @@ $(() => {
         tick();
     };
 
+    // Update every copy of an offer only after the server confirms its favorite state.
     $(document).on('click', '[data-offer-favorite]', function () {
         const $button = $(this);
         if ($button.attr('data-favorite-authenticated') !== 'true') {
@@ -725,19 +720,33 @@ $(() => {
 
     const $code = $modal.find('[data-revealed-code]');
     const $copy = $modal.find('[data-copy-revealed]');
+    const $copyLabel = $copy.find('[data-copy-label]');
+    const $copyIcon = $copy.find('.ti');
     const $status = $modal.find('[data-copy-status]');
     let reveal;
 
+    // Offer-code decoding is used only by this shared reveal modal.
+    const decodeOfferCode = async (encoded) => {
+        const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+        const keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cashafandy'));
+        const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+        const decoded = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, key, bytes.slice(12));
+
+        return new TextDecoder().decode(decoded);
+    };
+    // Reset the same label and icon both when opening an offer and when retrying a copy.
+    const copyState = (copied) => {
+        $copyLabel.text($status.attr(copied ? 'data-copied-label' : 'data-copy-label'));
+        $copyIcon.toggleClass('ti-check', copied).toggleClass('ti-copy', !copied);
+    };
     const copy = async () => {
         const currentReveal = reveal;
-        $copy.find('[data-copy-label]').text($status.attr('data-copy-label'));
-        $copy.find('.ti').removeClass('ti-check').addClass('ti-copy');
+        copyState(false);
         try {
             await copyToClipboard($code.text());
             if (reveal !== currentReveal || !$modal.hasClass('show')) return;
 
-            $copy.find('[data-copy-label]').text($status.attr('data-copied-label'));
-            $copy.find('.ti').removeClass('ti-copy').addClass('ti-check');
+            copyState(true);
             $status.text($status.attr('data-copy-success'));
         } catch {
             if (reveal !== currentReveal || !$modal.hasClass('show')) return;
@@ -745,6 +754,7 @@ $(() => {
         }
     };
 
+    // Ignore delayed decoding or clipboard results after another offer opens or the modal closes.
     $modal.on('show.bs.modal', (event) => {
         const $button = $(event.relatedTarget);
         const logo = $button.attr('data-store-logo');
@@ -756,8 +766,8 @@ $(() => {
         $modal.find('[data-reveal-link]').prop('hidden', !url).find('a').attr('href', url || null);
 
         $code.text('');
-        $copy.prop('disabled', true).find('[data-copy-label]').text($status.attr('data-copy-label'));
-        $copy.find('.ti').removeClass('ti-check').addClass('ti-copy');
+        $copy.prop('disabled', true);
+        copyState(false);
         $status.text($status.attr('data-copy-pending'));
         reveal = decodeOfferCode($button.attr('data-offer-code'));
         reveal.catch(() => {});
@@ -781,22 +791,20 @@ $(() => {
     });
 
     $copy.on('click', copy);
-
 });
 
 // ==================================================
-// Offer filters
+// Home offer filters: match any category assigned to an offer
 // ==================================================
 $(() => {
     $('.site-offers').on('click', '[data-offer-filter]', function () {
         const $section = $(this).closest('.site-offers');
         const filter = $(this).attr('data-offer-filter');
-        const attribute = $section.attr('data-offer-filter-attribute') || 'data-offer-category';
 
         $section.find('[data-offer-filter]').removeClass('btn-primary').attr('aria-pressed', 'false');
         $(this).addClass('btn-primary').attr('aria-pressed', 'true');
-        $section.find(`[${attribute}]`).each((_, element) => {
-            element.hidden = filter !== 'all' && !element.getAttribute(attribute).split(' ').includes(filter);
+        $section.find('[data-offer-category]').each((_, element) => {
+            element.hidden = filter !== 'all' && !element.getAttribute('data-offer-category').split(' ').includes(filter);
         });
     });
 });
@@ -920,6 +928,9 @@ $(() => {
     const $prompt = $('[data-push-prompt]');
     const $enable = $panel.add($prompt).find('[data-push-enable]');
     const $disable = $panel.find('[data-push-disable]');
+    const $controls = $enable.add($disable);
+    const $status = $panel.find('[data-push-status]');
+    const $promptStatus = $prompt.find('[data-push-prompt-status]');
     const preferenceKey = 'cash-afandy:browser-push-enabled';
     const messageKey = 'cash-afandy:last-push-message';
     const dismissedKey = 'cash-afandy:push-prompt-dismissed-until';
@@ -927,16 +938,61 @@ $(() => {
     let busy = false;
     let requestingPermission = false;
     let lastSync = 0;
+    let promptVisible = false;
+    let promptAnimation;
 
+    // Animate from the inline end in either direction, including interrupted animations.
+    const showPrompt = (visible) => {
+        if (promptVisible === visible) return;
+        promptVisible = visible;
+        const element = $prompt[0];
+        if (!element) return;
+        const style = window.getComputedStyle(element);
+        const outside = style.direction === 'rtl'
+            ? `translateX(calc(-100% - ${style.insetInlineEnd}))`
+            : `translateX(calc(100% + ${style.insetInlineEnd}))`;
+        const from = promptAnimation ? style.transform : (visible ? outside : 'translateX(0)');
+        promptAnimation?.cancel();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            promptAnimation = null;
+            $prompt.prop('hidden', !visible);
+            return;
+        }
+        $prompt.prop('hidden', false);
+        const animation = element.animate([
+            { transform: from },
+            { transform: visible ? 'translateX(0)' : outside },
+        ], { duration: 200, easing: 'ease-out' });
+        promptAnimation = animation;
+        animation.onfinish = () => {
+            if (promptAnimation !== animation) return;
+            $prompt.prop('hidden', !visible);
+            animation.cancel();
+            promptAnimation = null;
+        };
+    };
+    // Share status and controls between the invitation and the browser settings panel.
     const render = (message, enabled = false) => {
-        $panel.find('[data-push-status]').text(message);
+        $status.text(message);
         $enable.prop('hidden', enabled).prop('disabled', busy);
         $disable.prop('hidden', !enabled).prop('disabled', busy);
     };
     const wanted = () => localStorage.getItem(preferenceKey) === 'true';
     const remember = (enabled) => localStorage.setItem(preferenceKey, String(enabled));
+    const showError = () => {
+        const message = __('Unable to update browser notifications. Please try again.');
+        render(message, wanted());
+        $enable.prop('hidden', false);
+        $promptStatus.text(message).prop('hidden', false);
+        if (wanted() && Notification.permission === 'granted') showPrompt(true);
+    };
+    const unsupported = () => {
+        render(__('Browser notifications are not supported on this device.'));
+        $enable.prop('disabled', true);
+    };
+    // Keep dismissal temporary; an explicit opt-out remains a separate stored preference.
     const dismissPrompt = () => {
-        $prompt.prop('hidden', true);
+        showPrompt(false);
         try {
             localStorage.setItem(dismissedKey, String(Date.now() + 7 * 24 * 60 * 60 * 1000));
         } catch {
@@ -947,15 +1003,9 @@ $(() => {
         const hidden = wanted() || localStorage.getItem(preferenceKey) === 'false'
             || Notification.permission === 'denied'
             || Number(localStorage.getItem(dismissedKey)) > Date.now();
-        $prompt.prop('hidden', hidden);
+        showPrompt(!hidden);
     };
-    const removeSubscription = () =>
-        $.ajax({
-            url: endpoints.destroyUrl,
-            method: 'DELETE',
-            dataType: 'json',
-            loginRequiredHandled: true,
-        });
+    // Reuse one Firebase client and one foreground-message listener per page.
     const client = () => {
         if (!clientPromise) {
             clientPromise = (async () => {
@@ -984,23 +1034,30 @@ $(() => {
         }
         return clientPromise;
     };
+    // Serialize subscription changes and restore both sets of controls after failures.
     const run = async (action) => {
         if (busy) return;
         busy = true;
-        $enable.add($disable).prop('disabled', true);
+        $controls.prop('disabled', true);
         try {
             // Coordinate registration and opt-out across tabs in the same browser.
             if (navigator.locks) await navigator.locks.request('cash-afandy:push-subscription', action);
             else await action();
         } catch {
-            render(__('Unable to update browser notifications. Please try again.'), wanted());
-            $enable.prop('hidden', false);
-            $prompt.find('[data-push-prompt-status]').text(__('Unable to update browser notifications. Please try again.')).prop('hidden', false);
+            showError();
         } finally {
             busy = false;
-            $enable.add($disable).prop('disabled', false);
+            $controls.prop('disabled', false);
         }
     };
+    const removeSubscription = () =>
+        $.ajax({
+            url: endpoints.destroyUrl,
+            method: 'DELETE',
+            dataType: 'json',
+            loginRequiredHandled: true,
+        });
+    // Save tokens only after worker activation and recheck opt-out across asynchronous work.
     const synchronize = async () => {
         if (!wanted()) return;
         if (Notification.permission !== 'granted') {
@@ -1026,7 +1083,8 @@ $(() => {
             vapidKey: config.vapidKey,
             serviceWorkerRegistration: registration,
         });
-        if (!token || !wanted()) return;
+        if (!wanted()) return;
+        if (!token) throw new Error('token unavailable');
         await $.ajax({
             url: endpoints.storeUrl,
             method: 'POST',
@@ -1040,7 +1098,8 @@ $(() => {
         }
         lastSync = Date.now();
         render(__('Notifications are enabled for this browser.'), true);
-        $prompt.prop('hidden', true);
+        showPrompt(false);
+        $(document).trigger('website:push-subscription-updated');
     };
     const disable = async () => {
         try {
@@ -1056,11 +1115,12 @@ $(() => {
             }
         }
         render(__('Browser notifications are disabled.'));
+        $(document).trigger('website:push-subscription-updated');
     };
 
+    // Restore the saved preference only on supported browsers with accessible storage.
     if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
-        render(__('Browser notifications are not supported on this device.'));
-        $enable.prop('disabled', true);
+        unsupported();
         return;
     }
     try {
@@ -1069,28 +1129,28 @@ $(() => {
         else if (localStorage.getItem(preferenceKey) === 'false') run(disable);
         updatePrompt();
     } catch {
-        render(__('Browser notifications are not supported on this device.'));
-        $enable.prop('disabled', true);
+        unsupported();
         return;
     }
 
+    // Ask permission from the click handler and keep registration errors retryable.
     $enable.on('click', async () => {
         if (busy || requestingPermission) return;
         requestingPermission = true;
         $enable.prop('disabled', true);
-        $prompt.find('[data-push-prompt-status]').prop('hidden', true);
+        $promptStatus.prop('hidden', true);
         try {
-            const permission = await Notification.requestPermission();
+            const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
             if (permission !== 'granted') {
                 dismissPrompt();
                 render(__('Allow notifications in your browser settings to enable them.'));
                 return;
             }
+            showPrompt(false);
             remember(true);
             await run(synchronize);
         } catch {
-            render(__('Unable to update browser notifications. Please try again.'));
-            $prompt.find('[data-push-prompt-status]').text(__('Unable to update browser notifications. Please try again.')).prop('hidden', false);
+            showError();
         } finally {
             requestingPermission = false;
             $enable.prop('disabled', false);
@@ -1105,6 +1165,7 @@ $(() => {
         remember(false);
         run(disable);
     });
+    // Sync other tabs and refresh an active subscription at most once every five minutes.
     $(window).on('storage.browserPush', (event) => {
         if (event.originalEvent.key === dismissedKey) updatePrompt();
         if (event.originalEvent.key !== preferenceKey) return;
