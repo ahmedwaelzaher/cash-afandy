@@ -131,9 +131,9 @@ return Sidebar::make([
                 ->icon('ti ti-photo'),
 
             Item::make()
-                ->title(__('Website') . ' — ' . __('Send Notification'))
-                ->route('dashboard.website-notifications.create')
-                ->icon('ti ti-bell-plus'),
+                ->title(__('Website') . ' — ' . __('Notifications'))
+                ->route('dashboard.website-notifications.index')
+                ->icon('ti ti-bell'),
         ]),
 
     Item::make()

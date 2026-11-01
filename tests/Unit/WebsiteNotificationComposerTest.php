@@ -1,8 +1,14 @@
 <?php
 
 use App\Http\Controllers\Dashboard\WebsiteNotificationController;
+use App\Jobs\SendScheduledWebsiteNotifications;
+use App\Livewire\Datatables\ScheduledWebsiteNotifications;
 use App\Models\Admin;
+use App\Models\ScheduledWebsiteNotification;
 use App\Models\User;
+use App\Notifications\WebsiteNotification;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Request;
@@ -10,7 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
@@ -61,6 +67,7 @@ beforeEach(function () {
         $table->timestamps();
     });
     (require database_path('migrations/2026_11_01_000001_add_notification_preferences_to_user_preferences.php'))->up();
+    (require database_path('migrations/2026_11_01_000002_create_scheduled_website_notifications_table.php'))->up();
     Schema::create('notifications', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('type');
@@ -90,23 +97,31 @@ test('website notifications are invisible before their scheduled time and delive
     $response = $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'users' => json_encode($this->payload['users'])]));
     $sendAt = Carbon::parse($this->payload['send_at'], config('app.timezone'));
 
-    expect($response->getTargetUrl())->toBe(route('dashboard.website-notifications.create'))
-        ->and(DB::table('jobs')->count())->toBe(2)
-        ->and(DB::table('jobs')->distinct()->pluck('available_at')->all())->toBe([$sendAt->timestamp])
+    expect($response->getTargetUrl())->toBe(route('dashboard.website-notifications.index'))
+        ->and(DB::table('jobs')->count())->toBe(0)
+        ->and(ScheduledWebsiteNotification::count())->toBe(1)
+        ->and(ScheduledWebsiteNotification::first()->send_at->timestamp)->toBe($sendAt->timestamp)
+        ->and(ScheduledWebsiteNotification::first()->recipient_ids)->toBe([1, 2])
         ->and(DB::table('notifications')->count())->toBe(0)
-        ->and(Queue::connection()->pop())->toBeNull();
+        ->and(ScheduledWebsiteNotification::first()->sent_at)->toBeNull();
+
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->count())->toBe(0);
 
     Carbon::setTestNow($sendAt);
-    while ($job = Queue::connection()->pop()) {
-        $job->fire();
-    }
+    (new SendScheduledWebsiteNotifications)->handle();
 
     expect(DB::table('jobs')->count())->toBe(0)
-        ->and(DB::table('notifications')->orderBy('notifiable_id')->pluck('notifiable_id')->all())->toBe([1, 2]);
+        ->and(DB::table('notifications')->orderBy('notifiable_id')->pluck('notifiable_id')->all())->toBe([1, 2])
+        ->and(ScheduledWebsiteNotification::query()->pending()->count())->toBe(0)
+        ->and(ScheduledWebsiteNotification::first()->sent_at)->not->toBeNull();
     $notification = DB::table('notifications')->first();
     expect(json_decode($notification->data, true))->toMatchArray([
         'title' => 'New offer', 'body' => '<b>Plain text details</b>', 'url' => $this->payload['url'],
     ])->and($notification->read_at)->toBeNull();
+
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->count())->toBe(2);
 });
 
 test('invalid recipients content links and past schedules cannot queue a notification', function (array $invalid, string $field) {
@@ -115,7 +130,8 @@ test('invalid recipients content links and past schedules cannot queue a notific
         test()->fail('Expected validation to fail.');
     } catch (ValidationException $exception) {
         expect($exception->errors())->toHaveKey($field)
-            ->and(DB::table('jobs')->count())->toBe(0);
+            ->and(DB::table('jobs')->count())->toBe(0)
+            ->and(ScheduledWebsiteNotification::count())->toBe(0);
     }
 })->with([
     'no recipients' => [['users' => []], 'users'],
@@ -143,9 +159,7 @@ test('scheduled notifications respect account opt out performed after scheduling
     $this->composer->store(Request::create('/', 'POST', $this->payload));
     DB::table('user_preferences')->insert(['user_id' => 1, 'notifications_enabled' => false]);
     Carbon::setTestNow(Carbon::parse($this->payload['send_at'], config('app.timezone')));
-    while ($job = Queue::connection()->pop()) {
-        $job->fire();
-    }
+    (new SendScheduledWebsiteNotifications)->handle();
 
     expect(DB::table('notifications')->pluck('notifiable_id')->all())->toBe([2]);
 });
@@ -167,9 +181,7 @@ function allowComposerConditions(bool $allowed = true): void
 function deliverComposerNotifications(): array
 {
     Carbon::setTestNow(Carbon::parse(test()->payload['send_at'], config('app.timezone')));
-    while ($job = Queue::connection()->pop()) {
-        $job->fire();
-    }
+    (new SendScheduledWebsiteNotifications)->handle();
 
     return DB::table('notifications')->orderBy('notifiable_id')->pluck('notifiable_id')->all();
 }
@@ -181,7 +193,8 @@ test('condition mode schedules matches directly and ignores the inactive manual 
 
     $this->composer->store(Request::create('/', 'POST', $payload));
 
-    expect(DB::table('jobs')->count())->toBe(1)
+    expect(ScheduledWebsiteNotification::count())->toBe(1)
+        ->and(DB::table('jobs')->count())->toBe(0)
         ->and(DB::table('notifications')->count())->toBe(0)
         ->and(deliverComposerNotifications())->toBe([1]);
 });
@@ -208,6 +221,91 @@ test('conditions with no matching users report a validation error', function () 
 
     expect(fn () => $this->composer->store(Request::create('/', 'POST', $payload)))->toThrow(ValidationException::class);
     expect(DB::table('jobs')->count())->toBe(0);
+});
+
+test('deleting a pending schedule prevents its delivery', function () {
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $entry = ScheduledWebsiteNotification::firstOrFail();
+    $this->composer->destroy((string) $entry->id);
+
+    expect(ScheduledWebsiteNotification::find($entry->id))->toBeNull()
+        ->and(deliverComposerNotifications())->toBe([]);
+});
+
+test('completed schedules cannot be cancelled or shown as pending', function () {
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $entry = ScheduledWebsiteNotification::firstOrFail();
+    expect(deliverComposerNotifications())->toBe([1, 2])
+        ->and((new ScheduledWebsiteNotifications)->query()->count())->toBe(0);
+
+    expect(fn () => $this->composer->destroy((string) $entry->id))
+        ->toThrow(ModelNotFoundException::class);
+    expect(ScheduledWebsiteNotification::find($entry->id))->not->toBeNull();
+});
+
+test('the list contains both future schedules and overdue work that has not been sent', function () {
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $future = ScheduledWebsiteNotification::firstOrFail();
+    $overdue = $future->replicate();
+    $overdue->send_at = now()->subMinute();
+    $overdue->save();
+
+    expect((new ScheduledWebsiteNotifications)->query()->pluck('id')->all())->toBe([$overdue->id, $future->id]);
+});
+
+test('failed delivery rolls back inbox records and leaves the schedule available for retry', function () {
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    Carbon::setTestNow(Carbon::parse($this->payload['send_at'], config('app.timezone')));
+    $sender = Notification::getFacadeRoot();
+    Notification::shouldReceive('sendNow')->once()->andReturnUsing(function ($users) {
+        $users->first()->notifications()->create([
+            'id' => 'ab6241a0-2f7a-4617-a3a9-ef8ba194a41f',
+            'type' => WebsiteNotification::class,
+            'data' => ['title' => 'Incomplete delivery'],
+        ]);
+        throw new RuntimeException('Interrupted delivery');
+    });
+
+    expect(fn () => (new SendScheduledWebsiteNotifications)->handle())->toThrow(RuntimeException::class);
+    expect(DB::table('notifications')->count())->toBe(0)
+        ->and(ScheduledWebsiteNotification::first()->sent_at)->toBeNull();
+
+    Notification::swap($sender);
+    expect(deliverComposerNotifications())->toBe([1, 2]);
+});
+
+test('the dashboard entry opens the standard listing with its create action', function () {
+    $this->actingAs(new Admin(['name' => 'Test admin', 'active' => true]), 'admins');
+    Gate::shouldReceive('forUser')->andReturnSelf();
+    Gate::shouldReceive('allows')->andReturnTrue();
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $source = str_replace(['<x-layouts::dashboard>', '</x-layouts::dashboard>'], ['<div>', '</div>'], file_get_contents(resource_path('views/dashboard/website-notifications/index.blade.php')));
+    $html = Blade::render($source);
+
+    expect($this->composer->index()->name())->toBe('dashboard.website-notifications.index')
+        ->and($html)->toContain(route('dashboard.website-notifications.create'), 'New offer', 'method="delete"')
+        ->and($html)->not->toContain('Incomplete delivery');
+});
+
+test('schedule deletion is hidden without its route permission', function () {
+    expect((new ScheduledWebsiteNotifications)->actions()[0]->visible)->toBeFalse();
+});
+
+test('scheduled delivery is registered every minute before the existing queue worker', function () {
+    $events = app(Schedule::class)->events();
+    $sender = collect($events)->search(fn ($event) => $event->description === SendScheduledWebsiteNotifications::class);
+    $worker = collect($events)->search(fn ($event) => str_contains($event->command ?? '', 'queue:work'));
+
+    expect($sender)->not->toBeFalse()
+        ->and($worker)->not->toBeFalse()
+        ->and($events[$sender]->expression)->toBe('* * * * *')
+        ->and($sender)->toBeLessThan($worker);
+});
+
+test('the schedule migration rolls back independently of inbox notifications', function () {
+    (require database_path('migrations/2026_11_01_000002_create_scheduled_website_notifications_table.php'))->down();
+    expect(Schema::hasTable('scheduled_website_notifications'))->toBeFalse()
+        ->and(Schema::hasTable('notifications'))->toBeTrue();
 });
 
 test('condition sending still requires the existing audience filter permission', function () {
@@ -271,7 +369,7 @@ test('all composer routes require admin authentication and route permissions', f
     Gate::shouldReceive('allows')->once()->with(PermissionNameResolver::resolve($route))->andReturnFalse();
     expect(fn () => (new RoutePermission)->handle($request, fn () => response('allowed')))
         ->toThrow(HttpException::class);
-})->with(['create', 'store', 'recipients']);
+})->with(['index', 'create', 'store', 'destroy', 'recipients']);
 
 test('the composer renders shared recipient filter and date components in both languages and escapes old content', function (string $locale) {
     app()->setLocale($locale);

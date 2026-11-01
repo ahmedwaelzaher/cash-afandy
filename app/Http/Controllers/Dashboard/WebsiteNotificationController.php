@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Models\ScheduledWebsiteNotification;
 use App\Models\User;
-use App\Notifications\WebsiteNotification;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Redot\Http\Controllers\Controller;
@@ -16,6 +16,11 @@ use Redot\Support\QueryFilters;
 
 class WebsiteNotificationController extends Controller
 {
+    public function index()
+    {
+        return view('dashboard.website-notifications.index');
+    }
+
     public function create()
     {
         return view('dashboard.website-notifications.create', ['users' => User::query()]);
@@ -116,21 +121,31 @@ class WebsiteNotificationController extends Controller
             $recipients = User::query()->whereKey($validated['users']);
         }
 
-        if (! $recipients->exists()) {
+        $recipientIds = $recipients->pluck('id')->all();
+        if ($recipientIds === []) {
             $field = $validated['recipient_mode'] === 'condition' ? 'filters' : 'users';
             throw ValidationException::withMessages([$field => __('No users found')]);
         }
 
-        $notification = (new WebsiteNotification(
-            title: $validated['title'],
-            url: $validated['url'] ?? null,
-            body: $validated['body'],
-        ))->delay(Carbon::parse($validated['send_at'], config('app.timezone')));
+        ScheduledWebsiteNotification::create([
+            'title' => $validated['title'],
+            'body' => $validated['body'],
+            'url' => $validated['url'] ?? null,
+            'recipient_ids' => $recipientIds,
+            'send_at' => Carbon::parse($validated['send_at'], config('app.timezone')),
+        ]);
 
-        $recipients->chunkById(100, function ($users) use ($notification) {
-            Notification::send($users, $notification);
+        return $this->created(__('Notification'), 'dashboard.website-notifications.index');
+    }
+
+    public function destroy(string $websiteNotification)
+    {
+        DB::transaction(function () use ($websiteNotification) {
+            $entry = ScheduledWebsiteNotification::query()->pending()
+                ->whereKey($websiteNotification)->lockForUpdate()->firstOrFail();
+            $entry->delete();
         });
 
-        return $this->created(__('Notification'), 'dashboard.website-notifications.create');
+        return $this->deleted(__('Notification'));
     }
 }

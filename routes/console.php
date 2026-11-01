@@ -11,7 +11,10 @@
 |
 */
 
+use App\Jobs\SendScheduledWebsiteNotifications;
 use Illuminate\Support\Facades\Schedule;
+
+Schedule::job(new SendScheduledWebsiteNotifications)->everyMinute();
 
 Schedule::command('queue:work --tries=3 --stop-when-empty')
     ->everyMinute()

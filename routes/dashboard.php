@@ -67,7 +67,7 @@ Route::middleware('auth:admins')->group(function () {
     Route::resource('posts', PostController::class)->except(['show']);
     Route::resource('sliders', SliderController::class)->except(['show']);
     Route::post('website-notifications/recipients', [WebsiteNotificationController::class, 'recipients'])->name('website-notifications.recipients');
-    Route::resource('website-notifications', WebsiteNotificationController::class)->only(['create', 'store']);
+    Route::resource('website-notifications', WebsiteNotificationController::class)->only(['index', 'create', 'store', 'destroy']);
 
     /* --------- Utilities --------- */
     Route::withoutMiddleware(RoutePermission::class)->group(function () {

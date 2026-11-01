@@ -45,6 +45,9 @@
         </div>
 
         <div class="card-footer text-end">
+            @if (route_allowed('dashboard.website-notifications.index'))
+                <a href="{{ route('dashboard.website-notifications.index') }}" class="btn">{{ __('Cancel') }}</a>
+            @endif
             <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
         </div>
     </x-form>
