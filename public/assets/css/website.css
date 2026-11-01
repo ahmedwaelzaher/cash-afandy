@@ -22,12 +22,6 @@
     --tblr-primary-lt: var(--site-soft);
 }
 
-.site-notifications-page .nav-segmented {
-    --tblr-nav-bg: var(--site-surface);
-    --tblr-nav-active-bg: var(--site-soft);
-    --tblr-nav-radius: var(--site-control-radius);
-}
-
 .site-notification-card {
     border-inline-start-width: 3px;
 }

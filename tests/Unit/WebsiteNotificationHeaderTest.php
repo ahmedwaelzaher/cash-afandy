@@ -48,7 +48,9 @@ test('the website dropdown keeps only the accessible mark all action in its head
 test('the full website inbox retains filters and the labeled mark all action without settings', function () {
     Livewire::test(Notifications::class, ['website' => true, 'fullPage' => true])
         ->assertDontSee('ti-settings', false)
-        ->assertSee('nav-segmented', false)
+        ->assertSee('aria-label="' . __('Filter') . '"', false)
+        ->assertSee('<aside', false)
+        ->assertDontSee('nav-segmented', false)
         ->assertSee('wire:click="markAllAsRead"', false)
         ->assertSee(__('Mark all as read'))
         ->assertSee('ti-checks', false);
@@ -63,6 +65,7 @@ test('website inbox filter counts stay independent and changing filters resets p
         ->assertViewHas('totalCount', 31)
         ->assertViewHas('unreadCount', 3)
         ->assertViewHas('notifications', fn ($notifications) => $notifications->total() === 31)
+        ->assertSee('<h2 class="h2 lh-1 mb-0">' . __('All') . '</h2>', false)
         ->assertSee(__('pagination.showing'))
         ->assertDontSee('Showing')
         ->assertSee('wire:click.prevent="gotoPage(2, \'notificationsPage\')"', false)
@@ -73,6 +76,7 @@ test('website inbox filter counts stay independent and changing filters resets p
         ->assertSet('paginators.notificationsPage', 1)
         ->assertViewHas('totalCount', 31)
         ->assertViewHas('unreadCount', 3)
+        ->assertSee('<h2 class="h2 lh-1 mb-0">' . __('Unread') . '</h2>', false)
         ->assertViewHas('notifications', fn ($notifications) => $notifications->total() === 3);
 });
 

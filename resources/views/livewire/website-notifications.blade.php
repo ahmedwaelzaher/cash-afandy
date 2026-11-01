@@ -1,4 +1,27 @@
-<div @class(['dropdown site-notifications' => ! $fullPage, 'site-notifications-page' => $fullPage]) wire:poll.15s.visible>
+@php($filters = ['all' => __('All'), 'unread' => __('Unread')])
+
+<div @class(['dropdown site-notifications' => ! $fullPage, 'site-notifications-page row g-4 align-items-start' => $fullPage]) wire:poll.15s.visible>
+    @if ($fullPage)
+        <aside class="col-12 col-lg-3">
+            <div class="card p-3">
+                <h2 class="h3 mb-3 d-none d-lg-block">{{ __('Filter') }}</h2>
+                <button type="button" class="btn btn-ghost-secondary w-100 justify-content-between d-lg-none" data-bs-toggle="collapse" data-bs-target="#website-notifications-filters-{{ $this->getId() }}" aria-expanded="false" aria-controls="website-notifications-filters-{{ $this->getId() }}" wire:ignore.self>
+                    {{ __('Filter') }}
+                    <x-icon icon="ti ti-chevron-down" class="m-0" />
+                </button>
+                <nav class="nav flex-column gap-1 collapse d-lg-flex" id="website-notifications-filters-{{ $this->getId() }}" aria-label="{{ __('Filter') }}" wire:ignore.self>
+                    @foreach ($filters as $key => $label)
+                        <button type="button" @class(['site-store-filter nav-link d-flex align-items-center gap-3 px-3 py-3 w-100 text-start', 'active' => $status === $key]) wire:click="$set('status', '{{ $key }}')" aria-pressed="{{ $status === $key ? 'true' : 'false' }}">
+                            <x-icon :icon="$key === 'all' ? 'ti ti-bell' : 'ti ti-bell-exclamation'" class="flex-shrink-0 fs-2" />
+                            <span class="flex-fill">{{ $label }}</span>
+                            <span class="badge rounded-pill">{{ number_format($key === 'all' ? $totalCount : $unreadCount) }}</span>
+                        </button>
+                    @endforeach
+                </nav>
+            </div>
+        </aside>
+    @endif
+
     @if (! $fullPage)
         <button type="button" class="btn btn-icon btn-ghost-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('Notifications') }}" aria-controls="website-notifications-{{ $this->getId() }}" wire:ignore.self>
             <span class="position-relative d-inline-flex">
@@ -10,17 +33,10 @@
         </button>
     @endif
 
-    <div @class(['dropdown-menu dropdown-menu-end p-0' => ! $fullPage]) id="website-notifications-{{ $this->getId() }}" wire:ignore.self>
+    <div @class(['dropdown-menu dropdown-menu-end p-0' => ! $fullPage, 'col-12 col-lg-9' => $fullPage]) id="website-notifications-{{ $this->getId() }}" wire:ignore.self>
         <div @class(['d-flex align-items-center justify-content-between', 'gap-2 p-3 border-bottom' => ! $fullPage, 'flex-wrap gap-3 mb-3' => $fullPage])>
             @if ($fullPage)
-                <nav class="nav nav-segmented" aria-label="{{ __('Notifications') }}">
-                    @foreach (['all' => __('All'), 'unread' => __('Unread')] as $key => $label)
-                        <button type="button" @class(['nav-link', 'active' => $status === $key]) wire:click="$set('status', '{{ $key }}')" aria-pressed="{{ $status === $key ? 'true' : 'false' }}">
-                            {{ $label }}
-                            <span @class(['badge rounded-pill', 'bg-primary text-primary-fg' => $status === $key])>{{ number_format($key === 'all' ? $totalCount : $unreadCount) }}</span>
-                        </button>
-                    @endforeach
-                </nav>
+                <h2 class="h2 lh-1 mb-0">{{ $filters[$status] ?? $filters['all'] }}</h2>
             @else
                 <h2 class="h3 mb-0">{{ __('Notifications') }}</h2>
             @endif
@@ -34,7 +50,7 @@
                 </button>
             @endif
         </div>
-        <div @class(['list-group list-group-flush' => ! $fullPage, 'd-flex flex-column gap-3' => $fullPage])>
+        <div @class(['list-group list-group-flush' => ! $fullPage, 'd-flex flex-column gap-2' => $fullPage])>
             @forelse ($notifications as $notification)
                 @include('website.notifications.partials.notification')
             @empty
