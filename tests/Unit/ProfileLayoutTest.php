@@ -53,7 +53,9 @@ test('account sections keep profile and password submissions independent', funct
     expect($xpath->query('//a[@role="tab"]')->length)->toBe(3);
     foreach (['profile', 'password', 'notifications'] as $section) {
         expect($xpath->query('//a[@aria-controls="account-' . $section . '"]')->length)->toBe(1)
-            ->and($xpath->query('//div[@id="account-' . $section . '"][@role="tabpanel"]')->length)->toBe(1);
+            ->and($xpath->query('//div[@id="account-' . $section . '"][@role="tabpanel"]')->length)->toBe(1)
+            ->and($xpath->query('//div[@id="account-' . $section . '"]/h2')->length)->toBe(1)
+            ->and($xpath->query('//div[@id="account-' . $section . '"]//form//h2')->length)->toBe(0);
     }
     foreach (['first_name', 'last_name', 'email', 'phone', 'birthdate', 'gender'] as $field) {
         expect($xpath->query($profile . '//input[@name="' . $field . '"]')->length)->toBeGreaterThan(0)
@@ -68,7 +70,7 @@ test('account sections keep profile and password submissions independent', funct
         ->and($xpath->query('//input[@name="gender"][@value="female"][@checked]')->length)->toBe(1)
         ->and($xpath->query('//div[@id="account-notifications"]//input[@data-push-toggle][@role="switch"]')->length)->toBe(1)
         ->and($xpath->query('//div[@id="account-notifications"]//button')->length)->toBe(0)
-        ->and($xpath->query('//div[@id="account-notifications"]//h2')->length)->toBe(0);
+        ->and($xpath->query('//div[@id="account-notifications"]//div[@data-browser-notifications]//h2')->length)->toBe(0);
 })->with(['ar', 'en']);
 
 test('account validation opens the section that contains the invalid field', function (string $field, string $section) {

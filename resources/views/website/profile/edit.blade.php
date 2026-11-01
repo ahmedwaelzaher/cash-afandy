@@ -39,9 +39,9 @@
 
                 <div class="col-12 col-lg-9 tab-content">
                     <div @class(['tab-pane', 'active' => $activeSection === 'profile']) id="account-profile" role="tabpanel" aria-labelledby="account-profile-tab" tabindex="0">
+                        <h2 class="h2 lh-1 mb-3">{{ $sections['profile']['title'] }}</h2>
                         <x-form class="card card-md" :action="route('website.profile.update')" method="PUT">
                             <div class="card-body p-lg-4">
-                                <h2 class="h2 mb-4 pb-3 border-bottom">{{ __('Profile') }}</h2>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
                                         <x-input type="text" name="first_name" :title="__('First name')" :value="$user->first_name" :placeholder="__('First name')" autocomplete="given-name" validation="required" />
@@ -62,10 +62,9 @@
                     </div>
 
                     <div @class(['tab-pane', 'active' => $activeSection === 'password']) id="account-password" role="tabpanel" aria-labelledby="account-password-tab" tabindex="0">
+                        <h2 class="h2 lh-1 mb-3">{{ $sections['password']['title'] }}</h2>
                         <x-form class="card card-md" :action="route('website.profile.update')" method="PUT">
                             <div class="card-body p-lg-4">
-                                <h2 class="h2 mb-2">{{ __('Password') }}</h2>
-                                <p class="text-secondary mb-4">{{ __('Make sure to use a strong password to keep your account secure.') }}</p>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
                                         <x-input type="password" name="password" :title="__('Password')" :placeholder="__('Leave blank if you don\'t want to change it')" autocomplete="new-password" validation="nullable|confirmed" />
@@ -82,6 +81,7 @@
                     </div>
 
                     <div class="tab-pane" id="account-notifications" role="tabpanel" aria-labelledby="account-notifications-tab" tabindex="0">
+                        <h2 class="h2 lh-1 mb-3">{{ $sections['notifications']['title'] }}</h2>
                         @include('website.profile.partials.browser-notifications')
                     </div>
                 </div>
