@@ -926,9 +926,9 @@ $(() => {
 
     const $panel = $('[data-browser-notifications]').prop('hidden', false);
     const $prompt = $('[data-push-prompt]');
-    const $enable = $panel.add($prompt).find('[data-push-enable]');
-    const $disable = $panel.find('[data-push-disable]');
-    const $controls = $enable.add($disable);
+    const $enable = $prompt.find('[data-push-enable]');
+    const $toggle = $panel.find('[data-push-toggle]');
+    const $controls = $enable.add($toggle);
     const $status = $panel.find('[data-push-status]');
     const $promptStatus = $prompt.find('[data-push-prompt-status]');
     const preferenceKey = 'cash-afandy:browser-push-enabled';
@@ -937,6 +937,7 @@ $(() => {
     let clientPromise;
     let busy = false;
     let requestingPermission = false;
+    let subscribed = false;
     let lastSync = 0;
     let promptVisible = false;
     let promptAnimation;
@@ -973,22 +974,23 @@ $(() => {
     };
     // Share status and controls between the invitation and the browser settings panel.
     const render = (message, enabled = false) => {
+        subscribed = enabled;
         $status.text(message);
-        $enable.prop('hidden', enabled).prop('disabled', busy);
-        $disable.prop('hidden', !enabled).prop('disabled', busy);
+        $enable.prop('hidden', enabled).prop('disabled', busy || requestingPermission);
+        $toggle.prop('checked', enabled).prop('disabled', busy || requestingPermission);
     };
     const wanted = () => localStorage.getItem(preferenceKey) === 'true';
     const remember = (enabled) => localStorage.setItem(preferenceKey, String(enabled));
     const showError = () => {
         const message = __('Unable to update browser notifications. Please try again.');
-        render(message, wanted());
+        render(message, subscribed);
         $enable.prop('hidden', false);
         $promptStatus.text(message).prop('hidden', false);
         if (wanted() && Notification.permission === 'granted') showPrompt(true);
     };
     const unsupported = () => {
         render(__('Browser notifications are not supported on this device.'));
-        $enable.prop('disabled', true);
+        $controls.prop('disabled', true);
     };
     // Keep dismissal temporary; an explicit opt-out remains a separate stored preference.
     const dismissPrompt = () => {
@@ -1047,7 +1049,7 @@ $(() => {
             showError();
         } finally {
             busy = false;
-            $controls.prop('disabled', false);
+            $controls.prop('disabled', requestingPermission);
         }
     };
     const removeSubscription = () =>
@@ -1134,10 +1136,10 @@ $(() => {
     }
 
     // Ask permission from the click handler and keep registration errors retryable.
-    $enable.on('click', async () => {
+    const enable = async () => {
         if (busy || requestingPermission) return;
         requestingPermission = true;
-        $enable.prop('disabled', true);
+        $controls.prop('disabled', true);
         $promptStatus.prop('hidden', true);
         try {
             const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
@@ -1153,17 +1155,24 @@ $(() => {
             showError();
         } finally {
             requestingPermission = false;
-            $enable.prop('disabled', false);
+            $controls.prop('disabled', false);
+            $toggle.prop('checked', subscribed);
         }
-    });
+    };
+    $enable.on('click', enable);
     $prompt.find('[data-push-dismiss]').on('click', dismissPrompt);
     $prompt.on('keydown', (event) => {
         if (event.key === 'Escape') dismissPrompt();
     });
-    $disable.on('click', () => {
+    $toggle.on('change', function () {
+        if (busy || requestingPermission) {
+            $toggle.prop('checked', subscribed);
+            return;
+        }
+        if (this.checked) return enable();
         dismissPrompt();
         remember(false);
-        run(disable);
+        return run(disable);
     });
     // Sync other tabs and refresh an active subscription at most once every five minutes.
     $(window).on('storage.browserPush', (event) => {

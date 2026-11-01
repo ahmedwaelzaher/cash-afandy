@@ -19,9 +19,12 @@ const until = async (condition) => {
     assert.fail('The browser registration did not reach the expected state.');
 };
 
-function browser(reducedMotion = false, direction = 'rtl') {
+function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     const element = () => ({ props: { hidden: true }, children: {}, events: {} });
     const prompt = element();
+    const panel = element();
+    const toggle = element();
+    panel.children['[data-push-toggle]'] = toggle;
     const document = element();
     const window = Object.assign(element(), {
         AppPushConfig: { enabled: true, sdkVersion: 'test', firebase: {}, vapidKey: 'public-key' },
@@ -33,11 +36,14 @@ function browser(reducedMotion = false, direction = 'rtl') {
     });
     const state = {
         prompt,
+        panel,
+        toggle,
         permission: deferred(),
         token: deferred(),
         saved: deferred(),
         permissionRequests: 0,
         tokenRequests: 0,
+        tokenDeletes: 0,
         posts: [],
         animations: [],
         events: [],
@@ -65,6 +71,7 @@ function browser(reducedMotion = false, direction = 'rtl') {
         prop(key, value) {
             this.items.forEach((item) => {
                 item.props[key] = value;
+                item[key] = value;
             });
             return this;
         }
@@ -93,7 +100,7 @@ function browser(reducedMotion = false, direction = 'rtl') {
     }
     function $(target) {
         if (typeof target === 'function') return target();
-        if (target === '[data-browser-notifications]') return new Collection([]);
+        if (target === '[data-browser-notifications]') return new Collection(withPanel ? [panel] : []);
         return new Collection([target === '[data-push-prompt]' ? prompt : target]);
     }
     $.ajax = (options) => {
@@ -131,6 +138,7 @@ function browser(reducedMotion = false, direction = 'rtl') {
             state.tokenRequests++;
             return state.token.promise;
         },
+        deleteToken: async () => { state.tokenDeletes++; },
     };
     new vm.Script(source, {
         importModuleDynamically: async () => {
@@ -147,6 +155,11 @@ function browser(reducedMotion = false, direction = 'rtl') {
         },
     }).runInContext(context);
     state.click = () => prompt.children['[data-push-enable]'].events.click();
+    state.switch = (checked) => {
+        toggle.checked = checked;
+        toggle.props.checked = checked;
+        return toggle.events.change.call(toggle);
+    };
     state.grant = (permission) => {
         Notification.permission = permission;
         state.permission.resolve(permission);
@@ -226,6 +239,58 @@ function browser(reducedMotion = false, direction = 'rtl') {
     reduced.grant('denied');
     await reducedClick;
     assert.ok(reduced.animations.length === 0, 'Respect reduced motion for both appearance and dismissal.');
+
+    const panel = browser(false, 'rtl', true);
+    const enable = panel.switch(true);
+    assert.equal(panel.toggle.props.disabled, true, 'Lock the switch while permission is pending.');
+    panel.grant('granted');
+    await until(() => panel.tokenRequests === 1);
+    panel.token.resolve('panel-token');
+    await until(() => panel.posts.length === 1);
+    panel.saved.reject(new Error('Registration failed'));
+    await enable;
+    assert.equal(panel.toggle.props.checked, false, 'Failed activation restores the off state.');
+    assert.equal(panel.toggle.props.disabled, false, 'A failed activation remains retryable.');
+
+    panel.token = deferred();
+    panel.saved = deferred();
+    const enableAgain = panel.switch(true);
+    await until(() => panel.tokenRequests === 2);
+    assert.equal(panel.permissionRequests, 1, 'The switch reuses permission on retry.');
+    panel.token.resolve('panel-retry-token');
+    await until(() => panel.posts.length === 2);
+    panel.saved.resolve();
+    await enableAgain;
+    assert.equal(panel.toggle.props.checked, true);
+    assert.equal(panel.panel.children['[data-push-status]'].text, 'Notifications are enabled for this browser.');
+
+    panel.saved = deferred();
+    const failedDisable = panel.switch(false);
+    await until(() => panel.posts.length === 3);
+    assert.equal(panel.posts.at(-1).method, 'DELETE');
+    assert.equal(panel.toggle.props.disabled, true);
+    panel.saved.reject(new Error('Server unavailable'));
+    await failedDisable;
+    assert.equal(panel.toggle.props.checked, true, 'An unsuccessful opt-out restores the previous state.');
+    assert.equal(panel.toggle.props.disabled, false);
+
+    panel.saved = deferred();
+    const disable = panel.switch(false);
+    await until(() => panel.posts.length === 4);
+    panel.saved.resolve();
+    await disable;
+    assert.equal(panel.toggle.props.checked, false);
+    assert.equal(panel.toggle.props.disabled, false);
+    assert.ok(panel.tokenDeletes > 0, 'Opt-out still revokes the Firebase token.');
+    assert.equal(panel.panel.children['[data-push-status]'].text, 'Browser notifications are disabled.');
+
+    const panelDenied = browser(false, 'ltr', true);
+    const deniedSwitch = panelDenied.switch(true);
+    panelDenied.grant('denied');
+    await deniedSwitch;
+    assert.equal(panelDenied.toggle.props.checked, false);
+    assert.equal(panelDenied.toggle.props.disabled, false);
+    assert.equal(panelDenied.tokenRequests, 0);
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;

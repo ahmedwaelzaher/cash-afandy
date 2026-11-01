@@ -66,8 +66,9 @@ test('account sections keep profile and password submissions independent', funct
     expect($xpath->query('//form[@action="' . route('website.profile.update') . '"]//input[@name="_method"][@value="PUT"]')->length)->toBe(2)
         ->and($xpath->query('//form//input[@name="_token"]')->length)->toBe(2)
         ->and($xpath->query('//input[@name="gender"][@value="female"][@checked]')->length)->toBe(1)
-        ->and($xpath->query('//div[@id="account-notifications"]//button[@data-push-enable]')->length)->toBe(1)
-        ->and($xpath->query('//div[@id="account-notifications"]//button[@data-push-disable]')->length)->toBe(1);
+        ->and($xpath->query('//div[@id="account-notifications"]//input[@data-push-toggle][@role="switch"]')->length)->toBe(1)
+        ->and($xpath->query('//div[@id="account-notifications"]//button')->length)->toBe(0)
+        ->and($xpath->query('//div[@id="account-notifications"]//h2')->length)->toBe(0);
 })->with(['ar', 'en']);
 
 test('account validation opens the section that contains the invalid field', function (string $field, string $section) {
