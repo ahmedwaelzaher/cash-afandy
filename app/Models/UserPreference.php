@@ -22,12 +22,19 @@ class UserPreference extends Model
         'theme',
         'language',
         'country_id',
+        'notifications_enabled',
+        'notification_types',
     ];
 
     /**
      * Keep the internal shopping-country key out of serialized preferences.
      */
     protected $hidden = ['country_id'];
+
+    protected $casts = [
+        'notifications_enabled' => 'boolean',
+        'notification_types' => 'array',
+    ];
 
     public function country(): BelongsTo
     {

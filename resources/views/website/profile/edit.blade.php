@@ -1,5 +1,7 @@
 @php
-    $activeSection = $errors->hasAny(['password', 'password_confirmation']) ? 'password' : 'profile';
+    $activeSection = $errors->hasAny(['notifications_enabled', 'notification_types', 'notification_types.*']) || request('section') === 'notifications'
+        ? 'notifications'
+        : ($errors->hasAny(['password', 'password_confirmation']) ? 'password' : 'profile');
     $sections = [
         'profile' => ['title' => __('Profile'), 'icon' => 'ti ti-user'],
         'password' => ['title' => __('Password'), 'icon' => 'ti ti-lock'],
@@ -80,7 +82,7 @@
                         </x-form>
                     </div>
 
-                    <div class="tab-pane" id="account-notifications" role="tabpanel" aria-labelledby="account-notifications-tab" tabindex="0">
+                    <div @class(['tab-pane', 'active' => $activeSection === 'notifications']) id="account-notifications" role="tabpanel" aria-labelledby="account-notifications-tab" tabindex="0">
                         <h2 class="h2 lh-1 mb-3">{{ $sections['notifications']['title'] }}</h2>
                         @include('website.profile.partials.browser-notifications')
                     </div>

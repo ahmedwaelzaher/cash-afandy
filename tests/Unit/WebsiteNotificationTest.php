@@ -52,6 +52,7 @@ test('notifications retain the existing payload and wait for commit', function (
             'lightbox' => false,
             'data' => ['offer_id' => 42],
             'body' => 'Body',
+            'type' => 'general',
         ]);
 });
 

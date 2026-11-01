@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Enums\NotificationType;
 use App\Models\PushSubscription;
+use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Kreait\Firebase\Contract\Messaging;
@@ -52,6 +54,11 @@ class SendPushNotification implements ShouldQueue
         $notification = $recipient?->notifications()->whereKey($this->notificationId)->first();
 
         if (! $notification) return;
+
+        // An account can opt out after inbox storage but before this push job runs.
+        $owner = $this->forBrowser ? $subscription->notifiable : $recipient;
+        $type = NotificationType::tryFrom($notification->data['type'] ?? NotificationType::General->value);
+        if ($owner instanceof User && (! $type || ! $owner->receivesWebsiteNotification($type))) return;
 
         $message = CloudMessage::new()->withToken($subscription->token)
             ->withNotification([

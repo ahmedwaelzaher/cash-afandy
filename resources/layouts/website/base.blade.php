@@ -41,7 +41,7 @@
         @endif
     </main>
 
-    @if (! $inline && config('redot.notifications.push_enabled', false))
+    @if (! $inline && config('redot.notifications.push_enabled', false) && (! auth('users')->check() || auth('users')->user()->receivesWebsiteNotification(\App\Enums\NotificationType::General)))
         @include('website.partials.push-prompt')
     @endif
 

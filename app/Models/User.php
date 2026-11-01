@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Gender;
+use App\Enums\NotificationType;
 use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -133,6 +134,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function preferences(): HasOne
     {
         return $this->hasOne(UserPreference::class);
+    }
+
+    public function receivesWebsiteNotification(NotificationType $type): bool
+    {
+        $preferences = $this->preferences;
+
+        // Null preferences preserve delivery for existing accounts until they choose types.
+        return ! $this->trashed() && ($preferences?->notifications_enabled ?? true)
+            && in_array($type->value, $preferences?->notification_types ?? array_keys(NotificationType::values()), true);
     }
 
     public function favoriteOffers(): BelongsToMany

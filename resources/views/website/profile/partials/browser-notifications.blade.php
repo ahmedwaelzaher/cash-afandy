@@ -1,8 +1,27 @@
-<div class="card card-md" data-browser-notifications>
-    <div class="card-body p-lg-4 d-flex align-items-center justify-content-between gap-3">
-        <p class="mb-0" id="browser-notifications-status" data-push-status role="status" aria-live="polite">{{ __('Browser notifications are disabled.') }}</p>
-        <label class="form-check form-switch mb-0 flex-shrink-0">
-            <input type="checkbox" class="form-check-input" role="switch" data-push-toggle aria-label="{{ __('Notifications') }}" aria-describedby="browser-notifications-status" disabled>
-        </label>
+@php
+    $preferences = $user->preferences;
+    $notificationTypes = \App\Enums\NotificationType::values();
+@endphp
+
+<x-form class="card card-md" :action="route('website.profile.preferences.update')" method="PUT" data-browser-notifications>
+    <div class="card-body p-lg-4">
+        <div class="row g-3">
+            <div class="col-12">
+                <input type="hidden" name="notifications_enabled" value="0" />
+                <x-toggle id="account-notifications-enabled" name="notifications_enabled" :title="__('Enable notifications')" :value="$preferences?->notifications_enabled ?? true" role="switch" />
+            </div>
+            <div class="col-12" visible-when="$account-notifications-enabled">
+                <fieldset>
+                    <legend class="form-label">{{ __('Notification types') }}</legend>
+                    <x-checkboxes name="notification_types[]" :options="$notificationTypes" :value="$preferences?->notification_types ?? array_keys($notificationTypes)" validation="required|min:1" />
+                </fieldset>
+            </div>
+            <div class="col-12" visible-when="$account-notifications-enabled">
+                <button type="button" class="btn btn-ghost-secondary" data-push-enable hidden>{{ __('Enable browser notifications') }}</button>
+            </div>
+        </div>
+        <div class="mt-4 pt-3 border-top">
+            <button type="submit" class="btn btn-primary px-4">{{ __('Save') }}</button>
+        </div>
     </div>
-</div>
+</x-form>

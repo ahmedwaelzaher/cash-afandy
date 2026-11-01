@@ -926,7 +926,7 @@ $(() => {
 
     const $panel = $('[data-browser-notifications]').prop('hidden', false);
     const $prompt = $('[data-push-prompt]');
-    const $enable = $prompt.find('[data-push-enable]');
+    const $enable = $prompt.find('[data-push-enable]').add($panel.find('[data-push-enable]'));
     const $toggle = $panel.find('[data-push-toggle]');
     const $controls = $enable.add($toggle);
     const $status = $panel.find('[data-push-status]');

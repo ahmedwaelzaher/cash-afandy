@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Enums\NotificationType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -59,12 +60,24 @@ class ProfileController extends Controller
      */
     public function updatePreferences(Request $request)
     {
+        // The shared toggle submits the native checkbox value when checked.
+        if ($request->input('notifications_enabled') === 'on') {
+            $request->merge(['notifications_enabled' => 1]);
+        }
+
         $validated = $request->validate([
             'theme' => ['sometimes', 'required', 'string', 'in:light,dark'],
             'language' => ['sometimes', 'required', 'string', 'in:' . implode(',', setting('website_locales'))],
+            'notifications_enabled' => ['sometimes', 'required', 'boolean'],
+            'notification_types' => ['exclude_without:notifications_enabled', 'exclude_if:notifications_enabled,0', 'required_with:notifications_enabled', 'array', 'min:1'],
+            'notification_types.*' => ['required', 'distinct', Rule::enum(NotificationType::class)],
         ]);
 
         $request->user()->preferences()->update($validated);
+
+        if ($request->has('notifications_enabled')) {
+            return $this->updated(__('Preferences'), 'website.profile.edit', ['section' => 'notifications']);
+        }
 
         return $this->updated(__('Preferences'));
     }

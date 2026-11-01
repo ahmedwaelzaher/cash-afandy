@@ -155,6 +155,7 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         },
     }).runInContext(context);
     state.click = () => prompt.children['[data-push-enable]'].events.click();
+    state.enableBrowser = () => panel.children['[data-push-enable]'].events.click();
     state.switch = (checked) => {
         toggle.checked = checked;
         toggle.props.checked = checked;
@@ -291,6 +292,17 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     assert.equal(panelDenied.toggle.props.checked, false);
     assert.equal(panelDenied.toggle.props.disabled, false);
     assert.equal(panelDenied.tokenRequests, 0);
+
+    const account = browser(false, 'rtl', true);
+    const accountEnable = account.enableBrowser();
+    account.grant('granted');
+    await until(() => account.tokenRequests === 1);
+    account.token.resolve('account-browser-token');
+    await until(() => account.posts.length === 1);
+    account.saved.resolve();
+    await accountEnable;
+    assert.equal(account.panel.children['[data-push-enable]'].props.hidden, true);
+    assert.equal(account.panel.children['[data-push-status]'].text, 'Notifications are enabled for this browser.');
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;

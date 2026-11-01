@@ -66,10 +66,15 @@ test('account sections keep profile and password submissions independent', funct
             ->and($xpath->query($profile . '//input[@name="' . $field . '"]')->length)->toBe(0);
     }
     expect($xpath->query('//form[@action="' . route('website.profile.update') . '"]//input[@name="_method"][@value="PUT"]')->length)->toBe(2)
-        ->and($xpath->query('//form//input[@name="_token"]')->length)->toBe(2)
+        ->and($xpath->query('//form//input[@name="_token"]')->length)->toBe(3)
         ->and($xpath->query('//input[@name="gender"][@value="female"][@checked]')->length)->toBe(1)
-        ->and($xpath->query('//div[@id="account-notifications"]//input[@data-push-toggle][@role="switch"]')->length)->toBe(1)
-        ->and($xpath->query('//div[@id="account-notifications"]//button')->length)->toBe(0)
+        ->and($xpath->query('//div[@id="account-notifications"]//input[@name="notifications_enabled"][@type="checkbox"]')->length)->toBe(1)
+        ->and($xpath->query('//div[@id="account-notifications"]//input[@name="notification_types[]"][@type="checkbox"]')->length)->toBe(1)
+        ->and($xpath->query('//div[@id="account-notifications"]//div[@visible-when="$account-notifications-enabled"]')->length)->toBe(2)
+        ->and($xpath->query('//div[@id="account-notifications"]//select')->length)->toBe(0)
+        ->and($xpath->query('//div[@id="account-notifications"]//*[@data-push-status]')->length)->toBe(0)
+        ->and($xpath->query('//div[@id="account-notifications"]//form[@action="' . route('website.profile.preferences.update') . '"]')->length)->toBe(1)
+        ->and($xpath->query('//div[@id="account-notifications"]//button[@type="submit"]')->length)->toBe(1)
         ->and($xpath->query('//div[@id="account-notifications"]//div[@data-browser-notifications]//h2')->length)->toBe(0);
 })->with(['ar', 'en']);
 
@@ -78,7 +83,7 @@ test('account validation opens the section that contains the invalid field', fun
 
     expect($xpath->query('//a[@id="account-' . $section . '-tab"][@aria-selected="true"]')->length)->toBe(1)
         ->and($xpath->query('//div[@id="account-' . $section . '"][contains(concat(" ", normalize-space(@class), " "), " active ")]')->length)->toBe(1);
-})->with([['password', 'password'], ['email', 'profile']]);
+})->with([['password', 'password'], ['email', 'profile'], ['notification_types.0', 'notifications']]);
 
 test('registration keeps the shared gender field required without optional profile fields', function () {
     $html = view('website.profile.partials.personal-details', [

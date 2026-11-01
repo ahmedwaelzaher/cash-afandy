@@ -3,14 +3,18 @@
 namespace App\Notifications;
 
 use App\Enums\NotificationLevel;
+use App\Enums\NotificationType;
 use App\Jobs\SendPushNotification;
 use App\Models\PushSubscription;
+use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\DatabaseNotification;
 
 class WebsiteNotification extends DashboardNotification implements ShouldQueue
 {
     public int $tries = 3;
+
+    public NotificationType $type = NotificationType::General;
 
     public function __construct(
         string $title,
@@ -20,15 +24,24 @@ class WebsiteNotification extends DashboardNotification implements ShouldQueue
         bool $lightbox = false,
         public string $body = '',
         public bool $push = true,
+        NotificationType $type = NotificationType::General,
     ) {
         parent::__construct($title, $url, $level, $data, $lightbox);
+        $this->type = $type;
 
         $this->afterCommit();
     }
 
     public function toArray(object $notifiable): array
     {
-        return [...parent::toArray($notifiable), 'body' => $this->body];
+        return [...parent::toArray($notifiable), 'body' => $this->body, 'type' => $this->type->value];
+    }
+
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        $recipient = $notifiable instanceof PushSubscription ? $notifiable->notifiable : $notifiable;
+
+        return ! $recipient instanceof User || $recipient->receivesWebsiteNotification($this->type);
     }
 
     public function afterSending(object $notifiable, string $channel, mixed $response): void
