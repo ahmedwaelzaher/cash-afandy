@@ -800,6 +800,20 @@ Form Check (Radio)
     }
 }
 
+@media (max-width: 375.98px) {
+    .site-header-actions.gap-2 {
+        gap: 0.125rem !important;
+    }
+
+    .site-header-actions .btn-icon {
+        --tblr-btn-padding-x: 0.25rem;
+        --tblr-btn-padding-y: 0.25rem;
+        --tblr-btn-icon-size: 1.125rem;
+        inline-size: 2rem;
+        min-block-size: 2rem;
+    }
+}
+
 /* Hero */
 .site-hero {
     padding-block: clamp(2rem, 4vw, 3rem);
