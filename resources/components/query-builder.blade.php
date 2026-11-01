@@ -36,5 +36,6 @@
 @endPushOnce
 
 @pushOnce('plugins-scripts', 'query-builder-scripts')
+    <script src="{{ hashed_asset('/vendor/query-builder/query-builder.compatibility.js') }}"></script>
     <script src="{{ hashed_asset('/vendor/query-builder/query-builder.min.js') }}"></script>
 @endPushOnce

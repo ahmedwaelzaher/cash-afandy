@@ -29,6 +29,7 @@ use App\Http\Controllers\Dashboard\StoreController;
 use App\Http\Controllers\Dashboard\SubscriberController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\UserImpersonateController;
+use App\Http\Controllers\Dashboard\WebsiteNotificationController;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
 use Redot\Http\Middleware\RoutePermission;
@@ -65,6 +66,8 @@ Route::middleware('auth:admins')->group(function () {
     Route::resource('news', NewsController::class)->except(['show']);
     Route::resource('posts', PostController::class)->except(['show']);
     Route::resource('sliders', SliderController::class)->except(['show']);
+    Route::post('website-notifications/recipients', [WebsiteNotificationController::class, 'recipients'])->name('website-notifications.recipients');
+    Route::resource('website-notifications', WebsiteNotificationController::class)->only(['create', 'store']);
 
     /* --------- Utilities --------- */
     Route::withoutMiddleware(RoutePermission::class)->group(function () {

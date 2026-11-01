@@ -129,6 +129,11 @@ return Sidebar::make([
                 ->title(__('Sliders'))
                 ->route('dashboard.sliders.index')
                 ->icon('ti ti-photo'),
+
+            Item::make()
+                ->title(__('Website') . ' — ' . __('Send Notification'))
+                ->route('dashboard.website-notifications.create')
+                ->icon('ti ti-bell-plus'),
         ]),
 
     Item::make()
