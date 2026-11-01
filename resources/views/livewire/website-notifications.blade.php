@@ -27,7 +27,7 @@
             <span class="position-relative d-inline-flex">
                 <x-icon icon="ti ti-bell" class="m-0 fs-1 w-auto h-auto lh-1" />
                 @if ($unreadCount)
-                    <span class="badge fs-6 position-absolute top-0 start-0 translate-middle rounded-pill border border-2 border-white">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                    <span class="badge fs-6 position-absolute top-0 start-100 mt-1 ms-n1 translate-middle rounded-pill border border-2 border-white">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                 @endif
             </span>
         </button>
