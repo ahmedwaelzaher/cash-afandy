@@ -669,6 +669,22 @@ Form Check (Radio)
         position: static;
     }
 
+    .site-header-actions.gap-2 {
+        gap: 0.25rem !important;
+    }
+
+    .site-header-actions .btn-icon {
+        --tblr-btn-padding-x: 0.375rem;
+        --tblr-btn-padding-y: 0.375rem;
+        --tblr-btn-icon-size: 1.25rem;
+        inline-size: 2.25rem;
+        min-block-size: 2.25rem;
+    }
+
+    .site-header-actions .btn-icon .ti {
+        font-size: var(--tblr-btn-icon-size) !important;
+    }
+
     .site-navbar .site-header-search-panel {
         /* Keep the open panel out of the header actions' flex layout. */
         position: absolute;
