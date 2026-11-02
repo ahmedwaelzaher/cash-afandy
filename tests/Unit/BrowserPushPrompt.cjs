@@ -29,7 +29,13 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     const notificationContainer = element();
     const window = Object.assign(element(), {
         AppPushConfig: { enabled: true, sdkVersion: 'test', firebase: {}, vapidKey: 'public-key' },
-        WebsitePush: { storeUrl: '/subscribe', destroyUrl: '/unsubscribe' },
+        WebsitePush: {
+            storeUrl: '/subscribe', destroyUrl: '/unsubscribe',
+            types: {
+                general: { label: 'General notifications', icon: 'ti ti-bell' },
+                new_offer: { label: 'New offer', icon: 'ti ti-star' },
+            },
+        },
         AppServiceWorker: Promise.resolve({ active: { state: 'activated' } }),
         isSecureContext: true,
         location: { href: 'https://cashafandy.test/ar/offers' },
@@ -102,6 +108,10 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
             return this;
         }
         find(selector) {
+            if (selector === '[data-notification-icon]') {
+                return new Collection(this.items.flatMap((item) =>
+                    ['[data-notification-type-icon]', '[data-notification-fallback]'].map((key) => (item.children[key] ||= element()))));
+            }
             return new Collection(this.items.map((item) => (item.children[selector] ||= element())));
         }
         add(other) {
@@ -120,12 +130,6 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         attr(key, value) {
             if (value === undefined) return this.items[0]?.props[key];
             return this.prop(key, value);
-        }
-        toggleClass(name, enabled) {
-            this.items.forEach((item) => {
-                (item.classes ||= {})[name] = enabled;
-            });
-            return this;
         }
         one(event, callback) {
             return this.on(event, callback);
@@ -387,6 +391,9 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     });
     const card = account.cards[0];
     assert.equal(account.toasts[0].options.delay, 10000);
+    assert.equal(card.children['[data-notification-type-icon]'].props.class, 'ti ti-star m-0 lh-1');
+    assert.equal(card.children['[data-notification-fallback]'].props.class, 'ti ti-star m-0 lh-1');
+    assert.equal(card.children['[data-notification-type]'].text, 'New offer');
     assert.equal(
         card.children['[data-notification-title]'].text,
         title,
