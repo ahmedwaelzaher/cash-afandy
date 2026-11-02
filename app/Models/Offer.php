@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 class Offer extends Model
@@ -121,9 +122,18 @@ class Offer extends Model
     {
         $country = website_country();
 
-        $query->published()
-            ->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()))
+        $query->published()->notExpired()
             ->when($country, fn (Builder $query) => $query->whereHas('countries', fn (Builder $query) => $query->whereKey($country->id)));
+    }
+
+    public function scopeNotExpired(Builder $query): void
+    {
+        $query->where(fn (Builder $query) => $query->whereNull('expiration_date')->orWhere('expiration_date', '>', now()));
+    }
+
+    public function notificationEvents(): HasMany
+    {
+        return $this->hasMany(OfferNotificationEvent::class);
     }
 
     public function scopeWithFavoriteState(Builder $query): void

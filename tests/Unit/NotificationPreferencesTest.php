@@ -60,10 +60,11 @@ function notificationPreferenceRequest(array $data): Request
     return $request;
 }
 
-test('notification type choices contain only the currently supported general notifications', function () {
-    expect(array_keys(NotificationType::values()))->toBe(['general'])
+test('notification type choices contain only the currently supported types and enable new types by default', function () {
+    expect(array_keys(NotificationType::values()))->toBe(['general', 'new_offer', 'favorite_offer_expiring'])
         ->and(NotificationType::tryFrom('cashback'))->toBeNull()
-        ->and($this->user->receivesWebsiteNotification(NotificationType::General))->toBeTrue();
+        ->and($this->user->receivesWebsiteNotification(NotificationType::General))->toBeTrue()
+        ->and($this->user->receivesWebsiteNotification(NotificationType::NewOffer))->toBeTrue();
 });
 
 test('notification preferences save only for the authenticated account and keep unrelated settings', function () {
@@ -74,7 +75,7 @@ test('notification preferences save only for the authenticated account and keep 
 
     $preferences = $this->user->fresh()->preferences;
     expect($preferences->notifications_enabled)->toBeTrue()
-        ->and($preferences->notification_types)->toBe(['general'])
+        ->and($preferences->notification_types)->toBe(['disabled' => []])
         ->and($preferences->theme)->toBe('light')
         ->and($preferences->language)->toBe('ar')
         ->and(User::find(2)->preferences->notification_types)->toBeNull()
@@ -91,7 +92,7 @@ test('turning notifications off retains the previously selected types for reacti
         ->and($user->receivesWebsiteNotification(NotificationType::General))->toBeFalse();
 });
 
-test('unsupported duplicate and missing types cannot be saved', function (array $data, string $field) {
+test('unsupported duplicate and invalid preferences cannot be saved', function (array $data, string $field) {
     try {
         $this->controller->updatePreferences(notificationPreferenceRequest($data));
         test()->fail('Expected validation to fail.');
@@ -101,8 +102,6 @@ test('unsupported duplicate and missing types cannot be saved', function (array 
     }
 })->with([
     'unsupported type' => [['notifications_enabled' => 1, 'notification_types' => ['wallet']], 'notification_types.0'],
-    'no type' => [['notifications_enabled' => 1], 'notification_types'],
-    'empty types' => [['notifications_enabled' => 1, 'notification_types' => []], 'notification_types'],
     'duplicate type' => [['notifications_enabled' => 1, 'notification_types' => ['general', 'general']], 'notification_types.0'],
     'invalid switch' => [['notifications_enabled' => 'invalid', 'notification_types' => ['general']], 'notifications_enabled'],
 ]);
@@ -115,6 +114,54 @@ test('ordinary preference updates preserve notification settings', function () {
     expect($preferences->theme)->toBe('dark')
         ->and($preferences->notifications_enabled)->toBeFalse()
         ->and($preferences->notification_types)->toBe(['general']);
+});
+
+test('only explicitly unchecked rendered choices are disabled and old forms preserve newer choices', function () {
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1,
+        'notification_type_options' => array_keys(NotificationType::values()),
+        'notification_types' => ['general', 'favorite_offer_expiring'],
+    ]));
+    $user = $this->user->fresh();
+    expect($user->preferences->notification_types)->toBe(['disabled' => ['new_offer']])
+        ->and($user->receivesWebsiteNotification(NotificationType::NewOffer))->toBeFalse()
+        ->and($user->receivesWebsiteNotification(NotificationType::FavoriteOfferExpiring))->toBeTrue();
+
+    $this->user = $user;
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1, 'notification_types' => ['general'],
+    ]));
+    expect($this->user->fresh()->preferences->notification_types)->toBe(['disabled' => ['new_offer']]);
+});
+
+test('every visible choice can be unchecked without disabling future enum additions', function () {
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1, 'notification_type_options' => ['general'],
+    ]));
+    $user = $this->user->fresh();
+    expect($user->receivesWebsiteNotification(NotificationType::General))->toBeFalse()
+        ->and($user->receivesWebsiteNotification(NotificationType::NewOffer))->toBeTrue()
+        ->and($user->receivesWebsiteNotification(NotificationType::FavoriteOfferExpiring))->toBeTrue();
+
+    $this->user = $user;
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1, 'notification_type_options' => array_keys(NotificationType::values()),
+    ]));
+    expect($this->user->fresh()->preferences->enabledNotificationTypes())->toBe([]);
+});
+
+test('exclusion migration preserves legacy opt outs and master switch and supports rollback', function () {
+    $this->user->preferences()->update(['notifications_enabled' => false, 'notification_types' => []]);
+    $migration = require database_path('migrations/2026_11_02_000001_store_notification_type_exclusions.php');
+    $migration->up();
+    expect($this->user->fresh()->preferences->notification_types)->toBe(['disabled' => ['general']])
+        ->and($this->user->fresh()->preferences->notifications_enabled)->toBeFalse()
+        ->and(User::find(2)->preferences->notification_types)->toBe(['disabled' => []]);
+    $migration->up();
+    expect($this->user->fresh()->preferences->notification_types)->toBe(['disabled' => ['general']]);
+    $migration->down();
+    expect($this->user->fresh()->preferences->notification_types)->toBe([])
+        ->and(User::find(2)->preferences->notification_types)->toBe(['general']);
 });
 
 test('inbox delivery respects the saved account settings', function (bool $enabled, ?array $types, int $expected) {

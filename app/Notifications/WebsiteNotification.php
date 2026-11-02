@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Enums\NotificationLevel;
 use App\Enums\NotificationType;
 use App\Jobs\SendPushNotification;
+use App\Models\OfferNotificationEvent;
 use App\Models\PushSubscription;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -41,7 +42,14 @@ class WebsiteNotification extends DashboardNotification implements ShouldQueue
     {
         $recipient = $notifiable instanceof PushSubscription ? $notifiable->notifiable : $notifiable;
 
-        return ! $recipient instanceof User || $recipient->receivesWebsiteNotification($this->type);
+        if ($recipient instanceof User && ! $recipient->receivesWebsiteNotification($this->type)) return false;
+        if (isset($this->data['offer_event_id'])) {
+            $event = OfferNotificationEvent::find($this->data['offer_event_id']);
+
+            return $recipient instanceof User && $event?->allowsRecipient($recipient);
+        }
+
+        return true;
     }
 
     public function afterSending(object $notifiable, string $channel, mixed $response): void

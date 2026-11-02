@@ -1,5 +1,5 @@
 @php
-    $activeSection = $errors->hasAny(['notifications_enabled', 'notification_types', 'notification_types.*']) || request('section') === 'notifications'
+    $activeSection = $errors->hasAny(['notifications_enabled', 'notification_types', 'notification_types.*', 'notification_type_options', 'notification_type_options.*']) || request('section') === 'notifications'
         ? 'notifications'
         : ($errors->hasAny(['password', 'password_confirmation']) ? 'password' : 'profile');
     $sections = [

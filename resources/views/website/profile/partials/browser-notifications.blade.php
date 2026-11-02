@@ -13,7 +13,10 @@
             <div class="col-12" visible-when="$account-notifications-enabled">
                 <fieldset>
                     <legend class="form-label">{{ __('Notification types') }}</legend>
-                    <x-checkboxes name="notification_types[]" :options="$notificationTypes" :value="$preferences?->notification_types ?? array_keys($notificationTypes)" validation="required|min:1" />
+                    @foreach (array_keys($notificationTypes) as $type)
+                        <input type="hidden" name="notification_type_options[]" value="{{ $type }}" />
+                    @endforeach
+                    <x-checkboxes name="notification_types[]" :options="$notificationTypes" :value="$preferences?->enabledNotificationTypes() ?? array_keys($notificationTypes)" />
                 </fieldset>
             </div>
             <div class="col-12" visible-when="$account-notifications-enabled">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationType;
 use Database\Factories\UserPreferenceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,22 @@ class UserPreference extends Model
         'notifications_enabled' => 'boolean',
         'notification_types' => 'array',
     ];
+
+    public function excludedNotificationTypes(): array
+    {
+        $types = $this->notification_types;
+        if ($types === null) return [];
+
+        // Previously this column contained selected types, when only General existed.
+        if (array_is_list($types)) return array_values(array_diff([NotificationType::General->value], $types));
+
+        return $types['disabled'] ?? [];
+    }
+
+    public function enabledNotificationTypes(): array
+    {
+        return array_values(array_diff(array_column(NotificationType::cases(), 'value'), $this->excludedNotificationTypes()));
+    }
 
     public function country(): BelongsTo
     {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\NotificationType;
 use App\Models\User;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -69,7 +70,7 @@ test('account sections keep profile and password submissions independent', funct
         ->and($xpath->query('//form//input[@name="_token"]')->length)->toBe(3)
         ->and($xpath->query('//input[@name="gender"][@value="female"][@checked]')->length)->toBe(1)
         ->and($xpath->query('//div[@id="account-notifications"]//input[@name="notifications_enabled"][@type="checkbox"]')->length)->toBe(1)
-        ->and($xpath->query('//div[@id="account-notifications"]//input[@name="notification_types[]"][@type="checkbox"]')->length)->toBe(1)
+        ->and($xpath->query('//div[@id="account-notifications"]//input[@name="notification_types[]"][@type="checkbox"]')->length)->toBe(count(NotificationType::cases()))
         ->and($xpath->query('//div[@id="account-notifications"]//div[@visible-when="$account-notifications-enabled"]')->length)->toBe(2)
         ->and($xpath->query('//div[@id="account-notifications"]//select')->length)->toBe(0)
         ->and($xpath->query('//div[@id="account-notifications"]//*[@data-push-status]')->length)->toBe(0)

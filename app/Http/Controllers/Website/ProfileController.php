@@ -69,9 +69,22 @@ class ProfileController extends Controller
             'theme' => ['sometimes', 'required', 'string', 'in:light,dark'],
             'language' => ['sometimes', 'required', 'string', 'in:' . implode(',', setting('website_locales'))],
             'notifications_enabled' => ['sometimes', 'required', 'boolean'],
-            'notification_types' => ['exclude_without:notifications_enabled', 'exclude_if:notifications_enabled,0', 'required_with:notifications_enabled', 'array', 'min:1'],
+            'notification_types' => ['exclude_without:notifications_enabled', 'exclude_if:notifications_enabled,0', 'sometimes', 'array'],
             'notification_types.*' => ['required', 'distinct', Rule::enum(NotificationType::class)],
+            'notification_type_options' => ['exclude_without:notifications_enabled', 'exclude_if:notifications_enabled,0', 'sometimes', 'array', 'min:1'],
+            'notification_type_options.*' => ['required', 'distinct', Rule::enum(NotificationType::class)],
         ]);
+
+        if ($request->boolean('notifications_enabled')) {
+            // Limit changes to the choices actually rendered, including forms opened before an update.
+            $options = $validated['notification_type_options'] ?? [NotificationType::General->value];
+            $excluded = $request->user()->preferences?->excludedNotificationTypes() ?? [];
+            $validated['notification_types'] = ['disabled' => array_values(array_unique(array_merge(
+                array_diff($excluded, $options),
+                array_diff($options, $validated['notification_types'] ?? []),
+            )))];
+        }
+        unset($validated['notification_type_options']);
 
         $request->user()->preferences()->update($validated);
 

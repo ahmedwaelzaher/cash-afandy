@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -140,9 +141,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $preferences = $this->preferences;
 
-        // Null preferences preserve delivery for existing accounts until they choose types.
+        // New types are enabled unless the account explicitly excluded them.
         return ! $this->trashed() && ($preferences?->notifications_enabled ?? true)
-            && in_array($type->value, $preferences?->notification_types ?? array_keys(NotificationType::values()), true);
+            && ! in_array($type->value, $preferences?->excludedNotificationTypes() ?? [], true);
+    }
+
+    public function offerNotificationEvents(): HasMany
+    {
+        return $this->hasMany(OfferNotificationEvent::class);
     }
 
     public function favoriteOffers(): BelongsToMany
