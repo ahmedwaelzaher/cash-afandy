@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Notifications\Notifiable;
 
@@ -17,7 +18,7 @@ class PushSubscription extends Model
         'disabled_at',
     ];
 
-    protected $hidden = ['token', 'token_hash'];
+    protected $hidden = ['token', 'token_hash', 'country_id'];
 
     protected $casts = [
         'last_seen_at' => 'datetime',
@@ -37,6 +38,11 @@ class PushSubscription extends Model
     public function notifiable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public static function disableFor(?Model $notifiable, ?string $tokenHash): void

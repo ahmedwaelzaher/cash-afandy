@@ -24,8 +24,10 @@ class PushSubscriptionController extends Controller
             'disabled_at' => null,
         ]);
         $subscription->notifiable()->associate($owner);
+        $country = website_ip_country();
+        if ($country) $subscription->country_id = $country->id;
 
-        DB::transaction(function () use ($request, $owner, $subscription) {
+        DB::transaction(function () use ($request, $owner, $subscription, $country) {
             $previous = $request->session()->get('push_subscription_token_hash');
             if ($previous !== $subscription->token_hash) {
                 PushSubscription::disableFor($owner, $previous);
@@ -34,6 +36,7 @@ class PushSubscriptionController extends Controller
             // Atomic registration also transfers a shared browser after an account switch.
             PushSubscription::upsert([$subscription->getAttributes()], ['token_hash'], [
                 'notifiable_type', 'notifiable_id', 'token', 'last_seen_at', 'disabled_at', 'updated_at',
+                ...($country ? ['country_id'] : []),
             ]);
         });
 

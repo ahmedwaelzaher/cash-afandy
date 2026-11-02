@@ -20,22 +20,30 @@ class SendScheduledWebsiteNotifications implements ShouldQueue
 
     public function handle(): void
     {
-        ScheduledWebsiteNotification::query()->pending()->where('send_at', '<=', now())
+        ScheduledWebsiteNotification::query()->pending()->due()
             ->chunkById(100, function ($schedules) {
                 foreach ($schedules as $schedule) {
                     DB::transaction(function () use ($schedule) {
                         // Sending and cancellation lock the same row; concurrent workers recheck it.
                         $entry = ScheduledWebsiteNotification::query()->pending()->whereKey($schedule->id)
-                            ->where('send_at', '<=', now())->lockForUpdate()->first();
+                            ->due()->lockForUpdate()->first();
                         if (! $entry) return;
 
                         $notification = new WebsiteNotification($entry->title, $entry->url, data: ['source' => 'dashboard'], body: $entry->body);
-                        User::query()->whereKey($entry->recipient_ids)->chunkById(100, function ($users) use ($notification) {
-                            // Store inbox rows in this transaction; push remains queued after commit.
-                            Notification::sendNow($users, $notification);
-                        });
-                        $entry->sent_at = now();
-                        $entry->save();
+                        $deliveries = $entry->deliveries()->whereNull('sent_at')->where('send_at', '<=', now())->get();
+                        $batches = $entry->deliveries()->exists() ? $deliveries : [$entry];
+                        foreach ($batches as $batch) {
+                            User::query()->whereKey($batch->recipient_ids)->chunkById(100, function ($users) use ($notification) {
+                                // Store inbox rows and batch completion together; push stays queued after commit.
+                                Notification::sendNow($users, $notification);
+                            });
+                            $batch->sent_at = now();
+                            $batch->save();
+                        }
+                        if (! $entry->deliveries()->whereNull('sent_at')->exists()) {
+                            $entry->sent_at = now();
+                            $entry->save();
+                        }
                     });
                 }
             });

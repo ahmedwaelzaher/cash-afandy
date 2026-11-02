@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('push_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->morphs('notifiable');
+            $table->foreignId('country_id')->nullable()->constrained()->nullOnDelete();
             $table->text('token');
             $table->string('token_hash', 64)->unique();
             $table->timestamp('last_seen_at')->nullable();

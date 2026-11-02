@@ -40,7 +40,7 @@
             @endif
 
             <div class="mb-3">
-                <x-date-picker name="send_at" :title="__('Send') . ' — ' . __('Date')" :hint="config('app.timezone')" datetime validation="required" />
+                <x-date-picker name="send_at" :title="__('Send') . ' — ' . __('Date')" :hint="__('Sent at this local time in each recipient’s country.')" datetime validation="required" />
             </div>
         </div>
 

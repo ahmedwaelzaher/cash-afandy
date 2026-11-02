@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Dashboard\WebsiteNotificationController;
+use App\Http\Controllers\Website\PushSubscriptionController;
 use App\Jobs\SendScheduledWebsiteNotifications;
 use App\Livewire\Datatables\ScheduledWebsiteNotifications;
 use App\Models\Admin;
+use App\Models\PushSubscription;
 use App\Models\ScheduledWebsiteNotification;
 use App\Models\User;
 use App\Notifications\WebsiteNotification;
@@ -23,6 +25,8 @@ use Illuminate\Validation\ValidationException;
 use Redot\Http\Middleware\RoutePermission;
 use Redot\Support\PermissionNameResolver;
 use Redot\Support\QueryFilters;
+use Stevebauman\Location\Facades\Location;
+use Stevebauman\Location\Position;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 uses(TestCase::class);
@@ -30,7 +34,7 @@ uses(TestCase::class);
 beforeEach(function () {
     config([
         'database.default' => 'notification_test',
-        'database.connections.notification_test' => ['driver' => 'sqlite', 'database' => ':memory:'],
+        'database.connections.notification_test' => ['driver' => 'sqlite', 'database' => ':memory:', 'foreign_key_constraints' => true],
         'queue.default' => 'notification_test',
         'queue.connections.notification_test' => [
             'driver' => 'database', 'connection' => 'notification_test', 'table' => 'jobs',
@@ -39,6 +43,12 @@ beforeEach(function () {
         'redot.notifications.push_enabled' => false,
     ]);
     Carbon::setTestNow(Carbon::parse('2026-11-01 12:00:00', config('app.timezone')));
+    cache()->forever('settings.default_website_country', 'eg');
+    Schema::create('countries', function (Blueprint $table) {
+        $table->id();
+        $table->string('code');
+    });
+    DB::table('countries')->insert([['id' => 1, 'code' => 'eg'], ['id' => 2, 'code' => 'sa'], ['id' => 3, 'code' => 'us']]);
 
     // Isolated in-memory tables avoid the unrelated legacy migration's MySQL CONCAT.
     Schema::create('users', function (Blueprint $table) {
@@ -64,10 +74,13 @@ beforeEach(function () {
     Schema::create('user_preferences', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('user_id')->unique();
+        $table->unsignedBigInteger('country_id')->nullable();
         $table->timestamps();
     });
     (require database_path('migrations/2026_11_01_000001_add_notification_preferences_to_user_preferences.php'))->up();
     (require database_path('migrations/2026_11_01_000002_create_scheduled_website_notifications_table.php'))->up();
+    (require database_path('migrations/2026_10_28_000001_create_push_subscriptions_table.php'))->up();
+    (require database_path('migrations/2026_11_02_000003_create_scheduled_notification_deliveries_table.php'))->up();
     Schema::create('notifications', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('type');
@@ -172,6 +185,120 @@ test('dashboard messages ignore individual type exclusions while respecting the 
     $this->composer->store(Request::create('/', 'POST', $this->payload));
     expect(deliverComposerNotifications())->toBe([1])
         ->and(json_decode(DB::table('notifications')->first()->data, true)['data']['source'])->toBe('dashboard');
+});
+
+function browserWithCountry(int $userId, ?int $countryId, int $minutesAgo = 0, bool $disabled = false): PushSubscription
+{
+    $browser = new PushSubscription(['token' => 'browser-' . bin2hex(random_bytes(8)),
+        'last_seen_at' => now()->subMinutes($minutesAgo), 'disabled_at' => $disabled ? now() : null]);
+    $browser->country_id = $countryId;
+    $browser->notifiable()->associate(User::findOrFail($userId));
+    $browser->save();
+
+    return $browser;
+}
+
+test('local delivery groups send at each countrys clock time without duplicating accounts', function () {
+    browserWithCountry(1, 1);
+    browserWithCountry(1, 2, 10);
+    browserWithCountry(2, 2);
+    $this->payload['send_at'] = '2026-11-02 09:30:00';
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $entry = ScheduledWebsiteNotification::firstOrFail();
+    expect(ScheduledWebsiteNotification::count())->toBe(1)
+        ->and($entry->deliveries()->count())->toBe(2);
+    // Changing the browser country afterwards must not move a frozen delivery.
+    User::find(2)->pushSubscriptions()->update(['country_id' => 1]);
+    Carbon::setTestNow(Carbon::parse('2026-11-02 09:29:59', 'Asia/Riyadh'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->count())->toBe(0);
+    Carbon::setTestNow(Carbon::parse('2026-11-02 09:30:00', 'Asia/Riyadh'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->pluck('notifiable_id')->all())->toBe([2])
+        ->and($entry->fresh()->sent_at)->toBeNull();
+    Carbon::setTestNow(Carbon::parse('2026-11-02 09:30:00', 'Africa/Cairo'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->orderBy('notifiable_id')->pluck('notifiable_id')->all())->toBe([1, 2])
+        ->and($entry->fresh()->sent_at)->not->toBeNull();
+});
+
+test('recipient timezone uses latest known active browser then preferences then project default', function () {
+    DB::table('user_preferences')->insert(['user_id' => 1, 'country_id' => 2]);
+    expect(User::find(1)->notificationTimezone())->toBe('Asia/Riyadh');
+    browserWithCountry(1, 1, 10);
+    browserWithCountry(1, 2, 5, true);
+    browserWithCountry(1, null);
+    expect(User::find(1)->notificationTimezone())->toBe('Africa/Cairo');
+    browserWithCountry(1, 3);
+    expect(User::find(1)->notificationTimezone())->toBe('Asia/Riyadh');
+    User::find(1)->preferences()->update(['country_id' => 3]);
+    expect(User::find(1)->notificationTimezone())->toBe('Africa/Cairo');
+});
+
+test('a time already passed in any recipient country rejects the whole schedule atomically', function () {
+    browserWithCountry(2, 2);
+    $payload = [...$this->payload, 'send_at' => '2026-11-01 12:30:00'];
+    expect(fn () => $this->composer->store(Request::create('/', 'POST', $payload)))->toThrow(ValidationException::class);
+    expect(ScheduledWebsiteNotification::count())->toBe(0)
+        ->and(DB::table('scheduled_notification_deliveries')->count())->toBe(0);
+});
+
+test('local scheduling observes summer time and accepts the shared pickers AM PM format', function () {
+    Carbon::setTestNow(Carbon::parse('2027-05-01 12:00:00', 'UTC'));
+    browserWithCountry(1, 1);
+    browserWithCountry(2, 2);
+    $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'send_at' => '2027-05-02 09:30 PM']));
+    $groups = ScheduledWebsiteNotification::firstOrFail()->deliveries;
+    expect($groups->pluck('send_at')->map(fn ($date) => $date->copy()->utc()->format('H:i'))->unique()->all())->toBe(['18:30']);
+});
+
+test('a nonexistent local clock time during the spring transition is rejected', function () {
+    Carbon::setTestNow(Carbon::parse('2027-04-28 12:00:00', 'Africa/Cairo'));
+    expect(fn () => $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'send_at' => '2027-04-30 00:30:00'])))
+        ->toThrow(ValidationException::class);
+    expect(ScheduledWebsiteNotification::count())->toBe(0);
+});
+
+test('preexisting schedules retain their original absolute sending time', function () {
+    $entry = ScheduledWebsiteNotification::create([
+        'title' => 'Legacy schedule', 'body' => 'Existing delivery', 'recipient_ids' => [1, 2], 'send_at' => now()->addHour(),
+    ]);
+    browserWithCountry(2, 2);
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->count())->toBe(0);
+    Carbon::setTestNow($entry->send_at);
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->count())->toBe(2)
+        ->and($entry->fresh()->sent_at)->not->toBeNull();
+});
+
+test('cancelling a partially delivered schedule cancels the remaining countries only', function () {
+    browserWithCountry(2, 2);
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    $entry = ScheduledWebsiteNotification::firstOrFail();
+    Carbon::setTestNow(Carbon::parse($this->payload['send_at'], 'Asia/Riyadh'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    $this->composer->destroy((string) $entry->id);
+    Carbon::setTestNow(Carbon::parse($this->payload['send_at'], 'Africa/Cairo'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->pluck('notifiable_id')->all())->toBe([2])
+        ->and(DB::table('scheduled_notification_deliveries')->count())->toBe(0);
+});
+
+test('browser country comes from IP detection and an unavailable lookup preserves its last known country', function () {
+    config(['redot.notifications.push_enabled' => true]);
+    $controller = new PushSubscriptionController;
+    foreach (['203.0.113.10' => Position::make(['countryCode' => 'sa']), '203.0.113.11' => false] as $ip => $position) {
+        Location::shouldReceive('get')->once()->andReturn($position);
+        $request = Request::create('/', 'POST', ['token' => 'country-browser', 'country_id' => 1], server: ['REMOTE_ADDR' => $ip]);
+        $request->setLaravelSession(session()->driver());
+        app()->instance('request', $request);
+        $request->setUserResolver(fn () => User::findOrFail(1));
+        $controller->store($request);
+        expect(PushSubscription::where('token_hash', hash('sha256', 'country-browser'))->sole()->country_id)->toBe(2);
+    }
+    expect(PushSubscription::count())->toBe(1);
 });
 
 function composerFilter(string $field, string $operator, mixed $value): array

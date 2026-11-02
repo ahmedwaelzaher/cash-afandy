@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Models\Country;
 use App\Models\ScheduledWebsiteNotification;
 use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -106,7 +107,7 @@ class WebsiteNotificationController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:500'],
             'url' => ['nullable', 'url:http,https', 'max:2048'],
-            'send_at' => ['required', 'date', 'after:now'],
+            'send_at' => ['required', 'date_format:Y-m-d H:i,Y-m-d H:i:s,Y-m-d h:i A'],
         ]);
 
         // Delayed notifications must use a persistent queue, never the sync driver.
@@ -121,19 +122,40 @@ class WebsiteNotificationController extends Controller
             $recipients = User::query()->whereKey($validated['users']);
         }
 
-        $recipientIds = $recipients->pluck('id')->all();
+        $users = $recipients->with(['preferences.country', 'pushSubscriptions.country'])->get();
+        $recipientIds = $users->modelKeys();
         if ($recipientIds === []) {
             $field = $validated['recipient_mode'] === 'condition' ? 'filters' : 'users';
             throw ValidationException::withMessages([$field => __('No users found')]);
         }
 
-        ScheduledWebsiteNotification::create([
-            'title' => $validated['title'],
-            'body' => $validated['body'],
-            'url' => $validated['url'] ?? null,
-            'recipient_ids' => $recipientIds,
-            'send_at' => Carbon::parse($validated['send_at'], config('app.timezone')),
-        ]);
+        $groups = [];
+        $defaultCountry = Country::code(setting('default_website_country'));
+        foreach ($users as $user) {
+            $timezone = $user->notificationTimezone($defaultCountry);
+            if (! $timezone) {
+                throw ValidationException::withMessages(['send_at' => __('The recipient country must have a supported timezone.')]);
+            }
+            $local = Carbon::parse($validated['send_at'], $timezone);
+            // Reject nonexistent clock times at a DST transition rather than silently shifting them.
+            if ($local->format('Y-m-d H:i:s') !== Carbon::parse($validated['send_at'], 'UTC')->format('Y-m-d H:i:s') || $local->lte(now())) {
+                throw ValidationException::withMessages(['send_at' => __('Choose a future local time valid for every recipient.')]);
+            }
+            $groups[$timezone] ??= ['timezone' => $timezone, 'send_at' => $local->copy()->setTimezone(config('app.timezone')), 'recipient_ids' => []];
+            $groups[$timezone]['recipient_ids'][] = $user->id;
+        }
+
+        DB::transaction(function () use ($validated, $recipientIds, $groups) {
+            $entry = ScheduledWebsiteNotification::create([
+                'title' => $validated['title'],
+                'body' => $validated['body'],
+                'url' => $validated['url'] ?? null,
+                'recipient_ids' => $recipientIds,
+                // Display the requested wall clock time; delivery rows hold the actual sending instants.
+                'send_at' => Carbon::parse($validated['send_at'], config('app.timezone')),
+            ]);
+            $entry->deliveries()->createMany(array_values($groups));
+        });
 
         return $this->created(__('Notification'), 'dashboard.website-notifications.index');
     }

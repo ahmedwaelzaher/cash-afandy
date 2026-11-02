@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
 
 class Country extends Model
@@ -91,5 +92,14 @@ class Country extends Model
     public static function code(string $code): ?Country
     {
         return static::where('code', $code)->first();
+    }
+
+    public function notificationTimezone(): ?string
+    {
+        if (! preg_match('/^[a-z]{2}$/i', $this->code)) return null;
+        $zones = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, strtoupper($this->code));
+
+        // Country alone cannot identify the user's timezone in a country with multiple zones.
+        return count($zones) === 1 ? $zones[0] : null;
     }
 }

@@ -25,6 +25,9 @@ beforeEach(function () {
         'redot.notifications.push_enabled' => false,
     ]);
     cache()->forever('settings.website_locales', ['ar', 'en']);
+    Schema::create('countries', function (Blueprint $table) {
+        $table->id();
+    });
     Schema::create('users', function (Blueprint $table) {
         $table->id();
         $table->softDeletes();

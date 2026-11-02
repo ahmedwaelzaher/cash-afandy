@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -154,6 +155,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function favoriteOffers(): BelongsToMany
     {
         return $this->belongsToMany(Offer::class)->withTimestamps();
+    }
+
+    public function pushSubscriptions(): MorphMany
+    {
+        return $this->morphMany(PushSubscription::class, 'notifiable');
+    }
+
+    public function notificationTimezone(?Country $defaultCountry = null): ?string
+    {
+        $browser = $this->pushSubscriptions->whereNull('disabled_at')->whereNotNull('country_id')
+            ->sortByDesc(fn ($subscription) => [$subscription->last_seen_at?->timestamp ?? 0, $subscription->id])->first();
+
+        return $browser?->country?->notificationTimezone()
+            ?? $this->preferences?->country?->notificationTimezone()
+            ?? ($defaultCountry ?? Country::code(setting('default_website_country')))?->notificationTimezone();
     }
 
     /**
