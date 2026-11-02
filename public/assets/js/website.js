@@ -940,37 +940,44 @@ $(() => {
     let subscribed = false;
     let lastSync = 0;
     let promptVisible = false;
-    let promptAnimation;
+    const slideAnimations = new WeakMap();
 
     // Animate from the inline end in either direction, including interrupted animations.
+    const slide = (element, visible, complete = () => {}, motion = { duration: 200, easing: 'ease-out' }) => {
+        const previous = slideAnimations.get(element);
+        const style = window.getComputedStyle(element);
+        const inset = style.insetInlineEnd === 'auto'
+            ? window.getComputedStyle(element.parentElement).insetInlineEnd
+            : style.insetInlineEnd;
+        const outside = style.direction === 'rtl'
+            ? `translateX(calc(-100% - ${inset}))`
+            : `translateX(calc(100% + ${inset}))`;
+        const from = previous ? style.transform : (visible ? outside : 'translateX(0)');
+        previous?.cancel();
+        slideAnimations.delete(element);
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            complete();
+            return;
+        }
+        const animation = element.animate([
+            { transform: from },
+            { transform: visible ? 'translateX(0)' : outside },
+        ], motion);
+        slideAnimations.set(element, animation);
+        animation.onfinish = () => {
+            if (slideAnimations.get(element) !== animation) return;
+            slideAnimations.delete(element);
+            animation.cancel();
+            complete();
+        };
+    };
     const showPrompt = (visible) => {
         if (promptVisible === visible) return;
         promptVisible = visible;
         const element = $prompt[0];
         if (!element) return;
-        const style = window.getComputedStyle(element);
-        const outside = style.direction === 'rtl'
-            ? `translateX(calc(-100% - ${style.insetInlineEnd}))`
-            : `translateX(calc(100% + ${style.insetInlineEnd}))`;
-        const from = promptAnimation ? style.transform : (visible ? outside : 'translateX(0)');
-        promptAnimation?.cancel();
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            promptAnimation = null;
-            $prompt.prop('hidden', !visible);
-            return;
-        }
         $prompt.prop('hidden', false);
-        const animation = element.animate([
-            { transform: from },
-            { transform: visible ? 'translateX(0)' : outside },
-        ], { duration: 200, easing: 'ease-out' });
-        promptAnimation = animation;
-        animation.onfinish = () => {
-            if (promptAnimation !== animation) return;
-            $prompt.prop('hidden', !visible);
-            animation.cancel();
-            promptAnimation = null;
-        };
+        slide(element, visible, () => $prompt.prop('hidden', !visible));
     };
     // Share status and controls between the invitation and the browser settings panel.
     const render = (message, enabled = false) => {
@@ -1007,12 +1014,87 @@ $(() => {
             || Number(localStorage.getItem(dismissedKey)) > Date.now();
         showPrompt(!hidden);
     };
-    // Reuse one Firebase client and one foreground-message listener per page.
+    const pendingNotifications = [];
+    const notificationIds = new Set();
+    let popupClient = window.WebsiteNotificationClient;
+    let fillingNotifications = false;
+    let exitingNotifications = 0;
+    const notificationMotion = { duration: 280, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+    const layoutAnimations = new WeakMap();
+    const notificationPositions = (container) => new Map(
+        [...container.children].map((card) => [card, card.getBoundingClientRect().top]),
+    );
+    // Animate layout separately from the horizontal slide so stack changes cannot interrupt it.
+    const settleNotifications = (container, positions) => {
+        for (const card of container.children) {
+            const previous = positions.get(card);
+            if (previous === undefined) continue;
+            layoutAnimations.get(card)?.cancel();
+            layoutAnimations.delete(card);
+            const offset = previous - card.getBoundingClientRect().top;
+            if (Math.abs(offset) < 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) continue;
+            const animation = card.animate([{ translate: `0 ${offset}px` }, { translate: '0 0' }], notificationMotion);
+            layoutAnimations.set(card, animation);
+            animation.onfinish = () => {
+                if (layoutAnimations.get(card) !== animation) return;
+                layoutAnimations.delete(card);
+                animation.cancel();
+            };
+        }
+    };
+    // Measure each card at the current viewport width before starting its display timer.
+    const flushNotifications = async () => {
+        const container = document.querySelector('[data-notification-popups]');
+        if (!container || document.hidden || !popupClient || fillingNotifications || exitingNotifications) return;
+        fillingNotifications = true;
+        try {
+            while (pendingNotifications.length) {
+                const entry = pendingNotifications[0];
+                const { $card, toast, id } = entry;
+                const fits = () => {
+                    const occupied = container.childElementCount > 0;
+                    $card.addClass('d-block invisible').appendTo(container);
+                    const available = !occupied || $card[0].offsetTop + $card[0].offsetHeight <= container.clientHeight + 1;
+                    $card.detach().removeClass('d-block invisible');
+                    return available;
+                };
+                if (!fits()) break;
+                const claimStarted = Date.now();
+                const token = await popupClient.claim(id);
+                if (!token) {
+                    pendingNotifications.shift();
+                    notificationIds.delete(id);
+                    toast.dispose();
+                    $card.remove();
+                    continue;
+                }
+                if (Date.now() - claimStarted >= 25000 || document.hidden || exitingNotifications || !fits()) {
+                    await popupClient.release(id, token);
+                    break;
+                }
+                entry.token = token;
+                pendingNotifications.shift();
+                const positions = notificationPositions(container);
+                $card.appendTo(container);
+                toast.show();
+                settleNotifications(container, positions);
+            }
+        } catch {
+            // A failed request leaves the card pending; an abandoned server claim expires automatically.
+        } finally {
+            fillingNotifications = false;
+        }
+    };
+    $(window).on('resize.browserNotifications', flushNotifications);
     // Foreground notifications use the shared Toast lifecycle with the website card template.
     const showNotification = (payload) => {
         const template = document.getElementById('site-incoming-notification');
         const container = document.querySelector('[data-notification-popups]');
-        if (!template || !container || !payload.notification?.title) return;
+        if (!template || !container || typeof payload?.notification?.title !== 'string' || !payload.notification.title) return;
+        const id = payload.data?.notification_id || payload.messageId;
+        if (!id) return;
+        if (id && notificationIds.has(id)) return;
+        if (id) notificationIds.add(id);
 
         const safeUrl = (value) => {
             if (typeof value !== 'string' || !value.trim()) return null;
@@ -1033,7 +1115,7 @@ $(() => {
             .prop('hidden', !payload.notification.body);
         const type = endpoints.types?.[data.notification_type] || endpoints.types?.general;
         $card.find('[data-notification-type]').text(type?.label || __('Notification'));
-        if (type?.icon) $card.find('[data-notification-icon]').attr('class', `${type.icon} m-0 lh-1`);
+        if (type?.icon) $card.find('[data-notification-icon]').attr('class', `${type.icon} fs-1 m-0 lh-1 w-auto h-auto`);
         const image = safeUrl(data.store_image);
         if (image) {
             const $fallback = $card.find('[data-notification-fallback]');
@@ -1056,19 +1138,72 @@ $(() => {
                 .attr('href', url)
                 .text(offer ? __('View offer') : __('Details'));
             $card.find('[data-notification-action]').prop('hidden', false);
+        } else {
+            $card.find('[data-notification-action]').remove();
         }
-        $card.appendTo(container);
-        const toast = new tabler.Toast($card[0], { delay: Number($card.attr('data-delay')) });
+        const toast = new tabler.Toast($card[0], { delay: Number($card.attr('data-delay')), animation: false });
+        const entry = { $card, toast, id, token: null };
+        const confirm = () => {
+            if (entry.token) popupClient.confirm(id, entry.token).catch(() => {});
+        };
+        let exiting = false;
+        let exited = false;
+        $card.on('shown.bs.toast', () => {
+            showPrompt(false);
+            slide($card[0], true, () => {
+                if (!document.hidden) confirm();
+            }, notificationMotion);
+        });
+        $card.on('hide.bs.toast', (event) => {
+            if (exited) return;
+            event.preventDefault();
+            if (exiting) return;
+            exiting = true;
+            confirm();
+            exitingNotifications++;
+            slide($card[0], false, () => {
+                exited = true;
+                toast.hide();
+            }, notificationMotion);
+        });
         $card.find('[data-notification-link]').on('click', () => toast.hide());
         $card.on('hidden.bs.toast', () => {
+            const positions = notificationPositions(container);
+            if (exiting) exitingNotifications--;
+            layoutAnimations.get($card[0])?.cancel();
+            layoutAnimations.delete($card[0]);
             toast.dispose();
             $card.remove();
+            settleNotifications(container, positions);
+            flushNotifications();
         });
         $card.on('keydown', (event) => {
             if (event.key === 'Escape') toast.hide();
         });
-        toast.show();
+        pendingNotifications.push(entry);
+        flushNotifications();
     };
+    let loadingPopups = false;
+    const loadPendingNotifications = async () => {
+        if (!popupClient || document.hidden || loadingPopups) return;
+        loadingPopups = true;
+        try {
+            const payloads = await popupClient.list();
+            payloads.forEach(showNotification);
+            await flushNotifications();
+        } catch {
+            // Retry on the next poll or when the page becomes visible again.
+        } finally {
+            loadingPopups = false;
+        }
+    };
+    $(document).on('website:popup-client-ready', () => {
+        popupClient = window.WebsiteNotificationClient;
+        loadPendingNotifications();
+    });
+    window.setInterval(loadPendingNotifications, 15000);
+    loadPendingNotifications();
+    // Reuse one Firebase client and one foreground-message listener per page.
     const client = () => {
         if (!clientPromise) {
             clientPromise = (async () => {
@@ -1187,7 +1322,9 @@ $(() => {
     }
     try {
         render(wanted() ? __('Updating browser notifications…') : __('Browser notifications are disabled.'), wanted());
-        if (wanted()) run(synchronize);
+        if (wanted()) {
+            run(synchronize);
+        }
         else if (localStorage.getItem(preferenceKey) === 'false') run(disable);
         updatePrompt();
     } catch {
@@ -1243,6 +1380,8 @@ $(() => {
         else render(__('Browser notifications are disabled.'));
     });
     $(document).on('visibilitychange.browserPush', () => {
+        if (!document.hidden) loadPendingNotifications();
+        if (!document.hidden) flushNotifications();
         if (!document.hidden && wanted() && Date.now() - lastSync > 300000) run(synchronize);
         else if (!document.hidden && localStorage.getItem(preferenceKey) === 'false') run(disable);
     });

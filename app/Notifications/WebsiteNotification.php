@@ -54,6 +54,18 @@ class WebsiteNotification extends DashboardNotification implements ShouldQueue
         return true;
     }
 
+    public static function browserPayload(DatabaseNotification $notification, ?OfferNotificationEvent $event = null): array
+    {
+        $type = NotificationType::tryFrom($notification->data['type'] ?? NotificationType::General->value);
+        $data = ['notification_id' => (string) $notification->id, 'notification_type' => $type?->value ?? NotificationType::General->value];
+        if (is_string($url = $notification->data['url'] ?? null) && trim($url) !== '') $data['url'] = $url;
+        $event ??= isset($notification->data['data']['offer_event_id'])
+            ? OfferNotificationEvent::find($notification->data['data']['offer_event_id']) : null;
+        if ($image = $event?->offer?->store?->logo) $data['store_image'] = $image;
+
+        return ['notification' => ['title' => $notification->data['title'], 'body' => $notification->data['body'] ?? ''], 'data' => $data];
+    }
+
     public function afterSending(object $notifiable, string $channel, mixed $response): void
     {
         if (! $this->push || ! config('redot.notifications.push_enabled', false)

@@ -19,7 +19,7 @@ const until = async (condition) => {
     assert.fail('The browser registration did not reach the expected state.');
 };
 
-function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
+function browser(reducedMotion = false, direction = 'rtl', withPanel = false, savedState = {}) {
     const element = () => ({ props: { hidden: true }, children: {}, events: {} });
     const prompt = element();
     const panel = element();
@@ -39,8 +39,8 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         AppServiceWorker: Promise.resolve({ active: { state: 'activated' } }),
         isSecureContext: true,
         location: { href: 'https://cashafandy.test/ar/offers' },
-        matchMedia: () => ({ matches: reducedMotion }),
-        getComputedStyle: () => ({ direction, insetInlineEnd: '16px', transform: 'none' }),
+        matchMedia: () => ({ matches: state.reducedMotion }),
+        getComputedStyle: () => ({ direction: state.direction, insetInlineEnd: '16px', transform: 'none' }),
     });
     const state = {
         prompt,
@@ -57,14 +57,32 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         events: [],
         cards: [],
         toasts: [],
+        reducedMotion,
+        direction,
+        viewportHeight: savedState.viewportHeight || 10000,
     };
+    Object.defineProperties(notificationContainer, {
+        children: { get: () => notificationContainer.childrenList || [] },
+        childElementCount: { get: () => (notificationContainer.childrenList || []).length },
+        scrollHeight: { get: () => Math.max(0, (notificationContainer.childrenList || []).length * 110 - 10) },
+        clientHeight: { get: () => Math.min(notificationContainer.scrollHeight, state.viewportHeight) },
+    });
     document.getElementById = () => ({
         content: {
             firstElementChild: {
                 cloneNode: () => {
                     const card = element();
                     card.isNotification = true;
-                    card.props['data-delay'] = '10000';
+                    card.getBoundingClientRect = () => ({ top: state.measureLayout && card.parent
+                        ? state.viewportHeight - Math.min(notificationContainer.scrollHeight, state.viewportHeight)
+                            + notificationContainer.children.indexOf(card) * 110
+                        : 0 });
+                    Object.defineProperties(card, {
+                        offsetTop: { get: () => notificationContainer.children.indexOf(card) * 110 },
+                        offsetHeight: { get: () => 100 },
+                    });
+                    card.animate = prompt.animate;
+                    card.props['data-delay'] = '5000';
                     card.children['[data-notification-action]'] = element();
                     card.children['[data-notification-fallback]'] = element();
                     card.children['[data-notification-fallback]'].props.hidden = false;
@@ -75,7 +93,7 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     });
     document.querySelector = () => notificationContainer;
     prompt.animate = (frames, options) => {
-        state.animations.push({ from: frames[0].transform, to: frames[1].transform, duration: options.duration });
+        state.animations.push({ from: frames[0].transform ?? frames[0].translate, to: frames[1].transform ?? frames[1].translate, duration: options.duration });
         let cancelled = false;
         const animation = {
             cancel: () => {
@@ -134,16 +152,26 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         one(event, callback) {
             return this.on(event, callback);
         }
+        addClass() { return this; }
+        removeClass() { return this; }
         appendTo(target) {
             const parent = target instanceof Collection ? target[0] : target;
             this.items.forEach((item) => {
                 (parent.childrenList ||= []).push(item);
-                if (item.isNotification) state.cards.push(item);
+                item.parent = parent;
+                if (item.isNotification && !state.cards.includes(item)) state.cards.push(item);
             });
             return this;
         }
         remove() {
-            return this.prop('removed', true);
+            return this.detach().prop('removed', true);
+        }
+        detach() {
+            this.items.forEach((item) => {
+                if (item.parent) item.parent.childrenList = item.parent.childrenList.filter((child) => child !== item);
+                item.parent = null;
+            });
+            return this;
         }
     }
     function $(target, attributes) {
@@ -156,9 +184,29 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         state.posts.push(options);
         return state.saved.promise;
     };
-    const storage = new Map();
+    const storage = savedState.local || new Map();
+    const database = savedState.database || new Map();
+    const owner = savedState.recipientKey || 'user:1';
+    window.setInterval = (callback) => { state.poll = callback; };
+    window.WebsiteNotificationClient = {
+        list: async () => [...database.values()].filter((row) => row.owner === owner && !row.shown && !row.token).map((row) => row.payload),
+        claim: async (id) => {
+            const row = database.get(id);
+            if (!row || row.owner !== owner || row.shown || row.token) return null;
+            row.token = 'claim-' + id;
+            return row.token;
+        },
+        confirm: async (id, token) => {
+            const row = database.get(id);
+            if (row?.owner === owner && row.token === token) { row.shown = true; row.token = null; }
+        },
+        release: async (id, token) => {
+            const row = database.get(id);
+            if (row?.owner === owner && row.token === token) row.token = null;
+        },
+    };
     const Notification = {
-        permission: 'default',
+        permission: savedState.permission || 'default',
         requestPermission: () => {
             state.permissionRequests++;
             return state.permission.promise;
@@ -181,9 +229,12 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
                 }
                 show() {
                     this.card.shown = true;
+                    this.card.events['shown.bs.toast']?.();
                 }
                 hide() {
-                    this.card.events['hidden.bs.toast']();
+                    const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
+                    this.card.events['hide.bs.toast']?.(event);
+                    if (!event.defaultPrevented) this.card.events['hidden.bs.toast']();
                 }
                 dispose() {
                     this.disposed = true;
@@ -202,7 +253,11 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         isSupported: async () => true,
         getMessaging: () => ({}),
         onMessage: (_, callback) => {
-            state.receive = callback;
+            state.receive = (payload) => {
+                const id = payload.data?.notification_id || payload.messageId;
+                if (!database.has(id)) database.set(id, { payload, owner, shown: false, token: null });
+                callback(payload);
+            };
         },
         getToken: () => {
             state.tokenRequests++;
@@ -240,6 +295,14 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     state.setHidden = (hidden) => {
         document.hidden = hidden;
     };
+    state.setDirection = (value) => { state.direction = value; };
+    state.setReducedMotion = (value) => { state.reducedMotion = value; };
+    state.resize = (height) => {
+        state.viewportHeight = height;
+        window.events['resize.browserNotifications']();
+    };
+    state.measureLayout = false;
+    state.savedState = { database, permission: 'granted' };
     return state;
 }
 
@@ -389,10 +452,13 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
             store_image: '/logo.png',
         },
     });
+    await new Promise(setImmediate);
     const card = account.cards[0];
-    assert.equal(account.toasts[0].options.delay, 10000);
-    assert.equal(card.children['[data-notification-type-icon]'].props.class, 'ti ti-star m-0 lh-1');
-    assert.equal(card.children['[data-notification-fallback]'].props.class, 'ti ti-star m-0 lh-1');
+    assert.equal(account.toasts[0].options.delay, 5000);
+    assert.equal(card.children['[data-notification-type-icon]'].props.class, 'ti ti-star fs-1 m-0 lh-1 w-auto h-auto');
+    assert.equal(card.children['[data-notification-fallback]'].props.class, 'ti ti-star fs-1 m-0 lh-1 w-auto h-auto');
+    assert.equal(account.animations.at(-1).from, 'translateX(calc(-100% - 16px))');
+    assert.equal(account.toasts[0].options.animation, false, 'Use the shared slide instead of the default fade.');
     assert.equal(card.children['[data-notification-type]'].text, 'New offer');
     assert.equal(
         card.children['[data-notification-title]'].text,
@@ -414,28 +480,107 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     account.receive({ notification: { title: 'Duplicate' }, data: { notification_id: 'first-card' } });
     assert.equal(account.cards.length, 1, 'Do not display the same push twice.');
     account.receive({ notification: { title: 'No URL' }, data: { notification_id: 'without-url' } });
+    await new Promise(setImmediate);
     assert.equal(
-        account.cards[1].children['[data-notification-action]'].props.hidden,
+        account.cards[1].children['[data-notification-action]'].props.removed,
         true,
-        'No link means no action footer.',
+        'No link means the entire action footer is removed.',
     );
     assert.equal(account.cards[1].children['[data-notification-body]'].props.hidden, true, 'Omit an empty body.');
     account.receive({
         notification: { title: 'Unsafe URL' },
         data: { notification_id: 'unsafe-url', url: 'javascript:alert(1)', store_image: 'data:image/svg+xml,bad' },
     });
-    assert.equal(account.cards[2].children['[data-notification-action]'].props.hidden, true);
+    await new Promise(setImmediate);
+    assert.equal(account.cards[2].children['[data-notification-action]'].props.removed, true);
     assert.equal(account.cards[2].children['[data-notification-avatar]'], undefined);
     account.setHidden(true);
     account.receive({ notification: { title: 'Background' }, data: { notification_id: 'background' } });
     assert.equal(account.cards.length, 3, 'Leave background notifications to the system worker.');
     card.events.keydown({ key: 'Escape' });
+    assert.notEqual(card.props.removed, true, 'Wait until the slide exit finishes before removing the card.');
+    await new Promise(setImmediate);
     assert.equal(card.props.removed, true);
     assert.equal(account.toasts[0].disposed, true);
     account.setHidden(false);
+    account.setDirection('ltr');
     account.receive({ notification: { title: 'Open details' }, data: { notification_id: 'click-link', url: '/ar/offers/6' } });
+    await new Promise(setImmediate);
+    assert.equal(account.animations.at(-1).from, 'translateX(calc(100% + 16px))');
     account.cards[3].children['[data-notification-link]'].events.click();
+    assert.equal(account.animations.at(-1).to, 'translateX(calc(100% + 16px))');
+    await new Promise(setImmediate);
     assert.equal(account.cards[3].props.removed, true, 'Dismiss the card when its details link is clicked.');
+    account.setReducedMotion(true);
+    const animationCount = account.animations.length;
+    account.receive({ notification: { title: 'Reduced motion' }, data: { notification_id: 'reduced-motion' } });
+    await new Promise(setImmediate);
+    account.cards[4].events.keydown({ key: 'Escape' });
+    assert.equal(account.cards[4].props.removed, true);
+    assert.equal(account.animations.length, animationCount, 'Respect reduced motion for notification entry and exit.');
+    account.toasts.forEach((toast) => { if (!toast.disposed) toast.hide(); });
+    account.resize(240);
+    const firstQueued = account.toasts.length;
+    for (const id of ['room-one', 'room-two', 'room-three']) {
+        account.receive({ notification: { title: id }, data: { notification_id: id } });
+    }
+    await new Promise(setImmediate);
+    assert.equal(account.toasts[firstQueued].card.shown, true);
+    assert.equal(account.toasts[firstQueued + 1].card.shown, true);
+    assert.notEqual(account.toasts[firstQueued + 2].card.shown, true, 'Keep overflow pending without starting its timer.');
+    assert.equal(account.toasts[firstQueued + 2].card.parent, null);
+    account.toasts[firstQueued].hide();
+    await new Promise(setImmediate);
+    assert.equal(account.toasts[firstQueued + 2].card.shown, true, 'Display the oldest pending card after space is freed.');
+    account.receive({ notification: { title: 'Wait for resize' }, data: { notification_id: 'room-four' } });
+    assert.notEqual(account.toasts[firstQueued + 3].card.shown, true);
+    account.resize(400);
+    await new Promise(setImmediate);
+    assert.equal(account.toasts[firstQueued + 3].card.shown, true, 'Use additional space after a viewport resize.');
+    account.toasts.forEach((toast) => { if (!toast.disposed) toast.hide(); });
+    account.resize(240);
+    account.measureLayout = true;
+    account.setReducedMotion(false);
+    const transitionStart = account.toasts.length;
+    for (const id of ['transition-one', 'transition-two', 'transition-three']) {
+        account.receive({ notification: { title: id }, data: { notification_id: id } });
+    }
+    await new Promise(setImmediate);
+    assert.ok(account.animations.some((animation) => animation.from === '0 110px'), 'Move existing cards smoothly when the stack grows.');
+    account.toasts[transitionStart].hide();
+    account.toasts[transitionStart + 1].hide();
+    assert.notEqual(account.toasts[transitionStart + 2].card.shown, true, 'Do not enter while another card is exiting.');
+    account.receive({ notification: { title: 'Arrival during exit' }, data: { notification_id: 'transition-four' } });
+    assert.notEqual(account.toasts[transitionStart + 3].card.shown, true);
+    await new Promise(setImmediate);
+    assert.equal(account.toasts[transitionStart].disposed, true);
+    assert.equal(account.toasts[transitionStart + 1].disposed, true);
+    assert.equal(account.toasts[transitionStart + 2].card.shown, true);
+    assert.equal(account.toasts[transitionStart + 3].card.shown, true);
+    assert.equal(account.toasts[transitionStart + 2].options.delay, 5000);
+    // A fresh browser with no saved tab storage resumes the account's server-side backlog.
+    account.setReducedMotion(true);
+    account.toasts.forEach((toast) => { if (!toast.disposed) toast.hide(); });
+    await new Promise(setImmediate);
+    const backlog = new Map();
+    for (const id of ['server-one', 'server-two', 'server-three']) {
+        backlog.set(id, { owner: 'user:1', shown: false, token: null, payload: { notification: { title: id }, data: { notification_id: id, url: '/ar/offers/7' } } });
+    }
+    const firstBrowser = browser(true, 'rtl', true, { database: backlog, viewportHeight: 240 });
+    await new Promise(setImmediate);
+    assert.equal(firstBrowser.toasts.filter((toast) => toast.card.shown).length, 2);
+    assert.equal(backlog.get('server-three').shown, false);
+    const nextBrowser = browser(true, 'rtl', true, { database: backlog });
+    await new Promise(setImmediate);
+    assert.deepEqual(nextBrowser.toasts.filter((toast) => toast.card.shown).map((toast) => toast.card.children['[data-notification-title]'].text), ['server-three']);
+    const anotherAccount = browser(true, 'rtl', true, { database: backlog, recipientKey: 'user:2' });
+    await new Promise(setImmediate);
+    assert.equal(anotherAccount.cards.length, 0);
+    const onePending = new Map([['one-owner', { owner: 'user:1', shown: false, token: null, payload: { notification: { title: 'Once only' }, data: { notification_id: 'one-owner' } } }]]);
+    const tabOne = browser(true, 'rtl', true, { database: onePending });
+    const tabTwo = browser(true, 'rtl', true, { database: onePending });
+    await new Promise(setImmediate);
+    assert.equal([...tabOne.toasts, ...tabTwo.toasts].filter((toast) => toast.card.shown).length, 1);
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;

@@ -74,9 +74,18 @@
 
 @script
     <script>
+        const popupClient = {
+            list: () => $wire.pendingPopups(),
+            claim: (id) => $wire.claimPopup(id),
+            confirm: (id, token) => $wire.confirmPopup(id, token),
+            release: (id, token) => $wire.releasePopup(id, token),
+        };
+        window.WebsiteNotificationClient ||= popupClient;
+        $(document).trigger('website:popup-client-ready');
         const refresh = () => $wire.$refresh();
         $(document).on('website:notification-received website:push-subscription-updated', refresh);
         document.addEventListener('livewire:navigating', () => {
+            if (window.WebsiteNotificationClient === popupClient) delete window.WebsiteNotificationClient;
             $(document).off('website:notification-received website:push-subscription-updated', refresh);
         }, { once: true });
     </script>

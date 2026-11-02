@@ -41,9 +41,18 @@
     position: fixed;
     inset-block-end: max(1rem, env(safe-area-inset-bottom));
     inset-inline-end: 1rem;
-    max-block-size: calc(100dvh - 2rem);
-    overflow-y: auto;
     z-index: 1025;
+}
+
+.site-notification-popups,
+.site-push-prompt,
+.site-notification-popup {
+    max-block-size: calc(100dvh - 2rem);
+}
+
+.site-push-prompt,
+.site-notification-popup {
+    overflow-y: auto;
 }
 
 .site-notification-popups {

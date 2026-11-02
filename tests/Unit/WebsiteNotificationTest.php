@@ -70,9 +70,10 @@ test('the foreground notification template has a final optional action and no ti
     $document = new DOMDocument;
     @$document->loadHTML('<?xml encoding="utf-8" ?>' . $html);
     $xpath = new DOMXPath($document);
-    expect($xpath->query('//template[@id="site-incoming-notification"]//*[@role="status"][@aria-live="polite"][@data-delay="10000"]')->length)->toBe(1)
+    expect($xpath->query('//template[@id="site-incoming-notification"]//*[@role="status"][@aria-live="polite"][@data-delay="5000"]')->length)->toBe(1)
         ->and($xpath->query('//template//div[@data-notification-action][@hidden][contains(@class, "mt-4")][not(following-sibling::*)]/a[@data-notification-link]')->length)->toBe(1)
         ->and($xpath->query('//template//button[@data-bs-dismiss="toast"]')->length)->toBe(1)
+        ->and($xpath->query('//template//a[@data-notification-link][normalize-space(.) != ""]')->length)->toBe(1)
         ->and($xpath->query('//template//time')->length)->toBe(0);
 })->with(['ar', 'en']);
 

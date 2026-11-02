@@ -2,11 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Enums\NotificationType;
 use App\Models\PushSubscription;
+use App\Notifications\WebsiteNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -77,6 +83,67 @@ class Notifications extends Component
                 $query->orWhere(fn (Builder $query) => $query->where('notifiable_type', $browser->getMorphClass())->where('notifiable_id', $browser->getKey()));
             }
         });
+    }
+
+    protected function popupQuery(): Builder
+    {
+        return $this->websiteQuery()->where('type', WebsiteNotification::class)
+            ->whereNull('popup_shown_at')->whereNull('read_at');
+    }
+
+    protected function popupAllowed(DatabaseNotification $notification): bool
+    {
+        if (! config('redot.notifications.push_enabled', false)) return false;
+        $type = NotificationType::tryFrom($notification->data['type'] ?? NotificationType::General->value);
+        if (! $type || ! $recipient = $notification->notifiable) return false;
+
+        return (new WebsiteNotification(
+            title: $notification->data['title'], data: $notification->data['data'] ?? [], type: $type,
+        ))->shouldSend($recipient, 'database');
+    }
+
+    #[Renderless]
+    public function pendingPopups(): array
+    {
+        $query = $this->popupQuery()->where(fn (Builder $query) => $query->whereNull('popup_claim_expires_at')
+            ->orWhere('popup_claim_expires_at', '<=', now()))->orderBy('created_at')->orderBy('id');
+        $payloads = [];
+        foreach ($query->cursor() as $notification) {
+            if (! $this->popupAllowed($notification)) continue;
+            $payloads[] = WebsiteNotification::browserPayload($notification);
+            if (count($payloads) === 20) break;
+        }
+
+        return $payloads;
+    }
+
+    #[Renderless]
+    public function claimPopup(string $id): ?string
+    {
+        return DB::transaction(function () use ($id) {
+            $notification = $this->popupQuery()->whereKey($id)->lockForUpdate()->first();
+            if (! $notification || ! $this->popupAllowed($notification)
+                || ($notification->popup_claim_expires_at && Carbon::parse($notification->popup_claim_expires_at)->isFuture())) return null;
+            $token = (string) Str::uuid();
+            $notification->forceFill(['popup_claim_token' => $token, 'popup_claim_expires_at' => now()->addSeconds(30)])->save();
+
+            return $token;
+        });
+    }
+
+    #[Renderless]
+    public function confirmPopup(string $id, string $token): void
+    {
+        $this->websiteQuery()->where('type', WebsiteNotification::class)->whereKey($id)
+            ->whereNull('popup_shown_at')->where('popup_claim_token', $token)
+            ->update(['popup_shown_at' => now(), 'popup_claim_token' => null, 'popup_claim_expires_at' => null]);
+    }
+
+    #[Renderless]
+    public function releasePopup(string $id, string $token): void
+    {
+        $this->popupQuery()->whereKey($id)->where('popup_claim_token', $token)
+            ->update(['popup_claim_token' => null, 'popup_claim_expires_at' => null]);
     }
 
     /**

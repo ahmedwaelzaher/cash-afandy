@@ -6,6 +6,7 @@ use App\Enums\NotificationType;
 use App\Models\OfferNotificationEvent;
 use App\Models\PushSubscription;
 use App\Models\User;
+use App\Notifications\WebsiteNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Kreait\Firebase\Contract\Messaging;
@@ -66,16 +67,11 @@ class SendPushNotification implements ShouldQueue
             if (! $owner instanceof User || ! $event?->allowsRecipient($owner)) return;
         }
 
-        $data = ['notification_id' => $this->notificationId, 'notification_type' => $type?->value ?? NotificationType::General->value];
-        if (is_string($url = $notification->data['url'] ?? null) && trim($url) !== '') $data['url'] = $url;
-        if (isset($event) && $image = $event->offer?->store?->logo) $data['store_image'] = $image;
+        $payload = WebsiteNotification::browserPayload($notification, $event ?? null);
 
         $message = CloudMessage::new()->withToken($subscription->token)
-            ->withNotification([
-                'title' => $notification->data['title'],
-                'body' => $notification->data['body'] ?? '',
-            ])
-            ->withData($data)
+            ->withNotification($payload['notification'])
+            ->withData($payload['data'])
             ->withWebPushConfig(['notification' => ['tag' => $this->notificationId]]);
 
         try {
