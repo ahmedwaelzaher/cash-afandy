@@ -38,10 +38,10 @@
             @if ($fullPage)
                 <h2 class="h2 lh-1 mb-0">{{ $filters[$status] ?? $filters['all'] }}</h2>
             @else
-                <h2 class="h3 mb-0">{{ __('Notifications') }}</h2>
+                <h2 class="h3 fs-4 lh-base mb-0">{{ __('Notifications') }}</h2>
             @endif
             @if ($unreadCount)
-                <button type="button" @class(['btn btn-sm', 'btn-icon btn-ghost-secondary flex-shrink-0' => ! $fullPage, 'btn-link text-primary text-decoration-none gap-2 p-0' => $fullPage]) wire:click="markAllAsRead" wire:loading.attr="disabled" aria-label="{{ __('Mark all as read') }}"
+                <button type="button" @class(['btn-link text-primary p-0', 'border-0 bg-transparent d-inline-flex align-items-center justify-content-center flex-shrink-0' => ! $fullPage, 'btn btn-sm text-decoration-none gap-2' => $fullPage]) wire:click="markAllAsRead" wire:loading.attr="disabled" aria-label="{{ __('Mark all as read') }}"
                     @if (! $fullPage) title="{{ __('Mark all as read') }}" data-bs-toggle="tooltip" @endif>
                     <x-icon icon="ti ti-checks" :class="$fullPage ? 'm-0' : null" />
                     @if ($fullPage)
