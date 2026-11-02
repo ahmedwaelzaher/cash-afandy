@@ -30,7 +30,7 @@ beforeEach(function () {
         $table->id(); $table->string('code'); $table->string('name');
     });
     Schema::create('stores', function (Blueprint $table) {
-        $table->id(); $table->json('title'); $table->boolean('active')->default(true);
+        $table->id(); $table->json('title'); $table->boolean('active')->default(true); $table->string('logo')->nullable();
     });
     Schema::create('users', function (Blueprint $table) {
         $table->id(); $table->softDeletes(); $table->timestamps();
@@ -211,6 +211,7 @@ test('recipient checkpoints commit atomically and let a retry resume without dup
 });
 
 test('eligible automatic notifications reach Firebase with their stored contents', function () {
+    DB::table('stores')->where('id', 1)->update(['logo' => 'https://example.test/store-logo.png']);
     $offer = automaticOffer(['expiration_date' => now()->addHours(12)]);
     $offer->favoritedBy()->attach(1);
     (new SendOfferNotifications)->handle();
@@ -223,7 +224,10 @@ test('eligible automatic notifications reach Firebase with their stored contents
     $messaging->shouldReceive('send')->once()->andReturnUsing(function ($message) use ($notification) {
         $payload = $message->jsonSerialize();
         expect($payload['token'])->toBe('eligible-device')
-            ->and($payload['notification']['title'])->toBe(json_decode($notification->data, true)['title']);
+            ->and($payload['notification']['title'])->toBe(json_decode($notification->data, true)['title'])
+            ->and($payload['data']['url'])->toBe(json_decode($notification->data, true)['url'])
+            ->and($payload['data']['notification_type'])->toBe('favorite_offer_expiring')
+            ->and($payload['data']['store_image'])->toBe('https://example.test/store-logo.png');
 
         return [];
     });

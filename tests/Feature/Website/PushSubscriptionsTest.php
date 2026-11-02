@@ -208,6 +208,8 @@ test('the website retains its push worker when asset caching is disabled', funct
     $this->actingAs(User::factory()->create(), 'users')->get(route('website.profile.edit'))
         ->assertOk()->assertSee('data-browser-notifications', false)
         ->assertSee('window.WebsitePush', false)
+        ->assertSee('id="site-incoming-notification"', false)
+        ->assertSee('data-notification-action hidden', false)
         ->assertSee('/service-worker.js?cache=0', false)
         ->assertDontSee('registration.unregister()', false)
         ->assertDontSee('service-account.json', false);

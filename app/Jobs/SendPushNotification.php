@@ -66,12 +66,16 @@ class SendPushNotification implements ShouldQueue
             if (! $owner instanceof User || ! $event?->allowsRecipient($owner)) return;
         }
 
+        $data = ['notification_id' => $this->notificationId, 'notification_type' => $type?->value ?? NotificationType::General->value];
+        if (is_string($url = $notification->data['url'] ?? null) && trim($url) !== '') $data['url'] = $url;
+        if (isset($event) && $image = $event->offer?->store?->logo) $data['store_image'] = $image;
+
         $message = CloudMessage::new()->withToken($subscription->token)
             ->withNotification([
                 'title' => $notification->data['title'],
                 'body' => $notification->data['body'] ?? '',
             ])
-            ->withData(['notification_id' => $this->notificationId])
+            ->withData($data)
             ->withWebPushConfig(['notification' => ['tag' => $this->notificationId]]);
 
         try {

@@ -41,6 +41,10 @@
         @endif
     </main>
 
+    @if (! $inline && config('redot.notifications.push_enabled', false))
+        @include('website.partials.incoming-notification')
+    @endif
+
     @if (! $inline && config('redot.notifications.push_enabled', false) && (! auth('users')->check() || auth('users')->user()->receivesWebsiteNotification(\App\Enums\NotificationType::General)))
         @include('website.partials.push-prompt')
     @endif
@@ -54,10 +58,7 @@
 
     @pushOnce('scripts')
         <script>
-            window.WebsitePush = @json([
-                'storeUrl' => route('website.push-subscriptions.store'),
-                'destroyUrl' => route('website.push-subscriptions.destroy'),
-            ]);
+            window.WebsitePush = @json($websitePush);
         </script>
         <script src="{{ hashed_asset('assets/js/website.js') }}"></script>
 

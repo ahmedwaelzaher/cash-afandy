@@ -64,6 +64,18 @@ test('push is disabled by default', function () {
     expect(config('redot.notifications.push_enabled'))->toBeFalse();
 });
 
+test('the foreground notification template has a final optional action and no timestamp', function (string $locale) {
+    app()->setLocale($locale);
+    $html = view('website.partials.incoming-notification')->render();
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="utf-8" ?>' . $html);
+    $xpath = new DOMXPath($document);
+    expect($xpath->query('//template[@id="site-incoming-notification"]//*[@role="status"][@aria-live="polite"]')->length)->toBe(1)
+        ->and($xpath->query('//template//div[@data-notification-action][@hidden][contains(@class, "mt-4")][not(following-sibling::*)]/a[@data-notification-link]')->length)->toBe(1)
+        ->and($xpath->query('//template//button[@data-bs-dismiss="toast"]')->length)->toBe(1)
+        ->and($xpath->query('//template//time')->length)->toBe(0);
+})->with(['ar', 'en']);
+
 test('database-only delivery never queries push subscriptions', function (bool $enabled, bool $push, string $channel) {
     Bus::fake();
     config(['redot.notifications.push_enabled' => $enabled]);
@@ -223,7 +235,7 @@ test('Firebase delivery builds the SDK message and preserves subscriptions on un
         expect($message->jsonSerialize())->toMatchArray([
             'token' => 'device-token',
             'notification' => ['title' => 'Title', 'body' => 'Body'],
-            'data' => ['notification_id' => 'notification-id'],
+            'data' => ['notification_id' => 'notification-id', 'notification_type' => 'general'],
             'webpush' => ['notification' => ['tag' => 'notification-id']],
         ]);
 

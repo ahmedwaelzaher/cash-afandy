@@ -26,11 +26,13 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     const toggle = element();
     panel.children['[data-push-toggle]'] = toggle;
     const document = element();
+    const notificationContainer = element();
     const window = Object.assign(element(), {
         AppPushConfig: { enabled: true, sdkVersion: 'test', firebase: {}, vapidKey: 'public-key' },
         WebsitePush: { storeUrl: '/subscribe', destroyUrl: '/unsubscribe' },
         AppServiceWorker: Promise.resolve({ active: { state: 'activated' } }),
         isSecureContext: true,
+        location: { href: 'https://cashafandy.test/ar/offers' },
         matchMedia: () => ({ matches: reducedMotion }),
         getComputedStyle: () => ({ direction, insetInlineEnd: '16px', transform: 'none' }),
     });
@@ -47,7 +49,25 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         posts: [],
         animations: [],
         events: [],
+        cards: [],
+        toasts: [],
     };
+    document.getElementById = () => ({
+        content: {
+            firstElementChild: {
+                cloneNode: () => {
+                    const card = element();
+                    card.isNotification = true;
+                    card.props['data-delay'] = '5000';
+                    card.children['[data-notification-action]'] = element();
+                    card.children['[data-notification-fallback]'] = element();
+                    card.children['[data-notification-fallback]'].props.hidden = false;
+                    return card;
+                },
+            },
+        },
+    });
+    document.querySelector = () => notificationContainer;
     prompt.animate = (frames, options) => {
         state.animations.push({ from: frames[0].transform, to: frames[1].transform, duration: options.duration });
         let cancelled = false;
@@ -97,9 +117,34 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
             state.events.push(event);
             return this;
         }
+        attr(key, value) {
+            if (value === undefined) return this.items[0]?.props[key];
+            return this.prop(key, value);
+        }
+        toggleClass(name, enabled) {
+            this.items.forEach((item) => {
+                (item.classes ||= {})[name] = enabled;
+            });
+            return this;
+        }
+        one(event, callback) {
+            return this.on(event, callback);
+        }
+        appendTo(target) {
+            const parent = target instanceof Collection ? target[0] : target;
+            this.items.forEach((item) => {
+                (parent.childrenList ||= []).push(item);
+                if (item.isNotification) state.cards.push(item);
+            });
+            return this;
+        }
+        remove() {
+            return this.prop('removed', true);
+        }
     }
-    function $(target) {
+    function $(target, attributes) {
         if (typeof target === 'function') return target();
+        if (target === '<img>') return new Collection([Object.assign(element(), { props: attributes })]);
         if (target === '[data-browser-notifications]') return new Collection(withPanel ? [panel] : []);
         return new Collection([target === '[data-push-prompt]' ? prompt : target]);
     }
@@ -122,6 +167,25 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         $,
         Notification,
         navigator: { serviceWorker: {} },
+        URL,
+        tabler: {
+            Toast: class {
+                constructor(card, options) {
+                    this.card = card;
+                    this.options = options;
+                    state.toasts.push(this);
+                }
+                show() {
+                    this.card.shown = true;
+                }
+                hide() {
+                    this.card.events['hidden.bs.toast']();
+                }
+                dispose() {
+                    this.disposed = true;
+                }
+            },
+        },
         __: (text) => text,
         localStorage: {
             getItem: (key) => storage.get(key) ?? null,
@@ -133,12 +197,16 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         initializeApp: () => ({}),
         isSupported: async () => true,
         getMessaging: () => ({}),
-        onMessage: () => {},
+        onMessage: (_, callback) => {
+            state.receive = callback;
+        },
         getToken: () => {
             state.tokenRequests++;
             return state.token.promise;
         },
-        deleteToken: async () => { state.tokenDeletes++; },
+        deleteToken: async () => {
+            state.tokenDeletes++;
+        },
     };
     new vm.Script(source, {
         importModuleDynamically: async () => {
@@ -164,6 +232,9 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     state.grant = (permission) => {
         Notification.permission = permission;
         state.permission.resolve(permission);
+    };
+    state.setHidden = (hidden) => {
+        document.hidden = hidden;
     };
     return state;
 }
@@ -303,6 +374,56 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     await accountEnable;
     assert.equal(account.panel.children['[data-push-enable]'].props.hidden, true);
     assert.equal(account.panel.children['[data-push-status]'].text, 'Notifications are enabled for this browser.');
+
+    const title = '<img src=x onerror=alert(1)>';
+    account.receive({
+        notification: { title, body: '<script>bad()</script>' },
+        data: {
+            notification_id: 'first-card',
+            notification_type: 'new_offer',
+            url: '/ar/offers/5',
+            store_image: '/logo.png',
+        },
+    });
+    const card = account.cards[0];
+    assert.equal(
+        card.children['[data-notification-title]'].text,
+        title,
+        'Treat the notification content as text, never HTML.',
+    );
+    assert.equal(card.children['[data-notification-body]'].text, '<script>bad()</script>');
+    assert.equal(card.children['[data-notification-link]'].props.href, 'https://cashafandy.test/ar/offers/5');
+    assert.equal(card.children['[data-notification-action]'].props.hidden, false);
+    assert.equal(card.children['[data-notification-link]'].text, 'View offer');
+    const image = card.children['[data-notification-avatar]'].childrenList[0];
+    image.events.error.call(image);
+    assert.equal(image.props.removed, true);
+    assert.equal(
+        card.children['[data-notification-fallback]'].props.hidden,
+        false,
+        'Keep the fallback when a merchant logo fails.',
+    );
+    account.receive({ notification: { title: 'Duplicate' }, data: { notification_id: 'first-card' } });
+    assert.equal(account.cards.length, 1, 'Do not display the same push twice.');
+    account.receive({ notification: { title: 'No URL' }, data: { notification_id: 'without-url' } });
+    assert.equal(
+        account.cards[1].children['[data-notification-action]'].props.hidden,
+        true,
+        'No link means no action footer.',
+    );
+    assert.equal(account.cards[1].children['[data-notification-body]'].props.hidden, true, 'Omit an empty body.');
+    account.receive({
+        notification: { title: 'Unsafe URL' },
+        data: { notification_id: 'unsafe-url', url: 'javascript:alert(1)', store_image: 'data:image/svg+xml,bad' },
+    });
+    assert.equal(account.cards[2].children['[data-notification-action]'].props.hidden, true);
+    assert.equal(account.cards[2].children['[data-notification-avatar]'], undefined);
+    account.setHidden(true);
+    account.receive({ notification: { title: 'Background' }, data: { notification_id: 'background' } });
+    assert.equal(account.cards.length, 3, 'Leave background notifications to the system worker.');
+    card.events.keydown({ key: 'Escape' });
+    assert.equal(card.props.removed, true);
+    assert.equal(account.toasts[0].disposed, true);
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;

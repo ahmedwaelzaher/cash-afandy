@@ -1008,6 +1008,66 @@ $(() => {
         showPrompt(!hidden);
     };
     // Reuse one Firebase client and one foreground-message listener per page.
+    // Foreground notifications use the shared Toast lifecycle with the website card template.
+    const showNotification = (payload) => {
+        const template = document.getElementById('site-incoming-notification');
+        const container = document.querySelector('[data-notification-popups]');
+        if (!template || !container || !payload.notification?.title) return;
+
+        const safeUrl = (value) => {
+            if (typeof value !== 'string' || !value.trim()) return null;
+            try {
+                const url = new URL(value, window.location.href);
+                return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+            } catch {
+                return null;
+            }
+        };
+        const data = payload.data || {};
+        const offer = ['new_offer', 'favorite_offer_expiring'].includes(data.notification_type);
+        const $card = $(template.content.firstElementChild.cloneNode(true));
+        $card.find('[data-notification-title]').text(payload.notification.title);
+        $card
+            .find('[data-notification-body]')
+            .text(payload.notification.body || '')
+            .prop('hidden', !payload.notification.body);
+        $card.find('[data-notification-type]').text(endpoints.types?.[data.notification_type] || __('Notification'));
+        $card.find('[data-notification-type-icon]').toggleClass('ti-ticket', offer).toggleClass('ti-bell', !offer);
+        $card.find('[data-notification-fallback]').toggleClass('ti-bell', !offer).toggleClass('ti-ticket', offer);
+        const image = safeUrl(data.store_image);
+        if (image) {
+            const $fallback = $card.find('[data-notification-fallback]');
+            $('<img>', {
+                src: image,
+                alt: '',
+                referrerpolicy: 'no-referrer',
+                class: 'w-100 h-100 object-fit-contain p-1',
+            })
+                .one('load', () => $fallback.prop('hidden', true))
+                .one('error', function () {
+                    $(this).remove();
+                })
+                .appendTo($card.find('[data-notification-avatar]'));
+        }
+        const url = safeUrl(data.url);
+        if (url) {
+            $card
+                .find('[data-notification-link]')
+                .attr('href', url)
+                .text(offer ? __('View offer') : __('Details'));
+            $card.find('[data-notification-action]').prop('hidden', false);
+        }
+        $card.appendTo(container);
+        const toast = new tabler.Toast($card[0], { delay: Number($card.attr('data-delay')) });
+        $card.on('hidden.bs.toast', () => {
+            toast.dispose();
+            $card.remove();
+        });
+        $card.on('keydown', (event) => {
+            if (event.key === 'Escape') toast.hide();
+        });
+        toast.show();
+    };
     const client = () => {
         if (!clientPromise) {
             clientPromise = (async () => {
@@ -1025,8 +1085,7 @@ $(() => {
                     const id = payload.data?.notification_id || payload.messageId;
                     if (id && localStorage.getItem(messageKey) === id) return;
                     if (id) localStorage.setItem(messageKey, id);
-                    const text = [payload.notification?.title, payload.notification?.body].filter(Boolean).join(' — ');
-                    if (text) toastify().info($('<span>').text(text).html());
+                    showNotification(payload);
                 });
                 return { sdk, messaging };
             })().catch((error) => {
