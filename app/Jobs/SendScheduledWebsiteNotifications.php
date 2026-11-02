@@ -29,7 +29,7 @@ class SendScheduledWebsiteNotifications implements ShouldQueue
                             ->where('send_at', '<=', now())->lockForUpdate()->first();
                         if (! $entry) return;
 
-                        $notification = new WebsiteNotification($entry->title, $entry->url, body: $entry->body);
+                        $notification = new WebsiteNotification($entry->title, $entry->url, data: ['source' => 'dashboard'], body: $entry->body);
                         User::query()->whereKey($entry->recipient_ids)->chunkById(100, function ($users) use ($notification) {
                             // Store inbox rows in this transaction; push remains queued after commit.
                             Notification::sendNow($users, $notification);

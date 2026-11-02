@@ -137,13 +137,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserPreference::class);
     }
 
-    public function receivesWebsiteNotification(NotificationType $type): bool
+    public function receivesWebsiteNotification(?NotificationType $type = null): bool
     {
         $preferences = $this->preferences;
 
         // New types are enabled unless the account explicitly excluded them.
         return ! $this->trashed() && ($preferences?->notifications_enabled ?? true)
-            && ! in_array($type->value, $preferences?->excludedNotificationTypes() ?? [], true);
+            && ($type === null || ! in_array($type->value, $preferences?->excludedNotificationTypes() ?? [], true));
     }
 
     public function offerNotificationEvents(): HasMany

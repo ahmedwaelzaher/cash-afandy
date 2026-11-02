@@ -205,6 +205,33 @@ test('public notification storage respects the signed in browser owners preferen
     expect(DB::table('notifications')->count())->toBe(0);
 });
 
+test('dashboard browser delivery bypasses type exclusions and rechecks the account switch', function (bool $enabled) {
+    config(['redot.notifications.push_enabled' => true]);
+    $this->user->preferences()->update(['notification_types' => ['disabled' => array_keys(NotificationType::values())]]);
+    $subscription = new PushSubscription(['token' => 'dashboard-device']);
+    $subscription->notifiable()->associate($this->user);
+    $subscription->save();
+    Queue::fake();
+    Notification::sendNow($this->user->fresh(), new WebsiteNotification('Dashboard message', data: ['source' => 'dashboard']));
+    $notification = DB::table('notifications')->first();
+    expect($notification)->not->toBeNull();
+    Queue::assertPushed(SendPushNotification::class);
+    $this->user->preferences()->update(['notifications_enabled' => $enabled]);
+
+    $messaging = Mockery::mock(Messaging::class);
+    if ($enabled) {
+        $messaging->shouldReceive('send')->once()->andReturnUsing(function ($message) {
+            expect($message->jsonSerialize()['token'])->toBe('dashboard-device');
+
+            return [];
+        });
+    } else {
+        $messaging->shouldNotReceive('send');
+    }
+    app()->instance(Messaging::class, $messaging);
+    (new SendPushNotification($notification->id, $subscription->id, $subscription->token_hash))->handle();
+})->with([true, false]);
+
 test('one account preference update controls every registered browser without affecting another account', function () {
     config(['redot.notifications.push_enabled' => true]);
     $jobs = [];

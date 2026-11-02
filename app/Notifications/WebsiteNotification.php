@@ -42,7 +42,9 @@ class WebsiteNotification extends DashboardNotification implements ShouldQueue
     {
         $recipient = $notifiable instanceof PushSubscription ? $notifiable->notifiable : $notifiable;
 
-        if ($recipient instanceof User && ! $recipient->receivesWebsiteNotification($this->type)) return false;
+        // Dashboard messages follow the account switch, independently of automatic notification types.
+        $type = ($this->data['source'] ?? null) === 'dashboard' ? null : $this->type;
+        if ($recipient instanceof User && ! $recipient->receivesWebsiteNotification($type)) return false;
         if (isset($this->data['offer_event_id'])) {
             $event = OfferNotificationEvent::find($this->data['offer_event_id']);
 

@@ -164,6 +164,16 @@ test('scheduled notifications respect account opt out performed after scheduling
     expect(DB::table('notifications')->pluck('notifiable_id')->all())->toBe([2]);
 });
 
+test('dashboard messages ignore individual type exclusions while respecting the account switch', function () {
+    DB::table('user_preferences')->insert([
+        ['user_id' => 1, 'notifications_enabled' => true, 'notification_types' => json_encode(['disabled' => ['general', 'new_offer', 'favorite_offer_expiring']])],
+        ['user_id' => 2, 'notifications_enabled' => false, 'notification_types' => null],
+    ]);
+    $this->composer->store(Request::create('/', 'POST', $this->payload));
+    expect(deliverComposerNotifications())->toBe([1])
+        ->and(json_decode(DB::table('notifications')->first()->data, true)['data']['source'])->toBe('dashboard');
+});
+
 function composerFilter(string $field, string $operator, mixed $value): array
 {
     $definition = collect(QueryFilters::resolve(User::class))->firstWhere('id', hash('sha256', $field));

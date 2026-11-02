@@ -59,7 +59,8 @@ class SendPushNotification implements ShouldQueue
         // An account can opt out after inbox storage but before this push job runs.
         $owner = $this->forBrowser ? $subscription->notifiable : $recipient;
         $type = NotificationType::tryFrom($notification->data['type'] ?? NotificationType::General->value);
-        if ($owner instanceof User && (! $type || ! $owner->receivesWebsiteNotification($type))) return;
+        $fromDashboard = ($notification->data['data']['source'] ?? null) === 'dashboard';
+        if ($owner instanceof User && (! $type || ! $owner->receivesWebsiteNotification($fromDashboard ? null : $type))) return;
         if (isset($notification->data['data']['offer_event_id'])) {
             $event = OfferNotificationEvent::find($notification->data['data']['offer_event_id']);
             if (! $owner instanceof User || ! $event?->allowsRecipient($owner)) return;
