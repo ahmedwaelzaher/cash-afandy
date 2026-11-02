@@ -29,7 +29,9 @@ class Website extends Component
             'websitePush' => [
                 'storeUrl' => route('website.push-subscriptions.store'),
                 'destroyUrl' => route('website.push-subscriptions.destroy'),
-                'types' => NotificationType::values(),
+                'types' => collect(NotificationType::cases())->mapWithKeys(fn (NotificationType $type) => [
+                    $type->value => ['label' => $type->label(), 'icon' => $type->icon()],
+                ])->all(),
             ],
         ]);
     }

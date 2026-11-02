@@ -21,4 +21,12 @@ enum NotificationType: string
     {
         return collect(self::cases())->mapWithKeys(fn (self $type) => [$type->value => $type->label()])->all();
     }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::General => 'ti ti-bell',
+            self::NewOffer, self::FavoriteOfferExpiring => 'ti ti-ticket',
+        };
+    }
 }
