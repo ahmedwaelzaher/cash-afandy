@@ -1031,9 +1031,9 @@ $(() => {
             .find('[data-notification-body]')
             .text(payload.notification.body || '')
             .prop('hidden', !payload.notification.body);
-        $card.find('[data-notification-type]').text(endpoints.types?.[data.notification_type] || __('Notification'));
-        $card.find('[data-notification-type-icon]').toggleClass('ti-ticket', offer).toggleClass('ti-bell', !offer);
-        $card.find('[data-notification-fallback]').toggleClass('ti-bell', !offer).toggleClass('ti-ticket', offer);
+        const type = endpoints.types?.[data.notification_type] || endpoints.types?.general;
+        $card.find('[data-notification-type]').text(type?.label || __('Notification'));
+        if (type?.icon) $card.find('[data-notification-icon]').attr('class', `${type.icon} m-0 lh-1`);
         const image = safeUrl(data.store_image);
         if (image) {
             const $fallback = $card.find('[data-notification-fallback]');
@@ -1059,6 +1059,7 @@ $(() => {
         }
         $card.appendTo(container);
         const toast = new tabler.Toast($card[0], { delay: Number($card.attr('data-delay')) });
+        $card.find('[data-notification-link]').on('click', () => toast.hide());
         $card.on('hidden.bs.toast', () => {
             toast.dispose();
             $card.remove();

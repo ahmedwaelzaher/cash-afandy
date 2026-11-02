@@ -58,7 +58,7 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
                 cloneNode: () => {
                     const card = element();
                     card.isNotification = true;
-                    card.props['data-delay'] = '5000';
+                    card.props['data-delay'] = '10000';
                     card.children['[data-notification-action]'] = element();
                     card.children['[data-notification-fallback]'] = element();
                     card.children['[data-notification-fallback]'].props.hidden = false;
@@ -386,6 +386,7 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
         },
     });
     const card = account.cards[0];
+    assert.equal(account.toasts[0].options.delay, 10000);
     assert.equal(
         card.children['[data-notification-title]'].text,
         title,
@@ -424,6 +425,10 @@ function browser(reducedMotion = false, direction = 'rtl', withPanel = false) {
     card.events.keydown({ key: 'Escape' });
     assert.equal(card.props.removed, true);
     assert.equal(account.toasts[0].disposed, true);
+    account.setHidden(false);
+    account.receive({ notification: { title: 'Open details' }, data: { notification_id: 'click-link', url: '/ar/offers/6' } });
+    account.cards[3].children['[data-notification-link]'].events.click();
+    assert.equal(account.cards[3].props.removed, true, 'Dismiss the card when its details link is clicked.');
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;
