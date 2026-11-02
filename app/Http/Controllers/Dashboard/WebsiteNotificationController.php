@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Jobs\SendScheduledWebsiteNotifications;
 use App\Models\Country;
 use App\Models\ScheduledWebsiteNotification;
 use App\Models\User;
@@ -137,10 +138,6 @@ class WebsiteNotificationController extends Controller
                 throw ValidationException::withMessages(['send_at' => __('The recipient country must have a supported timezone.')]);
             }
             $local = Carbon::parse($validated['send_at'], $timezone);
-            // Reject nonexistent clock times at a DST transition rather than silently shifting them.
-            if ($local->format('Y-m-d H:i:s') !== Carbon::parse($validated['send_at'], 'UTC')->format('Y-m-d H:i:s') || $local->lte(now())) {
-                throw ValidationException::withMessages(['send_at' => __('Choose a future local time valid for every recipient.')]);
-            }
             $groups[$timezone] ??= ['timezone' => $timezone, 'send_at' => $local->copy()->setTimezone(config('app.timezone')), 'recipient_ids' => []];
             $groups[$timezone]['recipient_ids'][] = $user->id;
         }
@@ -155,6 +152,9 @@ class WebsiteNotificationController extends Controller
                 'send_at' => Carbon::parse($validated['send_at'], config('app.timezone')),
             ]);
             $entry->deliveries()->createMany(array_values($groups));
+            if ($entry->deliveries()->where('send_at', '<=', now())->exists()) {
+                SendScheduledWebsiteNotifications::dispatch($entry->id)->afterCommit();
+            }
         });
 
         return $this->created(__('Notification'), 'dashboard.website-notifications.index');

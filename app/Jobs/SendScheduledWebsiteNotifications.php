@@ -18,9 +18,17 @@ class SendScheduledWebsiteNotifications implements ShouldQueue
 
     public int $timeout = 60;
 
+    public ?int $scheduleId = null;
+
+    public function __construct(?int $scheduleId = null)
+    {
+        $this->scheduleId = $scheduleId;
+    }
+
     public function handle(): void
     {
         ScheduledWebsiteNotification::query()->pending()->due()
+            ->when($this->scheduleId, fn ($query) => $query->whereKey($this->scheduleId))
             ->chunkById(100, function ($schedules) {
                 foreach ($schedules as $schedule) {
                     DB::transaction(function () use ($schedule) {

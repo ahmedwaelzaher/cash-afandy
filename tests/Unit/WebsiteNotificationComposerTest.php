@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
@@ -137,7 +138,7 @@ test('website notifications are invisible before their scheduled time and delive
     expect(DB::table('notifications')->count())->toBe(2);
 });
 
-test('invalid recipients content links and past schedules cannot queue a notification', function (array $invalid, string $field) {
+test('invalid recipients content links and dates cannot queue a notification', function (array $invalid, string $field) {
     try {
         $this->composer->store(Request::create('/', 'POST', array_replace($this->payload, $invalid)));
         test()->fail('Expected validation to fail.');
@@ -156,7 +157,6 @@ test('invalid recipients content links and past schedules cannot queue a notific
     'missing title' => [['title' => ''], 'title'],
     'oversized body' => [['body' => str_repeat('a', 501)], 'body'],
     'unsafe URL' => [['url' => 'javascript:alert(1)'], 'url'],
-    'past date' => [['send_at' => '2026-11-01 11:59:00'], 'send_at'],
     'invalid date' => [['send_at' => 'later'], 'send_at'],
     'invalid recipient mode' => [['recipient_mode' => 'all'], 'recipient_mode'],
 ]);
@@ -236,12 +236,31 @@ test('recipient timezone uses latest known active browser then preferences then 
     expect(User::find(1)->notificationTimezone())->toBe('Africa/Cairo');
 });
 
-test('a time already passed in any recipient country rejects the whole schedule atomically', function () {
+test('overdue recipients are queued immediately while other countries keep their future local time', function () {
     browserWithCountry(2, 2);
     $payload = [...$this->payload, 'send_at' => '2026-11-01 12:30:00'];
-    expect(fn () => $this->composer->store(Request::create('/', 'POST', $payload)))->toThrow(ValidationException::class);
-    expect(ScheduledWebsiteNotification::count())->toBe(0)
-        ->and(DB::table('scheduled_notification_deliveries')->count())->toBe(0);
+    $this->composer->store(Request::create('/', 'POST', $payload));
+    $entry = ScheduledWebsiteNotification::firstOrFail();
+    expect($entry->deliveries()->count())->toBe(2)
+        ->and(DB::table('jobs')->count())->toBe(1);
+    Queue::connection()->pop()->fire();
+    expect(DB::table('notifications')->pluck('notifiable_id')->all())->toBe([2])
+        ->and($entry->fresh()->sent_at)->toBeNull();
+    Carbon::setTestNow(Carbon::parse('2026-11-01 12:30:00', 'Africa/Cairo'));
+    (new SendScheduledWebsiteNotifications)->handle();
+    (new SendScheduledWebsiteNotifications)->handle();
+    expect(DB::table('notifications')->orderBy('notifiable_id')->pluck('notifiable_id')->all())->toBe([1, 2])
+        ->and($entry->fresh()->sent_at)->not->toBeNull();
+});
+
+test('an entirely past date is accepted and its immediate job only sends the new schedule', function () {
+    $other = ScheduledWebsiteNotification::create([
+        'title' => 'Other overdue schedule', 'body' => 'Unrelated', 'recipient_ids' => [1], 'send_at' => now()->subDay(),
+    ]);
+    $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'send_at' => '2026-10-30 11:59:00']));
+    Queue::connection()->pop()->fire();
+    expect(DB::table('notifications')->count())->toBe(2)
+        ->and($other->fresh()->sent_at)->toBeNull();
 });
 
 test('local scheduling observes summer time and accepts the shared pickers AM PM format', function () {
@@ -253,11 +272,11 @@ test('local scheduling observes summer time and accepts the shared pickers AM PM
     expect($groups->pluck('send_at')->map(fn ($date) => $date->copy()->utc()->format('H:i'))->unique()->all())->toBe(['18:30']);
 });
 
-test('a nonexistent local clock time during the spring transition is rejected', function () {
+test('a nonexistent local clock time during the spring transition uses the next valid clock time', function () {
     Carbon::setTestNow(Carbon::parse('2027-04-28 12:00:00', 'Africa/Cairo'));
-    expect(fn () => $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'send_at' => '2027-04-30 00:30:00'])))
-        ->toThrow(ValidationException::class);
-    expect(ScheduledWebsiteNotification::count())->toBe(0);
+    $this->composer->store(Request::create('/', 'POST', [...$this->payload, 'send_at' => '2027-04-30 00:30:00']));
+    expect(ScheduledWebsiteNotification::firstOrFail()->deliveries()->first()->send_at->format('Y-m-d H:i'))->toBe('2027-04-30 01:30')
+        ->and(DB::table('jobs')->count())->toBe(0);
 });
 
 test('preexisting schedules retain their original absolute sending time', function () {
