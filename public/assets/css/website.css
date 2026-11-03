@@ -180,6 +180,7 @@ Form Check (Radio)
 }
 
 /* Shared design tokens for the navbar and subsequent sections. */
+:root:has(> body.website-layout),
 .website-layout {
     --site-paper: #fcfaf5;
     --site-gutter: clamp(1rem, 2.5vw, 2rem);
@@ -192,12 +193,70 @@ Form Check (Radio)
     --site-ink: #1b301e;
     --site-text: #53634a;
     --site-line: #dce3d0;
+    --site-scrollbar-size: 4px;
+    --site-scrollbar-thumb: color-mix(in srgb, var(--site-green) 45%, var(--site-soft));
+    --site-scrollbar-hover: color-mix(in srgb, var(--site-green) 75%, var(--site-soft));
     --site-radius: 1.25rem;
     --site-control-radius: 0.75rem;
     --site-shadow: 0 12px 32px #243b1710;
     --site-input-focus-shadow: var(--tblr-shadow-input), 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
     --site-highlight: linear-gradient(transparent 73%, #edbe5080 73%, #edbe5080 88%, transparent 88%);
     --tblr-body-bg: var(--site-paper);
+}
+
+/* Include the viewport while keeping dashboard scrollbars unchanged. */
+:root:has(> body.website-layout) {
+    --site-scrollbar-size: 5px;
+}
+
+@media (forced-colors: none) {
+    /* Low specificity preserves controls that intentionally hide their scrollbar. */
+    :where(:root:has(> body.website-layout), .website-layout, .website-layout *) {
+        scrollbar-width: thin;
+        scrollbar-color: var(--site-scrollbar-thumb) var(--site-soft);
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+        /* Standard non-auto values override the detailed scrollbar styling. */
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *) {
+            scrollbar-width: auto;
+            scrollbar-color: auto;
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar {
+            width: var(--site-scrollbar-size);
+            height: var(--site-scrollbar-size);
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-track,
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-track {
+            background: var(--site-soft);
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-thumb {
+            background: var(--site-scrollbar-thumb);
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-thumb:hover {
+            background: var(--site-scrollbar-hover);
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-thumb:active {
+            background: var(--site-green);
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-button {
+            display: none;
+        }
+
+        :where(:root:has(> body.website-layout), .website-layout, .website-layout *)::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+    }
 }
 
 /* Compound controls share one focus shadow around their outer edge. */
