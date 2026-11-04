@@ -29,6 +29,8 @@ class StaticPageSeeder extends Seeder
                         <p>تُستخدم البيانات لإنشاء حسابك وإدارته، وتسجيل الدخول والتحقق من البريد واستعادة الوصول، وحفظ تفضيلاتك، وعرض المحتوى المناسب، والرد على استفساراتك، وحماية الموقع من إساءة الاستخدام. ويُستخدم بريد الاشتراك لإرسال أخبار الموقع والعروض.</p>
                         <h2>ملفات الارتباط وأدوات القياس</h2>
                         <p>يستخدم الموقع ملفات الارتباط والتخزين المحلي لتشغيل الجلسات وحفظ بعض التفضيلات مثل البلد والمظهر. وقد يستخدم Google Analytics وMeta Pixel عند تفعيلهما لقياس الزيارات والتفاعل مع المحتوى. يمكنك إدارة ملفات الارتباط من إعدادات المتصفح؛ وقد يؤثر تعطيل بعضها في تسجيل الدخول أو حفظ التفضيلات.</p>
+                        <h2>بيانات برنامج الدعوات</h2>
+                        <p>عند زيارة رابط دعوة، نحفظ كود الدعوة في الجلسة وملف ارتباط لمدة ساعة لربط التسجيل بصاحب الدعوة. استبدال الكود بكود دعوة آخر صالح يبدأ مدة ساعة جديدة، وبعد انتهاء المدة لا يُستخدم الكود المحفوظ في التسجيل. عند التسجيل بدعوة، نحتفظ بسجل يربط الحسابين ووقت التسجيل وحالة قبول الدعوة لحساب التقدم ومراجعة الاستحقاق. وقد يظهر اسمك لصاحب كود الدعوة في إشعار يخبره بتسجيلك عن طريقه.</p>
                         <h2>مزودو الخدمة والروابط الخارجية</h2>
                         <p>قد تُعالج البيانات اللازمة للتشغيل بواسطة مزودي الاستضافة والبريد وتسجيل الدخول وأدوات القياس عند استخدامها. وقد تنقلك روابط العروض إلى متاجر أو شبكات تسويق بالعمولة تستخدم أدواتها الخاصة لتتبع الإحالات. تسري سياسات تلك الجهات على البيانات التي تقدمها لها، لذلك راجعها قبل إتمام الشراء.</p>
                         <h2>الاحتفاظ بالبيانات وحمايتها</h2>
@@ -51,6 +53,8 @@ class StaticPageSeeder extends Seeder
                         <p>Data is used to create and manage your account, sign you in, verify your email, restore access, save preferences, display relevant content, respond to enquiries and protect the website from misuse. Newsletter subscription addresses are used to send website news and offers.</p>
                         <h2>Cookies and measurement tools</h2>
                         <p>The website uses cookies and local storage to operate sessions and remember preferences such as country and appearance. Google Analytics and Meta Pixel may be used when enabled to measure visits and content interactions. You can manage cookies through your browser settings; disabling some cookies may affect sign-in or saved preferences.</p>
+                        <h2>Referral program data</h2>
+                        <p>When you visit an invitation link, we store the referral code in the session and a cookie for one hour to associate registration with the referrer. Replacing it with a different valid code starts a new one-hour period. After expiry, the stored code is not used for registration. When you register through a referral, we retain a record linking the two accounts, the registration time and the referral acceptance status to calculate progress and review eligibility. Your name may appear in a notification to the referrer confirming that you registered through their code.</p>
                         <h2>Service providers and external links</h2>
                         <p>Data needed to operate the service may be processed by hosting, email, sign-in and measurement providers when used. Offer links may take you to stores or affiliate networks that use their own referral tracking tools. Their policies apply to information you provide to them, so review those policies before purchasing.</p>
                         <h2>Retention and protection</h2>
@@ -73,6 +77,10 @@ class StaticPageSeeder extends Seeder
                         <p>قد تتطلب بعض الخدمات إنشاء حساب. قدّم بيانات صحيحة، واحفظ بيانات دخولك، وتواصل معنا إذا اشتبهت في استخدام حسابك دون إذنك. يُحظر استخدام الموقع للتحايل على العروض أو نشر محتوى ضار أو محاولة تعطيل الخدمة أو الوصول إلى بيانات الغير.</p>
                         <h2>العروض</h2>
                         <p>لكل عرض شروطه الخاصة، مثل البلد والمنتجات المشمولة والحد الأدنى للطلب وتاريخ الانتهاء وإمكانية الجمع مع خصومات أخرى. راجع التفاصيل وتأكد من تطبيق الخصم في المتجر قبل الدفع. قد يعدّل المتجر العرض أو يوقفه، وقد تنتهي بعض الأكواد قبل تحديثها على الموقع.</p>
+                        <h2>برنامج الدعوات والمكافآت</h2>
+                        <p>قد تتيح المنصة برنامجًا لمكافأة المستخدم عند اكتمال عدد الدعوات المؤهلة المحدد في قسم الدعوات بحسابه، وفق قيمة الجائزة وشروط البرنامج المعلنة على المنصة. تُحتسب الدعوات المقبولة والمستوفية للشروط فقط، ولا تُحتسب الدعوات المرفوضة أو غير الصحيحة.</p>
+                        <p>برنامج الدعوات برنامج مؤقت، ويحق لكاش أفندي إيقافه أو إنهاؤه أو حذفه من المنصة في أي وقت. ولا يؤدي ذلك إلى إسقاط حق المستخدمين الذين أكملوا متطلبات البرنامج بدعوات مؤهلة قبل الإيقاف أو الإنهاء أو الحذف؛ وتلتزم المنصة بتسليم جوائزهم بعد استكمال باقي شروط استلام الجائزة المعلنة والمنطبقة على مشاركتهم.</p>
+                        <p>اكتمال عدد الدعوات لا يعني إتاحة استلام الجائزة أو سحب قيمتها فورًا. يظل الاستلام أو السحب خاضعًا لباقي الشروط المعلنة على المنصة، بما فيها شروط الرصيد والحد الأدنى للسحب متى انطبقت، وشروط اعتماد الكاش باك الخاصة بكل متجر عند ارتباط الاستلام به.</p>
                         <h2>روابط التسويق بالعمولة</h2>
                         <p>قد يحصل كاش أفندي على عمولة من بعض الروابط عند إتمام عملية مؤهلة لدى جهة شريكة. لا تعني هذه العمولة ضمان قبول العرض لكل طلب.</p>
                         <h2>الشراء لدى المتاجر</h2>
@@ -90,6 +98,10 @@ class StaticPageSeeder extends Seeder
                         <p>Some services may require an account. Provide accurate details, keep your sign-in credentials safe and contact us if you suspect unauthorised use. Do not use the website to abuse offers, publish harmful content, disrupt the service or access other people's data.</p>
                         <h2>Offers</h2>
                         <p>Each offer has its own conditions, such as country, eligible products, minimum spend, expiry and whether it can be combined with other discounts. Read the details and confirm that the store applies the discount before paying. Stores may change or withdraw offers, and some codes may expire before the website is updated.</p>
+                        <h2>Referral program and rewards</h2>
+                        <p>The platform may offer a reward program when a user completes the qualifying referral target shown in their account's referral section, subject to the reward value and program conditions published on the platform. Only accepted referrals that meet the conditions count; rejected or invalid referrals do not count.</p>
+                        <p>The referral program is temporary. Cash Afandy may pause, terminate or remove it from the platform at any time. This does not cancel the entitlement of users who completed the program requirements through qualifying referrals before the pause, termination or removal. The platform will deliver their rewards once they fulfil the remaining published reward receipt conditions applicable to their participation.</p>
+                        <p>Completing the referral target does not make a reward immediately available for receipt or withdrawal. Receipt or withdrawal remains subject to the other conditions published on the platform, including balance requirements and minimum withdrawal thresholds where applicable, and each store's cashback approval conditions where receipt depends on cashback.</p>
                         <h2>Affiliate links</h2>
                         <p>Cash Afandy may earn a commission through some links when a qualifying transaction is completed with a partner. This does not guarantee that an offer will be accepted for every order.</p>
                         <h2>Purchases from stores</h2>
