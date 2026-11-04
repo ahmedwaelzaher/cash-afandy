@@ -12,7 +12,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = Admin::factory()->create([
+        $admin = Admin::create([
             'name' => 'Administrator',
             'email' => 'admin@email.com',
             'email_verified_at' => now(),
