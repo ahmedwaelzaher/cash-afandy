@@ -16,7 +16,7 @@ beforeEach(function () {
 });
 
 test('an explicit country change updates only the authenticated users preferences', function (string $locale) {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $other = User::factory()->create();
     $other->preferences()->update(['country_id' => $this->egypt->id]);
     $this->actingAs($user, 'users')->get(route('website.stores.index', ['locale' => $locale, 'country' => 'sa']))
@@ -26,7 +26,7 @@ test('an explicit country change updates only the authenticated users preference
 })->with(['ar', 'en']);
 
 test('a saved country takes precedence over browser history and needs no explicit query', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $user->preferences()->update(['country_id' => $this->saudi->id]);
     $this->actingAs($user, 'users')->withSession(['website_country' => 'eg'])->withCookie('website_country', 'eg')
         ->get(route('website.stores.index'))->assertOk()->assertSessionHas('website_country', 'sa')->assertCookie('website_country', 'sa');
@@ -47,7 +47,7 @@ test('a cookie restores a guest selection after the session is gone', function (
 });
 
 test('automatic country resolution and invalid selections do not overwrite account preferences', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $this->actingAs($user, 'users')->withCookie('website_country', 'sa')->get(route('website.stores.index'))
         ->assertOk()->assertSessionHas('website_country', 'sa');
     $this->assertDatabaseHas('user_preferences', ['user_id' => $user->id, 'country_id' => null]);
@@ -60,7 +60,7 @@ test('automatic country resolution and invalid selections do not overwrite accou
 
 test('disabling the country dropdown keeps the default market without changing the saved country', function () {
     cache()->forever('settings.show_website_countries_dropdown', false);
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $user->preferences()->update(['country_id' => $this->saudi->id]);
     $this->actingAs($user, 'users')->get(route('website.stores.index', ['country' => 'eg']))->assertOk();
     expect(website_country()->code)->toBe('eg');
@@ -68,7 +68,7 @@ test('disabling the country dropdown keeps the default market without changing t
 });
 
 test('repeated country lookups do not repeat preference writes', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $this->actingAs($user, 'users');
     DB::enableQueryLog();
     $this->get(route('website.stores.index', ['country' => 'sa']))->assertOk();
@@ -79,7 +79,7 @@ test('repeated country lookups do not repeat preference writes', function () {
 });
 
 test('legacy accounts without a preference row can save a country selection', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $user->preferences()->delete();
     $this->actingAs($user, 'users')->get(route('website.stores.index', ['country' => 'sa']))->assertOk();
     expect($user->preferences()->count())->toBe(1);
