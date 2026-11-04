@@ -55,4 +55,30 @@
             </div>
         </div>
     </div>
+    @if (route_allowed('dashboard.referrals.index'))
+        <div class="card mt-3" id="invitations">
+            <div class="card-header"><h2 class="card-title">{{ __('Invitations') }}</h2></div>
+            <div class="card-body">
+                <div class="datagrid">
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">{{ __('Invitation code') }}</div>
+                        <div class="datagrid-content">{{ $user->referral_code ?? '-' }}</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">{{ __('Invited by') }}</div>
+                        <div class="datagrid-content">{{ $user->referral?->referrer?->full_name ?? '-' }}</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">{{ __('Registered At') }}</div>
+                        <div class="datagrid-content">{{ $user->referral?->registered_at?->format('Y-m-d H:i') ?? '-' }}</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">{{ __('Registrations through invitations') }}</div>
+                        <div class="datagrid-content">{{ number_format($user->accepted_referrals_count) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3"><livewire:datatables.referrals :user-id="$user->id" /></div>
+    @endif
 </x-layouts::dashboard>

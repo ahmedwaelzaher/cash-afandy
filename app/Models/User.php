@@ -54,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
         'country_id',
         'state_id',
+        'referral_code',
     ];
 
     /**
@@ -125,6 +126,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected static function booted(): void
     {
+        static::creating(function (User $user) {
+            do {
+                $code = Str::upper(Str::random(10));
+            } while (static::withTrashed()->where('referral_code', $code)->exists());
+
+            $user->referral_code = $code;
+        });
+
         static::created(function (User $user) {
             $user->preferences()->create();
         });
@@ -136,6 +145,40 @@ class User extends Authenticatable implements MustVerifyEmail
     public function preferences(): HasOne
     {
         return $this->hasOne(UserPreference::class);
+    }
+
+    public function referral(): HasOne
+    {
+        return $this->hasOne(Referral::class, 'referred_user_id');
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    public function acceptedReferrals(): HasMany
+    {
+        return $this->referrals()->accepted();
+    }
+
+    public function referralProgress(): array
+    {
+        $target = max(1, (int) setting('referral_reward_target'));
+        $count = max(0, (int) ($this->accepted_referrals_count ?? $this->acceptedReferrals()->count()));
+
+        return [
+            'target' => $target,
+            'count' => min($count, $target),
+            'remaining' => max(0, $target - $count),
+            'completed' => $count >= $target,
+            'percentage' => min($count, $target) / $target * 100,
+        ];
+    }
+
+    public function invitationUrl(): ?string
+    {
+        return $this->referral_code ? route('website.index', ['referral_code' => $this->referral_code]) : null;
     }
 
     public function receivesWebsiteNotification(?NotificationType $type = null): bool

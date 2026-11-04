@@ -18,10 +18,46 @@
 
 .site-notifications-page,
 .site-push-prompt,
-.site-notification-popup {
+.site-notification-popup,
+.site-referral-progress {
     --tblr-primary: var(--site-green);
     --tblr-primary-fg: var(--site-surface);
     --tblr-primary-lt: var(--site-soft);
+}
+
+.site-referral-progress .progress {
+    background: var(--site-line);
+}
+
+.site-referral-progress .progress-bar {
+    position: relative;
+    border-radius: inherit;
+    overflow: visible;
+}
+
+.site-referral-marker::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: -0.4375rem;
+    inset-block-start: 50%;
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    transform: translateY(-50%);
+    background: var(--site-green);
+    border: 2px solid var(--site-surface);
+    border-radius: 50%;
+}
+
+.site-referral-goal {
+    background: var(--site-surface);
+    border: 3px solid var(--site-line);
+}
+
+.site-referral-goal-label {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline: 0;
+    margin-block-start: 0.5rem;
 }
 
 .site-notification-card {

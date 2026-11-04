@@ -1,4 +1,71 @@
 // ==================================================
+// Invitations: persist the URL code on the server and carry it until its deadline.
+// ==================================================
+$(() => {
+    const options = window.WebsiteReferral;
+    if (!options) return;
+
+    let context = options.context;
+    let proof = options.proof;
+    let timer;
+    let revision = 0;
+
+    const $input = $('[data-referral-input]');
+    const $proof = $('[name="referral_context"]');
+    let edited = $input.attr('data-referral-preserve') === 'true';
+    $input.on('input', () => { edited = true; });
+
+    const sync = () => {
+        clearTimeout(timer);
+        if (options.authenticated || (context && context.expires_at * 1000 <= Date.now())) context = null;
+
+        const url = new URL(window.location.href);
+        if (context) {
+            url.searchParams.set('referral_code', context.code);
+            timer = setTimeout(sync, Math.max(0, context.expires_at * 1000 - Date.now()));
+        } else {
+            url.searchParams.delete('referral_code');
+        }
+
+        if (url.href !== window.location.href) history.replaceState(history.state, '', url.href);
+        if (!edited) {
+            $input.val(context?.code || '');
+            $proof.val(context ? proof : '');
+        }
+    };
+    const capture = () => {
+        const code = new URL(window.location.href).searchParams.get('referral_code')?.trim().toUpperCase();
+        if (options.authenticated || !code || code === context?.code || code === options.expired_code) return sync();
+
+        const currentRevision = ++revision;
+        $.ajax({
+            url: options.url,
+            method: 'POST',
+            dataType: 'json',
+            data: { referral_code: code },
+        }).done((result) => {
+            if (currentRevision !== revision) return;
+            context = result.context;
+            proof = result.proof;
+            sync();
+        }).fail(() => {
+            // Keep the original URL available for a retry after a network failure.
+            if (context) sync();
+        });
+    };
+
+    $(window).on('popstate.referral', capture);
+    $(document).on('visibilitychange.referral', () => {
+        if (!document.hidden) sync();
+    });
+
+    $(document).ajaxComplete((event, xhr, request) => {
+        if (request.url !== options.url) sync();
+    });
+    capture();
+});
+
+// ==================================================
 // Hero heading: rotate words while respecting reduced-motion preferences
 // ==================================================
 $(() => {
@@ -440,6 +507,16 @@ $(() => {
 // Sharing: native share sheet with clipboard fallback
 // ==================================================
 $(() => {
+    $(document).on('click', '[data-copy-text]', async function () {
+        const $button = $(this);
+        try {
+            await copyToClipboard($button.attr('data-copy-text'));
+            toastify().success($button.attr('data-copy-success'));
+        } catch {
+            toastify().error($button.attr('data-copy-error'));
+        }
+    });
+
     $(document).on('click', '[data-share-url]', async function () {
         const $button = $(this);
         const url = $button.attr('data-share-url');

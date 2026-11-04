@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Actions\Auth\ReferralAttribution;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
@@ -63,7 +65,7 @@ class SocialiteController extends Controller
             return $this->error(__('Your account has been deactivated.'), 'website.login');
         }
 
-        $user ??= $this->createUser($socialUser);
+        $user ??= $this->createUser($socialUser, $request);
 
         if ($user->{"{$provider}_id"} !== $socialUser->getId()) {
             $user->forceFill(["{$provider}_id" => $socialUser->getId()]);
@@ -77,6 +79,7 @@ class SocialiteController extends Controller
         $user->last_login_at = now();
         $user->save();
 
+        app(ReferralAttribution::class)->forget($request);
         Auth::guard('users')->login($user, true);
         $request->session()->regenerate();
 
@@ -96,7 +99,7 @@ class SocialiteController extends Controller
     /**
      * Create a new user from the provider's user.
      */
-    protected function createUser(SocialiteUser $socialUser): User
+    protected function createUser(SocialiteUser $socialUser, Request $request): User
     {
         $raw = $socialUser->getRaw();
 
@@ -105,16 +108,23 @@ class SocialiteController extends Controller
         $firstName = $raw['given_name'] ?? $raw['first_name'] ?? $firstName;
         $lastName = $raw['family_name'] ?? $raw['last_name'] ?? $lastName;
 
-        $user = new User([
-            'first_name' => $firstName ?: Str::before($socialUser->getEmail(), '@'),
-            'last_name' => $lastName,
-            'email' => $socialUser->getEmail(),
-            // Social users can set a real password later through "Forgot Password".
-            'password' => Str::password(32),
-        ]);
+        $referrals = app(ReferralAttribution::class);
+        $context = $referrals->current($request);
+        $user = DB::transaction(function () use ($firstName, $lastName, $socialUser, $referrals, $context) {
+            $user = new User([
+                'first_name' => $firstName ?: Str::before($socialUser->getEmail(), '@'),
+                'last_name' => $lastName,
+                'email' => $socialUser->getEmail(),
+                // Social users can set a real password later through "Forgot Password".
+                'password' => Str::password(32),
+            ]);
 
-        // Verified before the Registered event, so no verification email is sent.
-        $user->forceFill(['email_verified_at' => now()])->save();
+            // Verified before the Registered event, so no verification email is sent.
+            $user->forceFill(['email_verified_at' => now()])->save();
+            $referrals->attach($user, $context);
+
+            return $user;
+        });
 
         event(new Registered($user));
 

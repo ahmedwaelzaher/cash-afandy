@@ -59,6 +59,11 @@
     @pushOnce('scripts')
         <script>
             window.WebsitePush = @json($websitePush);
+            window.WebsiteReferral = {
+                url: @json(route('website.referral.store')),
+                authenticated: @json(auth('users')->check()),
+                ...@json(app(\App\Actions\Auth\ReferralAttribution::class)->browserState(request())),
+            };
         </script>
         <script src="{{ hashed_asset('assets/js/website.js') }}"></script>
 

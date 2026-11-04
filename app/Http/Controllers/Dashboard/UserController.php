@@ -45,6 +45,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        if (route_allowed('dashboard.referrals.index')) $user->load('referral.referrer')->loadCount('acceptedReferrals');
+
         return view('dashboard.users.show', [
             'user' => $user,
         ]);

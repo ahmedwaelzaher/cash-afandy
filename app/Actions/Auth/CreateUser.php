@@ -4,6 +4,7 @@ namespace App\Actions\Auth;
 
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Redot\Auth\Contracts\CreatesUsers;
 use Redot\Auth\Panel;
@@ -21,6 +22,8 @@ class CreateUser implements CreatesUsers
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . $panel->model()],
             'password' => ['required', 'confirmed', Password::defaults()],
             ...User::personalDetailsRules(requireGender: true),
+            'referral_code' => ['nullable', 'string', 'max:64'],
+            'referral_context' => ['nullable', 'string', 'max:4096'],
             ...setting('cloudflare_turnstile_site_key') ? ['captcha' => ['required', 'captcha']] : [],
         ];
     }
@@ -30,12 +33,23 @@ class CreateUser implements CreatesUsers
      */
     public function create(array $input, Panel $panel): User
     {
-        return User::create([
-            'first_name' => $input['first_name'],
-            'last_name' => $input['last_name'],
-            'email' => $input['email'],
-            'password' => $input['password'],
-            ...Arr::only($input, ['phone', 'birthdate', 'gender']),
-        ]);
+        $request = request();
+        $referrals = app(ReferralAttribution::class);
+        $context = $referrals->resolve($request, $input, $panel->isApi());
+        $user = DB::transaction(function () use ($input, $referrals, $context) {
+            $user = User::create([
+                'first_name' => $input['first_name'],
+                'last_name' => $input['last_name'],
+                'email' => $input['email'],
+                'password' => $input['password'],
+                ...Arr::only($input, ['phone', 'birthdate', 'gender']),
+            ]);
+            $referrals->attach($user, $context);
+
+            return $user;
+        });
+        if (! $panel->isApi()) $referrals->forget($request);
+
+        return $user;
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\FavoriteOfferController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
+use App\Http\Controllers\Website\InvitationController;
 use App\Http\Controllers\Website\NotificationController;
 use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\PendingActionController;
@@ -29,6 +30,7 @@ use Redot\Auth\Facades\RedotAuth;
 */
 
 Route::get('/', HomeController::class)->name('index');
+Route::post('auth/referral', InvitationController::class)->middleware('throttle:30,1')->name('referral.store');
 Route::get('up', HealthCheckController::class)->name('health-check');
 Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
 Route::get('static-pages/{staticPage}', [StaticPageController::class, 'show'])->name('static-pages.show');

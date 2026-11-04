@@ -10,7 +10,8 @@ test('register screen can be rendered', function () {
 });
 
 test('user can register', function () {
-    Event::fake();
+    Event::fake([Registered::class]);
+    cache()->forever('settings.cloudflare_turnstile_site_key', '');
 
     $response = $this->post(route('website.register.store'), [
         'first_name' => fake()->firstName,
@@ -20,6 +21,8 @@ test('user can register', function () {
         'password_confirmation' => 'password',
         'gender' => 'male',
     ]);
+
+    $response->assertSessionHasNoErrors();
 
     Event::assertDispatched(Registered::class);
 
