@@ -56,6 +56,11 @@
                                         <x-input type="email" name="email" :title="__('Email address')" :value="$user->email" placeholder="your@email.com" autocomplete="email" validation="required|email" />
                                     </div>
                                     @include('website.profile.partials.personal-details', ['fieldClass' => 'col-12 col-md-6'])
+                                    <div class="col-12">
+                                        <div class="form-label">{{ __('Account country') }}</div>
+                                        <p class="mb-1">{{ app()->isLocale('ar') ? $user->country?->native : $user->country?->name }} <bdi dir="ltr">({{ $user->wallet?->currency }})</bdi></p>
+                                        <x-hint>{{ __('Your account country and wallet currency cannot be changed after confirmation.') }}</x-hint>
+                                    </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-top">
                                     <button type="submit" class="btn btn-primary px-4">{{ __('Save') }}</button>

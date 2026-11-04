@@ -40,15 +40,21 @@
                     </div>
 
                     <div class="row">
-                        @include('website.profile.partials.personal-details', ['showPhone' => false, 'showBirthdate' => false, 'requireGender' => true, 'fieldClass' => 'col-12 col-md-6 mb-3'])
-
-                        <div class="col-12 col-md-6 mb-3">
-                            <x-input type="text" name="referral_code" :title="__('Invitation code (optional)')"
-                                :value="old('referral_code', $invitation['code'] ?? '')" maxlength="64" autocomplete="off" dir="ltr"
-                                data-referral-input data-referral-preserve="{{ session()->hasOldInput('referral_code') ? 'true' : 'false' }}" />
-                            <input type="hidden" name="referral_context" value="{{ old('referral_context', $invitation ? encrypt($invitation) : '') }}" />
+                        <div class="col-12 col-md-6">
+                            @include('website.profile.partials.account-country')
                         </div>
+
+                        @include('website.profile.partials.personal-details', ['showPhone' => false, 'showBirthdate' => false, 'requireGender' => true, 'fieldClass' => 'col-12 col-md-6 mb-3'])
                     </div>
+
+                    <div class="mb-3">
+                        <x-input type="text" name="referral_code" :title="__('Invitation code (optional)')"
+                            :value="old('referral_code', $invitation['code'] ?? '')" maxlength="64" autocomplete="off" dir="ltr"
+                            data-referral-input data-referral-preserve="{{ session()->hasOldInput('referral_code') ? 'true' : 'false' }}" />
+                        <input type="hidden" name="referral_context" value="{{ old('referral_context', $invitation ? encrypt($invitation) : '') }}" />
+                    </div>
+
+                    @include('website.profile.partials.account-consents')
 
                     @if (setting('cloudflare_turnstile_site_key'))
                         <x-captcha :title="__('Captcha')" name="captcha" />
