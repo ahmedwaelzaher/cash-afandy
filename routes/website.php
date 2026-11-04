@@ -17,6 +17,7 @@ use App\Http\Controllers\Website\SocialiteController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\StoreController;
 use App\Http\Controllers\Website\StoreSubscriberController;
+use App\Http\Middleware\EnsureProfileIsComplete;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
 
@@ -29,31 +30,34 @@ use Redot\Auth\Facades\RedotAuth;
 |
 */
 
-Route::get('/', HomeController::class)->name('index');
-Route::post('auth/referral', InvitationController::class)->middleware('throttle:30,1')->name('referral.store');
 Route::get('up', HealthCheckController::class)->name('health-check');
-Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
 Route::get('static-pages/{staticPage}', [StaticPageController::class, 'show'])->name('static-pages.show');
-Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
 Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->middleware('throttle:30,1')->name('push-subscriptions.store');
 Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:30,1')->name('push-subscriptions.destroy');
 
-Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
-Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
+Route::middleware(EnsureProfileIsComplete::class)->group(function () {
+    Route::get('/', HomeController::class)->name('index');
+    Route::post('auth/referral', InvitationController::class)->middleware('throttle:30,1')->name('referral.store');
+    Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
+    Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
 
-Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.index');
-Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');
+    Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+    Route::get('offers/{offer}', [OfferController::class, 'show'])->name('offers.show');
 
-Route::get('stores', [StoreController::class, 'index'])->name('stores.index');
-Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.show');
+    Route::get('cashbacks', [CashbackController::class, 'index'])->name('cashbacks.index');
+    Route::get('cashbacks/{cashback}', [CashbackController::class, 'show'])->name('cashbacks.show');
 
-Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('stores', [StoreController::class, 'index'])->name('stores.index');
+    Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.show');
 
-Route::get('search', SearchController::class)->name('search');
-Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
-Route::post('auth/pending-action', [PendingActionController::class, 'store'])->middleware('throttle:30,1')->name('pending-action.store');
-Route::delete('auth/pending-action', [PendingActionController::class, 'destroy'])->middleware('throttle:30,1')->name('pending-action.destroy');
+    Route::get('search', SearchController::class)->name('search');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
+    Route::post('auth/pending-action', [PendingActionController::class, 'store'])->middleware('throttle:30,1')->name('pending-action.store');
+    Route::delete('auth/pending-action', [PendingActionController::class, 'destroy'])->middleware('throttle:30,1')->name('pending-action.destroy');
+});
 
 Route::middleware('guest:users')->group(function () {
     Route::get('auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->whereIn('provider', SocialiteController::PROVIDERS)->name('socialite.redirect');
@@ -61,6 +65,11 @@ Route::middleware('guest:users')->group(function () {
 });
 
 Route::middleware('auth:users')->group(function () {
+    Route::get('profile/complete', [ProfileController::class, 'complete'])->name('profile.complete');
+    Route::put('profile/complete', [ProfileController::class, 'storeCompletion'])->name('profile.complete.store');
+});
+
+Route::middleware(['auth:users', EnsureProfileIsComplete::class])->group(function () {
     Route::get('favorites', [FavoriteOfferController::class, 'index'])->name('favorites.index');
     Route::put('favorites/{offer}', [FavoriteOfferController::class, 'store'])->name('favorites.store');
     Route::delete('favorites/{offer}', [FavoriteOfferController::class, 'destroy'])->name('favorites.destroy');

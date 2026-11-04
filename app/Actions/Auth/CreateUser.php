@@ -2,9 +2,12 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\Wallets\InitializeWallet;
+use App\Models\Country;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Redot\Auth\Contracts\CreatesUsers;
 use Redot\Auth\Panel;
@@ -22,6 +25,9 @@ class CreateUser implements CreatesUsers
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . $panel->model()],
             'password' => ['required', 'confirmed', Password::defaults()],
             ...User::personalDetailsRules(requireGender: true),
+            'country_id' => ['required', 'integer', Rule::in(Country::forAccounts()->pluck('id')->all())],
+            'account_country_confirmation' => ['accepted'],
+            'terms_accepted' => ['accepted'],
             'referral_code' => ['nullable', 'string', 'max:64'],
             'referral_context' => ['nullable', 'string', 'max:4096'],
             ...setting('cloudflare_turnstile_site_key') ? ['captcha' => ['required', 'captcha']] : [],
@@ -44,6 +50,7 @@ class CreateUser implements CreatesUsers
                 'password' => $input['password'],
                 ...Arr::only($input, ['phone', 'birthdate', 'gender']),
             ]);
+            app(InitializeWallet::class)->handle($user, (int) $input['country_id']);
             $referrals->attach($user, $context);
 
             return $user;

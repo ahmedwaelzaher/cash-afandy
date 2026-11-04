@@ -8,6 +8,7 @@ use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -150,6 +151,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function referral(): HasOne
     {
         return $this->hasOne(Referral::class, 'referred_user_id');
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function hasCompletedProfile(): bool
+    {
+        return filled($this->first_name) && filled($this->last_name) && $this->gender !== null
+            && $this->country_id && $this->wallet()->exists();
     }
 
     public function referrals(): HasMany
