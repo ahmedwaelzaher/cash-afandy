@@ -15,19 +15,21 @@ class InitializeWallet
         $wallet = DB::transaction(function () use ($user, $countryId) {
             $owner = User::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
             $country = Country::forAccounts()->find($countryId);
+
             if (! $country || ! preg_match('/^[A-Z]{3}$/D', $country->currency)) {
                 throw ValidationException::withMessages(['country_id' => __('Please select a supported account country.')]);
             }
+
             $wallet = $owner->wallet()->lockForUpdate()->first();
             if ($wallet && $wallet->currency !== $country->currency) {
                 throw ValidationException::withMessages(['country_id' => __('The selected country must match your existing wallet currency.')]);
             }
-            $owner->forceFill(['country_id' => $country->id])->save();
 
+            $owner->forceFill(['country_id' => $country->id])->save();
             return $wallet ?? $owner->wallet()->create(['currency' => $country->currency]);
         }, 3);
-        $user->refresh()->setRelation('wallet', $wallet);
 
+        $user->refresh()->setRelation('wallet', $wallet);
         return $wallet;
     }
 }
