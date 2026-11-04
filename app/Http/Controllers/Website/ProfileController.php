@@ -2,15 +2,44 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Enums\Gender;
 use App\Enums\NotificationType;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Redot\Http\Controllers\Controller;
 
 class ProfileController extends Controller
 {
+    public function complete(Request $request)
+    {
+        $user = $request->user('users')->load('wallet');
+        if ($user->hasCompletedProfile()) return redirect()->intended(route('website.index'));
+
+        return view('website.profile.complete', ['user' => $user]);
+    }
+
+    public function storeCompletion(Request $request)
+    {
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', Rule::enum(Gender::class)],
+            'country_id' => User::accountCountryRules(),
+        ]);
+
+        DB::transaction(function () use ($request, $validated) {
+            $user = User::whereKey($request->user('users')->id)->lockForUpdate()->firstOrFail();
+            $user->fill(Arr::only($validated, ['first_name', 'last_name', 'gender']))->save();
+            $user->initializeWallet((int) $validated['country_id']);
+        }, 3);
+
+        return redirect()->intended(route('website.index'))->with('success', __('Your profile has been completed.'));
+    }
+
     /**
      * Show the form for editing the specified resource.
      */

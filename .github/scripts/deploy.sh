@@ -126,4 +126,17 @@ served_id="$(curl --fail --silent --show-error --retry 3 --max-time 20 "$origin/
 status="$(curl --silent --show-error --retry 3 --max-time 20 --output /dev/null --write-out '%{http_code}' "${health_url}?deployment=$release_id")"
 [[ "$status" == 200 ]] || fail "Health check returned HTTP $status."
 
+# Prune only after the new release passes its health checks; preserve rollback.
+for candidate in "$root"/releases/*; do
+    [[ -d "$candidate" && ! -L "$candidate" ]] || continue
+    [[ "$candidate" != "$release" && "$candidate" != "$previous" ]] || continue
+    [[ "${candidate##*/}" =~ ^[0-9]+-[0-9]+-[a-f0-9]{40}$ ]] || continue
+    [[ "$(realpath -e "$candidate")" == "$candidate" ]] || continue
+    if rm -rf --one-file-system -- "$candidate"; then
+        printf 'Removed inactive release: %s\n' "$candidate"
+    else
+        printf 'Warning: could not remove inactive release: %s\n' "$candidate" >&2
+    fi
+done
+
 printf 'Published release: %s\nPrevious release: %s\n' "$release" "${previous:-none}"

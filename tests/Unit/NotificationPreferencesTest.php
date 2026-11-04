@@ -64,7 +64,7 @@ function notificationPreferenceRequest(array $data): Request
 }
 
 test('notification type choices contain only the currently supported types and enable new types by default', function () {
-    expect(array_keys(NotificationType::values()))->toBe(['general', 'new_offer', 'favorite_offer_expiring'])
+    expect(array_keys(NotificationType::values()))->toBe(['general', 'new_offer', 'favorite_offer_expiring', 'new_referral', 'wallet'])
         ->and(NotificationType::tryFrom('cashback'))->toBeNull()
         ->and($this->user->receivesWebsiteNotification(NotificationType::General))->toBeTrue()
         ->and($this->user->receivesWebsiteNotification(NotificationType::NewOffer))->toBeTrue();
@@ -104,7 +104,7 @@ test('unsupported duplicate and invalid preferences cannot be saved', function (
             ->and($this->user->fresh()->preferences->notification_types)->toBeNull();
     }
 })->with([
-    'unsupported type' => [['notifications_enabled' => 1, 'notification_types' => ['wallet']], 'notification_types.0'],
+    'unsupported type' => [['notifications_enabled' => 1, 'notification_types' => ['unsupported']], 'notification_types.0'],
     'duplicate type' => [['notifications_enabled' => 1, 'notification_types' => ['general', 'general']], 'notification_types.0'],
     'invalid switch' => [['notifications_enabled' => 'invalid', 'notification_types' => ['general']], 'notifications_enabled'],
 ]);
@@ -123,7 +123,7 @@ test('only explicitly unchecked rendered choices are disabled and old forms pres
     $this->controller->updatePreferences(notificationPreferenceRequest([
         'notifications_enabled' => 1,
         'notification_type_options' => array_keys(NotificationType::values()),
-        'notification_types' => ['general', 'favorite_offer_expiring'],
+        'notification_types' => array_values(array_diff(array_keys(NotificationType::values()), ['new_offer'])),
     ]));
     $user = $this->user->fresh();
     expect($user->preferences->notification_types)->toBe(['disabled' => ['new_offer']])
@@ -151,6 +151,22 @@ test('every visible choice can be unchecked without disabling future enum additi
         'notifications_enabled' => 1, 'notification_type_options' => array_keys(NotificationType::values()),
     ]));
     expect($this->user->fresh()->preferences->enabledNotificationTypes())->toBe([]);
+});
+
+test('wallet notifications can be disabled and reenabled independently from other types', function () {
+    $options = array_keys(NotificationType::values());
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1, 'notification_type_options' => $options,
+        'notification_types' => array_values(array_diff($options, ['wallet'])),
+    ]));
+    $this->user = $this->user->fresh();
+    expect($this->user->receivesWebsiteNotification(NotificationType::Wallet))->toBeFalse()
+        ->and($this->user->receivesWebsiteNotification(NotificationType::General))->toBeTrue();
+
+    $this->controller->updatePreferences(notificationPreferenceRequest([
+        'notifications_enabled' => 1, 'notification_type_options' => $options, 'notification_types' => $options,
+    ]));
+    expect($this->user->fresh()->receivesWebsiteNotification(NotificationType::Wallet))->toBeTrue();
 });
 
 test('exclusion migration preserves legacy opt outs and master switch and supports rollback', function () {

@@ -17,7 +17,7 @@ beforeEach(function () {
 });
 
 test('social login returns to the originating page with its filters after the callback', function (string $provider, string $locale) {
-    $user = User::factory()->create();
+    $user = User::factory()->completedProfile()->create();
     $socialUser = (new SocialiteUser)->map(['id' => 'provider-user', 'email' => $user->email, 'name' => 'Test User']);
     $driver = Mockery::mock();
     $driver->shouldReceive('fields')->andReturnSelf();
@@ -79,7 +79,7 @@ test('social registration uses only an unexpired captured invitation and ignores
         ->assertRedirect('https://provider.example/authorize');
     if ($invitation === 'expired') $this->travel(61)->minutes();
     $this->get(route('website.socialite.callback', ['provider' => $provider]))
-        ->assertRedirect(route('website.index'))->assertSessionMissing('auth.invitation');
+        ->assertRedirect(route('website.profile.complete'))->assertSessionMissing('auth.invitation');
 
     $user = auth('users')->user();
     expect($user->email)->toBe('new-social@example.test');

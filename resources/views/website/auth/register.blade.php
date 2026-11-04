@@ -50,6 +50,8 @@
                         </div>
                     </div>
 
+                    @include('website.profile.partials.account-country')
+
                     @if (setting('cloudflare_turnstile_site_key'))
                         <x-captcha :title="__('Captcha')" name="captcha" />
                     @endif

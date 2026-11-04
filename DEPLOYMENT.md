@@ -28,7 +28,7 @@ Each deployment gets its own release directory. `.env`, storage, and uploads are
 - PHP 8.3, for both the website and SSH commands, with bcmath, ctype, curl, dom, exif, fileinfo, gd, gmp, intl, mbstring, openssl, pdo_mysql, xml, xmlreader, xmlwriter, and zip enabled. The deployment checks the CLI runtime; verify the website runtime in hPanel as well.
 - An HTTPS domain and a MySQL/MariaDB database configured in hPanel.
 - Working filesystem symlinks, including serving the website through a `public_html` symlink. Enable the PHP `symlink` function for application features too. Verify this on the actual plan before enabling automatic publishing. If Hostinger will not serve this layout, stop and adapt deployment to the supported document root.
-- Enough disk space for the uploaded archive and multiple complete releases. Releases are retained for recovery and are not automatically deleted; monitor disk usage and remove old, inactive releases separately.
+- Enough disk space and inodes for the uploaded archive, the new release, and two retained releases during deployment. After the new release passes its HTTP checks, deployment removes older releases and keeps only the live release and its immediate predecessor. Failed or prepared releases are also removed by the next successful deployment. Shared storage, uploads, configuration, and the database are outside this cleanup.
 
 The website's default PHP runtime was verified as 8.2. Deployment prepends Hostinger's `SetHandler application/x-lsphp83` rule to each release's public `.htaccess`, using the selected CLI PHP version. This scopes the runtime change to this site. It also sets the deployment root/releases to mode 755 and shared to mode 711 so the web server can traverse public asset symlinks; `.env` stays mode 600. See [Hostinger's per-directory PHP handler guidance](https://www.hostinger.com/support/4047803-how-to-change-the-php-version-for-subfolders-or-subdomains-in-hostinger/).
 
@@ -188,4 +188,4 @@ ln -s /home/u554309232/domains/cashafandy.com/cash-afandy/releases/PREVIOUS_RELE
 mv -Tf current-recovery current
 ```
 
-Recheck the health URL and assets afterward. Settings, sessions, uploads, and storage survive code rollback. Old releases remain on disk until deliberately removed. If PHP OPcache does not revalidate files or Hostinger caches the document-root symlink, ask Hostinger to clear/restart the site's PHP cache and verify switching before relying on automatic releases.
+Recheck the health URL and assets afterward. Settings, sessions, uploads, and storage survive code rollback. Automatic cleanup retains only the live release and its immediate predecessor, so code rollback is available for one previous release. It does not restore or roll back the database. If PHP OPcache does not revalidate files or Hostinger caches the document-root symlink, ask Hostinger to clear/restart the site's PHP cache and verify switching before relying on automatic releases.

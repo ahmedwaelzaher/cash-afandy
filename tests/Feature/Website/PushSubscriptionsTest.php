@@ -205,7 +205,7 @@ test('the website retains its push worker when asset caching is disabled', funct
         'redot.notifications.firebase' => ['apiKey' => 'public-api-key', 'projectId' => 'test', 'messagingSenderId' => '123', 'appId' => 'web-app'],
     ]);
 
-    $this->actingAs(User::factory()->create(), 'users')->get(route('website.profile.edit'))
+    $this->actingAs(User::factory()->completedProfile()->create(), 'users')->get(route('website.profile.edit'))
         ->assertOk()->assertSee('data-browser-notifications', false)
         ->assertSee('window.WebsitePush', false)
         ->assertSee('id="site-incoming-notification"', false)
@@ -219,7 +219,7 @@ test('the browser invitation is available to guests and website users when push 
     $this->get(route('website.index'))->assertOk()->assertSee('data-push-prompt hidden', false)
         ->assertSee('window.WebsitePush', false);
 
-    $this->actingAs(User::factory()->create(), 'users')->get(route('website.index'))
+    $this->actingAs(User::factory()->completedProfile()->create(), 'users')->get(route('website.index'))
         ->assertOk()->assertSee('data-push-prompt hidden', false)
         ->assertSee('data-push-dismiss', false)->assertSee('data-push-enable', false);
 

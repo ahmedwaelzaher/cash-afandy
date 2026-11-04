@@ -4,6 +4,7 @@
     @pushOnce('meta')
         <meta name="mitgo-verification" content="b4e9bf6b-7c0b-4ca8-96d2-0a15e960a7fb" />
         <meta name="mitgo-verification" content="1373fcd4-9b3c-4b59-af2a-d4e4b4ebc9f1" />
+        <meta name="mitgo-verification" content="2e1e3b4a-147c-4bc3-9477-9f05b5d69116" />
     @endPushOnce
 
     {{-- Website styles aren't dark-mode ready yet, so force light regardless of system/localStorage preference --}}

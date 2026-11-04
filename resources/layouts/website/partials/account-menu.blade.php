@@ -17,6 +17,11 @@
                 <span class="dropdown-item-title">{{ __('Favorite offers') }}</span>
             </a>
 
+            <a class="dropdown-item" href="{{ route('website.wallet.show') }}">
+                <span class="dropdown-item-icon"><x-icon icon="ti ti-wallet" /></span>
+                <span class="dropdown-item-title">{{ __('Afandy Wallet') }}</span>
+            </a>
+
             <x-form :action="route('website.logout')" method="POST" disable-validation>
                 <button type="submit" class="dropdown-item">
                     <span class="dropdown-item-icon"><x-icon icon="ti ti-logout" /></span>
