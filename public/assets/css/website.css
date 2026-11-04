@@ -13,6 +13,7 @@
 
 /* Website notifications and browser invitation */
 .site-notifications .dropdown-menu {
+    --tblr-dropdown-border-radius: var(--site-control-radius);
     inline-size: 22rem;
 }
 
