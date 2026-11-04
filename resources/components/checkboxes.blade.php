@@ -8,7 +8,7 @@
             <input type="checkbox" class="form-check-input" name="{{ $name }}" value="{{ $key }}"
                 @checked(in_array($key, $value)) @disabled(in_array($key, $disabled))
                 @if ($validation && $loop->first) validation="{{ $validation }}" validation-container="#{{ $id }}" @endif
-                title="{{ $label }}" />
+                title="{{ $label instanceof \Illuminate\Contracts\Support\Htmlable ? strip_tags($label->toHtml()) : $label }}" />
             <span class="form-check-label">{{ $label }}</span>
         </label>
     @endforeach
