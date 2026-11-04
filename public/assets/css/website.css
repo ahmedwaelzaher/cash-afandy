@@ -101,7 +101,7 @@
     background: var(--site-surface);
     color: var(--site-ink);
     border: 1px solid var(--site-line);
-    border-radius: var(--site-radius);
+    border-radius: var(--site-control-radius);
     box-shadow: var(--site-shadow);
 }
 
