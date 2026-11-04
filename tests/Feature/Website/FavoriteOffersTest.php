@@ -150,13 +150,14 @@ test('favorite state is loaded in one query and saved offers paginate across mar
         ->assertViewHas('offers', fn ($offers) => $offers->count() === 1);
 });
 
-test('deleted offers and permanently deleted users do not leave favorite links behind', function () {
-    $this->user->favoriteOffers()->attach($this->offer);
+test('deleted offers and permanently deleted users without wallets do not leave favorite links behind', function () {
+    $user = User::factory()->create();
+    $user->favoriteOffers()->attach($this->offer);
     $this->offer->delete();
     $this->assertDatabaseCount('offer_user', 0);
 
     $offer = Offer::factory()->create(['store_id' => $this->store->id]);
-    $this->user->favoriteOffers()->attach($offer);
-    $this->user->forceDelete();
+    $user->favoriteOffers()->attach($offer);
+    $user->forceDelete();
     $this->assertDatabaseCount('offer_user', 0);
 });
