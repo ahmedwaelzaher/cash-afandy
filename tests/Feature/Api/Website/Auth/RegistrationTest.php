@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Country;
-
 test('user can register', function () {
     $email = fake()->unique()->safeEmail;
     $response = $this->post(route('api.website.register.store'), [
@@ -11,7 +9,6 @@ test('user can register', function () {
         'password' => 'password',
         'password_confirmation' => 'password',
         'gender' => 'male',
-        'country_id' => Country::code('eg')->id,
     ]);
 
     $response->assertStatus(201);

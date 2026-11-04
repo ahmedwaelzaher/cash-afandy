@@ -4,7 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 test('profile page is displayed', function () {
-    $user = User::factory()->verified()->completedProfile()->create();
+    $user = User::factory()->verified()->create();
 
     $response = $this->actingAs($user, 'users')->get(route('website.profile.edit'));
 
@@ -12,7 +12,7 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->verified()->completedProfile()->create();
+    $user = User::factory()->verified()->create();
 
     $response = $this->actingAs($user, 'users')->put(route('website.profile.update'), [
         'first_name' => fake()->firstName,
@@ -26,7 +26,7 @@ test('profile information can be updated', function () {
 });
 
 test('user can update password', function () {
-    $user = User::factory()->verified()->completedProfile()->create();
+    $user = User::factory()->verified()->create();
 
     $response = $this->actingAs($user, 'users')->put(route('website.profile.update'), [
         'password' => 'new-password',

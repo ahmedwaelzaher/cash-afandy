@@ -8,7 +8,6 @@ use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -16,10 +15,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 use Redot\Traits\HasSessions;
 use Spatie\Permission\Traits\HasRoles;
@@ -140,12 +137,6 @@ class User extends Authenticatable implements MustVerifyEmail
         static::created(function (User $user) {
             $user->preferences()->create();
         });
-
-        static::updating(function (User $user) {
-            if ($user->isDirty('country_id') && $user->getOriginal('country_id') && $user->wallet()->exists()) {
-                throw ValidationException::withMessages(['country_id' => __('The account country cannot be changed after the wallet is created.')]);
-            }
-        });
     }
 
     /**
@@ -159,48 +150,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function referral(): HasOne
     {
         return $this->hasOne(Referral::class, 'referred_user_id');
-    }
-
-    public function wallet(): HasOne
-    {
-        return $this->hasOne(Wallet::class);
-    }
-
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class);
-    }
-
-    public static function accountCountryRules(): array
-    {
-        return ['required', 'integer', Rule::in(Country::forAccounts()->pluck('id')->all())];
-    }
-
-    public function hasCompletedProfile(): bool
-    {
-        return filled($this->first_name) && filled($this->last_name) && $this->gender !== null
-            && $this->country_id && $this->wallet()->exists();
-    }
-
-    public function initializeWallet(int $countryId): Wallet
-    {
-        $wallet = DB::transaction(function () use ($countryId) {
-            $owner = static::whereKey($this->getKey())->lockForUpdate()->firstOrFail();
-            $country = Country::forAccounts()->find($countryId);
-            if (! $country || ! preg_match('/^[A-Z]{3}$/D', $country->currency)) {
-                throw ValidationException::withMessages(['country_id' => __('Please select a supported account country.')]);
-            }
-            $wallet = $owner->wallet()->lockForUpdate()->first();
-            if ($wallet && $wallet->currency !== $country->currency) {
-                throw ValidationException::withMessages(['country_id' => __('The selected country must match your existing wallet currency.')]);
-            }
-            $owner->forceFill(['country_id' => $country->id])->save();
-
-            return $wallet ?? $owner->wallet()->create(['currency' => $country->currency]);
-        }, 3);
-        $this->refresh()->setRelation('wallet', $wallet);
-
-        return $wallet;
     }
 
     public function referrals(): HasMany

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Country;
 use App\Models\Offer;
 use App\Models\Store;
 use App\Models\User;
@@ -14,7 +13,7 @@ beforeEach(function () {
     $this->withoutMiddleware(EnsureDependenciesBuilt::class);
     cache()->forever('settings.show_website_countries_dropdown', false);
     cache()->forever('settings.default_website_country', 'eg');
-    $this->user = User::factory()->completedProfile()->create();
+    $this->user = User::factory()->create();
     $store = Store::factory()->create(['active' => true]);
     $this->offer = Offer::factory()->create([
         'store_id' => $store->id, 'active' => true,
@@ -77,7 +76,6 @@ test('creating an account also completes the pending action', function () {
     $this->post(route('website.register.store'), [
         'first_name' => 'Test', 'last_name' => 'User', 'email' => 'pending-registration@example.test',
         'password' => 'Password123!', 'password_confirmation' => 'Password123!', 'gender' => 'male',
-        'country_id' => Country::code('eg')->id,
     ])->assertSessionHasNoErrors()->assertRedirect($this->destination)->assertSessionMissing('auth.pending_action');
     $this->assertDatabaseHas('offer_user', ['user_id' => auth('users')->id(), 'offer_id' => $this->offer->id]);
 });

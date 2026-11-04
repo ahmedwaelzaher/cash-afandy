@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Country;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 
@@ -21,7 +20,6 @@ test('user can register', function () {
         'password' => 'password',
         'password_confirmation' => 'password',
         'gender' => 'male',
-        'country_id' => Country::code('eg')->id,
     ]);
 
     $response->assertSessionHasNoErrors();

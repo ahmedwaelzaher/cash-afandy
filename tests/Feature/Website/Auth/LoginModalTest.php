@@ -34,7 +34,7 @@ test('website pages include one accessible login modal with the existing login f
 })->with(['ar', 'en']);
 
 test('modal login uses the existing user authentication pipeline and returns a fresh csrf token', function () {
-    $user = User::factory()->completedProfile()->create();
+    $user = User::factory()->create();
     $oldToken = str_repeat('a', 40);
     $response = $this->withSession(['_token' => $oldToken, 'url.intended' => route('website.profile.edit')])
         ->withHeader('X-Login-Modal', 'true')->postJson(route('website.login.store'), [
@@ -64,7 +64,7 @@ test('modal login keeps validation failures and throttling in the existing pipel
 
 test('regular login keeps its intended redirect and protected routes still reject guests', function () {
     $this->get(route('website.favorites.index'))->assertRedirect(route('website.login'));
-    $user = User::factory()->completedProfile()->create();
+    $user = User::factory()->create();
     $this->post(route('website.login.store'), ['email' => $user->email, 'password' => 'password'])
         ->assertRedirect(route('website.favorites.index'));
     $this->assertAuthenticatedAs($user, 'users');

@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Country;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -35,13 +34,6 @@ class UserFactory extends Factory
             return [
                 'email_verified_at' => now(),
             ];
-        });
-    }
-
-    public function completedProfile(): UserFactory
-    {
-        return $this->state(['gender' => 'male'])->afterCreating(function (User $user) {
-            $user->initializeWallet(Country::forAccounts()->where('code', setting('default_website_country'))->firstOrFail()->id);
         });
     }
 

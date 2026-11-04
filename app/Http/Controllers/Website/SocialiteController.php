@@ -83,8 +83,6 @@ class SocialiteController extends Controller
         Auth::guard('users')->login($user, true);
         $request->session()->regenerate();
 
-        if (! $user->hasCompletedProfile()) return redirect()->route('website.profile.complete');
-
         return redirect()->intended(route('website.index'));
     }
 

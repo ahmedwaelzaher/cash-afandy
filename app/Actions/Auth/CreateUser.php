@@ -22,7 +22,6 @@ class CreateUser implements CreatesUsers
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . $panel->model()],
             'password' => ['required', 'confirmed', Password::defaults()],
             ...User::personalDetailsRules(requireGender: true),
-            'country_id' => User::accountCountryRules(),
             'referral_code' => ['nullable', 'string', 'max:64'],
             'referral_context' => ['nullable', 'string', 'max:4096'],
             ...setting('cloudflare_turnstile_site_key') ? ['captcha' => ['required', 'captcha']] : [],
@@ -45,7 +44,6 @@ class CreateUser implements CreatesUsers
                 'password' => $input['password'],
                 ...Arr::only($input, ['phone', 'birthdate', 'gender']),
             ]);
-            $user->initializeWallet((int) $input['country_id']);
             $referrals->attach($user, $context);
 
             return $user;

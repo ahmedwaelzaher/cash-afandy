@@ -28,7 +28,7 @@ test('code entry screen does not reveal whether an email has a valid token', fun
 });
 
 test('user can authenticate via magic link token', function () {
-    $user = User::factory()->completedProfile()->create();
+    $user = User::factory()->create();
     $loginToken = LoginToken::generate($user->email, 'users');
 
     $response = $this->get(route('website.magic-link.verify', ['token' => $loginToken->token]));
@@ -42,7 +42,7 @@ test('user can authenticate via magic link token', function () {
 });
 
 test('user can authenticate via OTP code', function () {
-    $user = User::factory()->completedProfile()->create();
+    $user = User::factory()->create();
     $loginToken = LoginToken::generate($user->email, 'users');
 
     $response = $this->post(route('website.magic-link-code.store'), [

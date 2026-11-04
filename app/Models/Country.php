@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use DateTimeZone;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Country extends Model
@@ -86,11 +85,6 @@ class Country extends Model
      * @var bool
      */
     public $timestamps = false;
-
-    public function scopeForAccounts(Builder $query): void
-    {
-        $query->whereIn('code', setting('website_countries'))->whereRaw('LENGTH(currency) = 3');
-    }
 
     /**
      * Get country by code.
