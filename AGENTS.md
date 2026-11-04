@@ -32,6 +32,21 @@
     - Don't refactor, rename, or restructure anything the task didn't ask for.
     - Match nearby naming, validation, and formatting.
 
+## Code Style and Organization
+
+- Treat the established writing style and organization in this codebase as the primary reference; use recognized Laravel/PHP standards where the project has no established convention. Inspect comparable existing files before writing code.
+- Before writing any code, search for an existing equivalent or similar implementation and read its actual usage. Reuse suitable existing code; otherwise follow the closest established example. Do not introduce a new pattern before checking what the project already does.
+- When a similar implementation exists, follow its established pattern and tell the user where it is and how it relates to the new work. If consolidating the old and new implementations into shared code would be useful, explain the opportunity and let the user decide; do not refactor the old implementation or extract a new shared component without their instruction. Continue reusing existing suitable shared code where available.
+- Match the existing code's exact style for conditions, guard clauses, operators, braces, comments, whitespace, blank lines, and indentation. Follow how comparable older code is written rather than imposing a preferred personal style or a different convention.
+- Match the project's naming, member order, array layout, line breaks, indentation, and documentation style. Prefer readable formatting over compressed code; follow nearby models by placing each attribute on its own line in attribute arrays.
+- Separate each logical section from the next with a blank line, including sections inside methods.
+- Add concise comments explaining the purpose of each logical section. Describe what the section handles without commenting on every statement.
+- Every class method, including constructors and lifecycle hooks, must have its own docblock immediately above its declaration explaining its purpose.
+- Every class property must have its own docblock immediately above its declaration explaining its purpose, with an appropriate `@var` type where useful. Document promoted constructor properties with `@param` entries in the constructor docblock.
+- Apply these rules to code added or changed within the task; do not reformat unrelated code.
+- Avoid unnecessary defensive conditions, repeated checks, and handling speculative cases that cannot occur in the supported flow. Base each guard on an actual requirement or a reachable case; do not revalidate guarantees already established by validated input, types, or database constraints.
+- Use Laravel's validator and existing validation rules for input validation whenever they express the requirement. Do not duplicate that validation with manual `if` checks or regular expressions inside business logic. Keep business rules that depend on current database state, such as sufficient wallet balance, in the operation where they must be enforced.
+
 ## Where Things Live
 
 | Layer                 | Path                                                                                           |
@@ -103,7 +118,7 @@
 - **While editing**
     - Keep changes localized.
     - Follow nearby patterns.
-    - Comment only non-obvious reasoning.
+    - Follow the Code Style and Organization rules for section comments and member docblocks; explain non-obvious reasoning where needed.
     - Preserve validation, authorization, translation, and escaping.
     - Add focused Pest tests when behavior changes.
 - **After editing**
