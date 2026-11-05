@@ -59,7 +59,6 @@
                                     <div class="col-12">
                                         <div class="form-label">{{ __('Account country') }}</div>
                                         <p class="mb-1">{{ app()->isLocale('ar') ? $user->country?->native : $user->country?->name }} <bdi dir="ltr">({{ $user->wallet?->currency }})</bdi></p>
-                                        <x-hint>{{ __('Your account country and wallet currency cannot be changed after confirmation.') }}</x-hint>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-top">
