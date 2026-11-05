@@ -1351,7 +1351,7 @@ Form Check (Radio)
     }
 
     .site-header {
-        grid-template-columns: minmax(20.25rem, 1fr) minmax(0, 26.25rem) minmax(20.25rem, 1fr);
+        grid-template-columns: minmax(max-content, 1fr) minmax(0, 26.25rem) minmax(max-content, 1fr);
         column-gap: clamp(1.125rem, 2.8vw, 1.875rem);
     }
 
