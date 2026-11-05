@@ -39,10 +39,6 @@ class SettingController extends Controller
                 'title' => __('Social Media'),
                 'icon' => 'fa fa-share-alt',
             ],
-            'referral-program' => [
-                'title' => __('Referral program'),
-                'icon' => 'ti ti-users',
-            ],
             'custom-code' => [
                 'title' => __('Code'),
                 'icon' => 'ti ti-code',

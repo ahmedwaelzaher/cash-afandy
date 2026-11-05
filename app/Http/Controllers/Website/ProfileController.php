@@ -49,8 +49,6 @@ class ProfileController extends Controller
      */
     public function edit()
     {
-        current_user()->loadCount('acceptedReferrals');
-
         return view('website.profile.edit', [
             'user' => current_user(),
             'details' => $this->personalDetails(current_user()),

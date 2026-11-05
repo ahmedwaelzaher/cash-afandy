@@ -1,12 +1,11 @@
 @php
     $activeSection = $errors->hasAny(['notifications_enabled', 'notification_types', 'notification_types.*', 'notification_type_options', 'notification_type_options.*']) || request('section') === 'notifications'
         ? 'notifications'
-        : ($errors->hasAny(['password', 'password_confirmation']) ? 'password' : (request('section') === 'referrals' ? 'referrals' : 'profile'));
+        : ($errors->hasAny(['password', 'password_confirmation']) ? 'password' : 'profile');
     $sections = [
         'profile' => ['title' => __('Profile'), 'icon' => 'ti ti-user'],
         'password' => ['title' => __('Password'), 'icon' => 'ti ti-lock'],
         'notifications' => ['title' => __('Notifications'), 'icon' => 'ti ti-bell'],
-        'referrals' => ['title' => __('Invite your friends'), 'icon' => 'ti ti-user-plus'],
     ];
 @endphp
 
@@ -92,10 +91,6 @@
                         @include('website.profile.partials.browser-notifications')
                     </div>
 
-                    <div @class(['tab-pane', 'active' => $activeSection === 'referrals']) id="account-referrals" role="tabpanel" aria-labelledby="account-referrals-tab" tabindex="0">
-                        <h2 class="h2 lh-1 mb-3">{{ $sections['referrals']['title'] }}</h2>
-                        @include('website.profile.partials.referrals')
-                    </div>
                 </div>
             </div>
         </div>

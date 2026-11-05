@@ -61,10 +61,6 @@
             <div class="card-body">
                 <div class="datagrid">
                     <div class="datagrid-item">
-                        <div class="datagrid-title">{{ __('Invitation code') }}</div>
-                        <div class="datagrid-content">{{ $user->referral_code ?? '-' }}</div>
-                    </div>
-                    <div class="datagrid-item">
                         <div class="datagrid-title">{{ __('Invited by') }}</div>
                         <div class="datagrid-content">{{ $user->referral?->referrer?->full_name ?? '-' }}</div>
                     </div>

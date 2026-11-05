@@ -38,12 +38,6 @@ Setting::define('default_website_country')->string()->default('eg')->rules(['req
 
 Setting::define('show_website_countries_dropdown')->boolean()->default(true);
 
-Setting::define('referral_program_enabled')->boolean()->default(true);
-
-Setting::define('referral_reward_amount')->float()->default(100)->rules(['sometimes', 'required', 'numeric', 'min:0']);
-
-Setting::define('referral_reward_target')->integer()->default(10)->rules(['sometimes', 'required', 'integer', 'min:1']);
-
 Setting::define('dashboard_locales')->array()->default(['ar', 'en'])->rules(['required', 'array', 'min:1']);
 
 Setting::define('page_loader_enabled')->boolean()->default(false);

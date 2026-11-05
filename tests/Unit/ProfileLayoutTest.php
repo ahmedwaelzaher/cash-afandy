@@ -31,7 +31,6 @@ afterEach(function () {
 function profileLayoutDocument(array $errors = []): DOMXPath
 {
     $user = new User(['first_name' => 'Sample', 'last_name' => 'User', 'email' => 'sample@example.com']);
-    $user->forceFill(['accepted_referrals_count' => 0]);
     $source = file_get_contents(resource_path('views/website/profile/edit.blade.php'));
     // Exercise the real account content without rendering database-backed global navigation.
     $source = str_replace(['<x-layouts::website :title="__(\'Account\')">', '</x-layouts::website>'], ['<div>', '</div>'], $source);
@@ -52,8 +51,8 @@ test('account sections keep profile and password submissions independent', funct
     $profile = '//div[@id="account-profile"]/form';
     $password = '//div[@id="account-password"]/form';
 
-    expect($xpath->query('//a[@role="tab"]')->length)->toBe(4);
-    foreach (['profile', 'password', 'notifications', 'referrals'] as $section) {
+    expect($xpath->query('//a[@role="tab"]')->length)->toBe(3);
+    foreach (['profile', 'password', 'notifications'] as $section) {
         expect($xpath->query('//a[@aria-controls="account-' . $section . '"]')->length)->toBe(1)
             ->and($xpath->query('//div[@id="account-' . $section . '"][@role="tabpanel"]')->length)->toBe(1)
             ->and($xpath->query('//div[@id="account-' . $section . '"]/h2')->length)->toBe(1)
