@@ -1,7 +1,3 @@
-@php
-    $invitation = app(\App\Actions\Auth\ReferralAttribution::class)->forRegistration(request());
-@endphp
-
 <x-layouts::website.auth-split :title="__('Create new account')">
     <x-status class="mb-3" />
 
@@ -45,13 +41,6 @@
                         </div>
 
                         @include('website.profile.partials.personal-details', ['showPhone' => false, 'showBirthdate' => false, 'requireGender' => true, 'fieldClass' => 'col-12 col-md-6 mb-3'])
-                    </div>
-
-                    <div class="mb-3">
-                        <x-input type="text" name="referral_code" :title="__('Invitation code (optional)')"
-                            :value="old('referral_code', $invitation['code'] ?? '')" maxlength="64" autocomplete="off" dir="ltr"
-                            data-referral-input data-referral-preserve="{{ session()->hasOldInput('referral_code') ? 'true' : 'false' }}" />
-                        <input type="hidden" name="referral_context" value="{{ old('referral_context', $invitation ? encrypt($invitation) : '') }}" />
                     </div>
 
                     @include('website.profile.partials.account-consents')

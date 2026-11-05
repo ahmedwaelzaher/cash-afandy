@@ -44,11 +44,6 @@ return Sidebar::make([
                 ->icon('ti ti-users'),
 
             Item::make()
-                ->title(__('Invitations'))
-                ->route('dashboard.referrals.index')
-                ->icon('ti ti-user-plus'),
-
-            Item::make()
                 ->title(__('Static Pages'))
                 ->route('dashboard.static-pages.index')
                 ->icon('ti ti-file-text')

@@ -18,7 +18,6 @@ use App\Http\Controllers\Dashboard\OfferController;
 use App\Http\Controllers\Dashboard\PostController;
 use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\QrCodeController;
-use App\Http\Controllers\Dashboard\ReferralController;
 use App\Http\Controllers\Dashboard\RepresentativeController;
 use App\Http\Controllers\Dashboard\RoleController;
 use App\Http\Controllers\Dashboard\ServerStatsController;
@@ -52,8 +51,6 @@ Route::middleware('auth:admins')->group(function () {
     /* --------- Website Management --------- */
     Route::resource('users', UserController::class)->withTrashed();
     Route::resource('wallet-payouts', WalletPayoutController::class)->only(['index', 'show', 'update']);
-    Route::get('referrals', [ReferralController::class, 'index'])->name('referrals.index');
-    Route::put('referrals/{referral}', [ReferralController::class, 'update'])->name('referrals.update');
     Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();
 
     if (config('redot.features.website.enabled')) {

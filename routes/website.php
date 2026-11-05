@@ -5,7 +5,6 @@ use App\Http\Controllers\Website\CategoryController;
 use App\Http\Controllers\Website\FavoriteOfferController;
 use App\Http\Controllers\Website\HealthCheckController;
 use App\Http\Controllers\Website\HomeController;
-use App\Http\Controllers\Website\InvitationController;
 use App\Http\Controllers\Website\NotificationController;
 use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\PendingActionController;
@@ -38,7 +37,6 @@ Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy
 
 Route::middleware(EnsureProfileIsComplete::class)->group(function () {
     Route::get('/', HomeController::class)->name('index');
-    Route::post('auth/referral', InvitationController::class)->middleware('throttle:30,1')->name('referral.store');
     Route::get('r/{shortenedUrl?}', [ShortenedUrlController::class, 'show'])->name('shortened-urls.show');
     Route::post('subscribers', StoreSubscriberController::class)->name('subscribers.store');
 

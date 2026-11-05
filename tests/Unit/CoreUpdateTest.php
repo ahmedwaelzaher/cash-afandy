@@ -27,5 +27,5 @@ test('personal details validation survives the authentication upgrade', function
 
     expect($rules['birthdate'])->toBe(['nullable', 'date', 'before:today'])
         ->and($rules['phone'])->toContain('phone', 'starts_with:+')
-        ->and($rules)->not->toHaveKeys(['country_id', 'state_id', 'referral_code']);
+        ->and($rules)->not->toHaveKeys(['country_id', 'state_id']);
 });

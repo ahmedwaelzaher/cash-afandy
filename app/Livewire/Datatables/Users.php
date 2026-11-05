@@ -50,9 +50,6 @@ class Users extends Datatable
     {
         return ActionGroup::auto([
             Action::view('dashboard.users.show')->visible(route_allowed('dashboard.users.show')),
-            Action::make(__('Invitations'), 'ti ti-users')
-                ->visible(route_allowed('dashboard.users.show') && route_allowed('dashboard.referrals.index'))
-                ->href(fn (User $user) => route('dashboard.users.show', $user) . '#invitations')->lightbox(),
             Action::edit('dashboard.users.edit')->visible(route_allowed('dashboard.users.edit')),
             Action::make(__('Impersonate'), 'ti ti-spy')
                 ->visible(route_allowed('dashboard.impersonate-users.create'))

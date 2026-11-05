@@ -28,8 +28,6 @@ class CreateUser implements CreatesUsers
             'country_id' => ['required', 'integer', Rule::in(Country::forAccounts()->pluck('id')->all())],
             'account_country_confirmation' => ['accepted'],
             'terms_accepted' => ['accepted'],
-            'referral_code' => ['nullable', 'string', 'max:64'],
-            'referral_context' => ['nullable', 'string', 'max:4096'],
             ...setting('cloudflare_turnstile_site_key') ? ['captcha' => ['required', 'captcha']] : [],
         ];
     }
@@ -39,10 +37,7 @@ class CreateUser implements CreatesUsers
      */
     public function create(array $input, Panel $panel): User
     {
-        $request = request();
-        $referrals = app(ReferralAttribution::class);
-        $context = $referrals->resolve($request, $input, $panel->isApi());
-        $user = DB::transaction(function () use ($input, $referrals, $context) {
+        $user = DB::transaction(function () use ($input) {
             $user = User::create([
                 'first_name' => $input['first_name'],
                 'last_name' => $input['last_name'],
@@ -51,11 +46,9 @@ class CreateUser implements CreatesUsers
                 ...Arr::only($input, ['phone', 'birthdate', 'gender']),
             ]);
             app(InitializeWallet::class)->handle($user, (int) $input['country_id']);
-            $referrals->attach($user, $context);
 
             return $user;
         });
-        if (! $panel->isApi()) $referrals->forget($request);
 
         return $user;
     }
