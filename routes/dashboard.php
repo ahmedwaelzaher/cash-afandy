@@ -30,6 +30,7 @@ use App\Http\Controllers\Dashboard\StoreController;
 use App\Http\Controllers\Dashboard\SubscriberController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\UserImpersonateController;
+use App\Http\Controllers\Dashboard\WalletController;
 use App\Http\Controllers\Dashboard\WalletPayoutController;
 use App\Http\Controllers\Dashboard\WebsiteNotificationController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,9 @@ Route::middleware('auth:admins')->group(function () {
     Route::resource('brokers.representatives', RepresentativeController::class)->except(['show']);
     Route::resource('offers', OfferController::class)->except(['show']);
     Route::resource('cashbacks', CashbackController::class)->except(['show']);
+    Route::get('wallets', [WalletController::class, 'index'])->name('wallets.index');
+    Route::get('wallets/{user}', [WalletController::class, 'show'])->name('wallets.show')->withTrashed();
+    Route::post('wallets/{user}/transactions', [WalletController::class, 'store'])->name('wallets.store');
     Route::resource('news', NewsController::class)->except(['show']);
     Route::resource('posts', PostController::class)->except(['show']);
     Route::resource('sliders', SliderController::class)->except(['show']);
