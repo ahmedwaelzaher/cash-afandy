@@ -50,6 +50,14 @@ class Wallet extends Model
     }
 
     /**
+     * Get the payout requests for the wallet.
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(WalletPayout::class);
+    }
+
+    /**
      * Format minor units without converting the monetary value to a float.
      */
     public static function formatAmount(int $amount): string

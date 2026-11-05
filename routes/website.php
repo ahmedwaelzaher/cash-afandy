@@ -17,6 +17,7 @@ use App\Http\Controllers\Website\SocialiteController;
 use App\Http\Controllers\Website\StaticPageController;
 use App\Http\Controllers\Website\StoreController;
 use App\Http\Controllers\Website\StoreSubscriberController;
+use App\Http\Controllers\Website\WalletController;
 use App\Http\Middleware\EnsureProfileIsComplete;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
@@ -70,6 +71,9 @@ Route::middleware('auth:users')->group(function () {
 });
 
 Route::middleware(['auth:users', EnsureProfileIsComplete::class])->group(function () {
+    Route::get('wallet', [WalletController::class, 'show'])->name('wallet.show');
+    Route::post('wallet/payouts', [WalletController::class, 'storePayout'])->middleware('throttle:10,1')->name('wallet.payouts.store');
+
     Route::get('favorites', [FavoriteOfferController::class, 'index'])->name('favorites.index');
     Route::put('favorites/{offer}', [FavoriteOfferController::class, 'store'])->name('favorites.store');
     Route::delete('favorites/{offer}', [FavoriteOfferController::class, 'destroy'])->name('favorites.destroy');

@@ -30,6 +30,7 @@ use App\Http\Controllers\Dashboard\StoreController;
 use App\Http\Controllers\Dashboard\SubscriberController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\UserImpersonateController;
+use App\Http\Controllers\Dashboard\WalletPayoutController;
 use App\Http\Controllers\Dashboard\WebsiteNotificationController;
 use Illuminate\Support\Facades\Route;
 use Redot\Auth\Facades\RedotAuth;
@@ -49,6 +50,7 @@ Route::middleware('auth:admins')->group(function () {
 
     /* --------- Website Management --------- */
     Route::resource('users', UserController::class)->withTrashed();
+    Route::resource('wallet-payouts', WalletPayoutController::class)->only(['index', 'show', 'update']);
     Route::get('referrals', [ReferralController::class, 'index'])->name('referrals.index');
     Route::put('referrals/{referral}', [ReferralController::class, 'update'])->name('referrals.update');
     Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();

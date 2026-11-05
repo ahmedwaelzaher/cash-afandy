@@ -32,7 +32,7 @@ class PostWalletTransaction
     ): WalletTransaction {
         return DB::transaction(function () use ($user, $type, $sourceCategory, $amount, $source, $description, $idempotencyKey, $admin) {
             // Use the same owner-first lock order as account completion.
-            $owner = User::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+            $owner = User::withTrashed()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
             $wallet = $owner->wallet()->lockForUpdate()->first();
             if (! $wallet) {
                 throw ValidationException::withMessages(['amount' => __('The user must confirm their account country before using the wallet.')]);
@@ -102,7 +102,7 @@ class PostWalletTransaction
 
         // Queue delivery through the existing website notification flow.
         $user->notify((new WebsiteNotification(
-            title: __('Afandy Wallet', [], $locale),
+            title: __('Balance', [], $locale),
             url: route('website.wallet.show', ['locale' => $locale]),
             data: ['wallet_transaction_id' => $transaction->id],
             body: $body,

@@ -121,6 +121,11 @@ return Sidebar::make([
                 ->icon('ti ti-coin'),
 
             Item::make()
+                ->title(__('Payout requests'))
+                ->route('dashboard.wallet-payouts.index')
+                ->icon('ti ti-cash-banknote'),
+
+            Item::make()
                 ->title(__('News'))
                 ->route('dashboard.news.index')
                 ->icon('ti ti-news'),

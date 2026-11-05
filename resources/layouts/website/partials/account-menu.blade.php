@@ -8,19 +8,24 @@
 
         <div class="dropdown-menu dropdown-menu-end">
             <a class="dropdown-item" href="{{ route('website.profile.edit') }}">
-                <span class="dropdown-item-icon"><x-icon icon="ti ti-user" /></span>
-                <span class="dropdown-item-title">{{ __('Profile') }}</span>
+                <span class="dropdown-item-icon d-inline-flex align-items-center justify-content-center"><x-icon class="m-0 lh-1" icon="ti ti-user" /></span>
+                <span class="dropdown-item-title lh-1">{{ __('Profile') }}</span>
             </a>
 
             <a class="dropdown-item" href="{{ route('website.favorites.index') }}">
-                <span class="dropdown-item-icon"><x-icon icon="ti ti-heart" /></span>
-                <span class="dropdown-item-title">{{ __('Favorite offers') }}</span>
+                <span class="dropdown-item-icon d-inline-flex align-items-center justify-content-center"><x-icon class="m-0 lh-1" icon="ti ti-heart" /></span>
+                <span class="dropdown-item-title lh-1">{{ __('Favorite offers') }}</span>
+            </a>
+
+            <a class="dropdown-item" href="{{ route('website.wallet.show') }}">
+                <span class="dropdown-item-icon d-inline-flex align-items-center justify-content-center"><x-icon class="m-0 lh-1" icon="ti ti-coin" /></span>
+                <span class="dropdown-item-title lh-1">{{ __('Balance') }}</span>
             </a>
 
             <x-form :action="route('website.logout')" method="POST" disable-validation>
                 <button type="submit" class="dropdown-item">
-                    <span class="dropdown-item-icon"><x-icon icon="ti ti-logout" /></span>
-                    <span class="dropdown-item-title">{{ __('Logout') }}</span>
+                    <span class="dropdown-item-icon d-inline-flex align-items-center justify-content-center"><x-icon class="m-0 lh-1" icon="ti ti-logout" /></span>
+                    <span class="dropdown-item-title lh-1">{{ __('Logout') }}</span>
                 </button>
             </x-form>
         </div>
