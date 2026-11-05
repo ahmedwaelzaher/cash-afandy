@@ -12,6 +12,9 @@
 
         <div class="site-header-actions d-flex gap-2">
             <div class="d-xl-none">
+                @include('layouts.website.partials.theme-switcher')
+            </div>
+            <div class="d-xl-none">
                 <livewire:notifications :website="true" key="website-notifications-mobile" />
             </div>
             <div class="dropdown site-header-search">
@@ -61,6 +64,9 @@
                 </nav>
 
                 <div class="site-navbar-settings d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center">
+                    <div class="d-none d-xl-block">
+                        @include('layouts.website.partials.theme-switcher')
+                    </div>
                     <div class="d-none d-xl-block">
                         <livewire:notifications :website="true" key="website-notifications-desktop" />
                     </div>
