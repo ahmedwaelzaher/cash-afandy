@@ -7,6 +7,11 @@
         <meta name="mitgo-verification" content="2e1e3b4a-147c-4bc3-9477-9f05b5d69116" />
     @endPushOnce
 
+    {{-- Website styles aren't dark-mode ready yet, so force light regardless of system/localStorage preference --}}
+    @push('pre-content')
+        <script>document.documentElement.setAttribute('data-bs-theme', 'light');</script>
+    @endpush
+
     @pushOnce('plugins-styles', 'tabler-flags-styles')
         <link rel="stylesheet" href="{{ hashed_asset('vendor/tabler/css/tabler-flags.min.css') }}" />
     @endPushOnce
