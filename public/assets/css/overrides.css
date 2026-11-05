@@ -66,6 +66,13 @@
     --tblr-link-hover-color-rgb: 140, 195, 162;
 }
 
+/* Empty states inside an outlined container share its frame and surface. */
+:is(.card, .border) .card:has(> .empty) {
+    --tblr-card-border-width: 0;
+    --tblr-card-box-shadow: none;
+    --tblr-card-bg: transparent;
+}
+
 /* ---------------------------------
  * Brand Logo
  * --------------------------------- */
