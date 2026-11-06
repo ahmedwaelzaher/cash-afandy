@@ -14,6 +14,7 @@
     ":user earned a reward in :program awaiting approval.": ":user earned a reward in :program awaiting approval.",
     ":user joined :program.": ":user joined :program.",
     ":user received an automatic reward in :program.": ":user received an automatic reward in :program.",
+    ":user registered a new account.": ":user registered a new account.",
     ":word in hand": ":word in hand",
     "A coupon in hand": "A coupon in hand",
     "A coupon lowers the price immediately. Cashback is a reward for an eligible, recorded purchase after confirmation.": "A coupon lowers the price immediately. Cashback is a reward for an eligible, recorded purchase after confirmation.",

@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\Admin;
 use App\Models\Country;
 use App\Models\User;
+use App\Notifications\DashboardNotification;
 use Illuminate\Foundation\Testing\TestCase;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -10,6 +13,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Redot\Http\Middleware\EnsureDependenciesBuilt;
 use Redot\Models\Language;
+use Spatie\Permission\Models\Permission;
 
 uses(TestCase::class);
 
@@ -65,6 +69,14 @@ beforeEach(function () {
     URL::defaults(['locale' => 'en']);
     Notification::fake();
     $this->withoutMiddleware(EnsureDependenciesBuilt::class);
+
+    // Keep registration notices limited to active administrators with access to user details.
+    $this->admin = Admin::factory()->create(['active' => true]);
+    $this->inactiveAdmin = Admin::factory()->create(['active' => false]);
+    $this->unauthorizedAdmin = Admin::factory()->create(['active' => true]);
+    Permission::create(['name' => 'dashboard.users.show', 'guard_name' => 'admins']);
+    $this->admin->givePermissionTo('dashboard.users.show');
+    $this->inactiveAdmin->givePermissionTo('dashboard.users.show');
 });
 
 afterEach(function () {
@@ -98,6 +110,11 @@ test('registration creates the account preferences and country wallet independen
         ->and($user->wallet->currency)->toBe('EGP')
         ->and($user->wallet->fresh()->balance)->toBe(0)
         ->and(User::count())->toBe(1);
+
+    Notification::assertSentToTimes($this->admin, DashboardNotification::class, 1);
+    Notification::assertSentTo($this->admin, DashboardNotification::class, fn ($notification) => $notification->url === route('dashboard.users.show', $user)
+        && $notification->data === ['user_id' => $user->id]);
+    Notification::assertNotSentTo([$this->inactiveAdmin, $this->unauthorizedAdmin], DashboardNotification::class);
 });
 
 test('registration still requires country confirmation and terms acceptance', function (string $consent) {
@@ -116,6 +133,7 @@ test('registration still requires country confirmation and terms acceptance', fu
     $this->postJson(route('website.register.store'), $input)->assertUnprocessable();
 
     expect(User::count())->toBe(0);
+    Notification::assertNothingSent();
 })->with(['account_country_confirmation', 'terms_accepted']);
 
 test('social registration creates an independent account and requests personal details completion', function (string $provider) {
@@ -137,4 +155,28 @@ test('social registration creates an independent account and requests personal d
         ->and($user->hasVerifiedEmail())->toBeTrue()
         ->and($user->preferences()->count())->toBe(1)
         ->and($user->wallet)->toBeNull();
+
+    Notification::assertSentToTimes($this->admin, DashboardNotification::class, 1);
+    Notification::assertSentTo($this->admin, DashboardNotification::class, fn ($notification) => $notification->url === route('dashboard.users.show', $user)
+        && $notification->data === ['user_id' => $user->id]);
+    Notification::assertNotSentTo([$this->inactiveAdmin, $this->unauthorizedAdmin], DashboardNotification::class);
 })->with(['google', 'facebook']);
+
+test('account updates do not repeat the registration notification', function () {
+    $user = User::factory()->create();
+    $user->update(['first_name' => 'Updated']);
+
+    Notification::assertSentToTimes($this->admin, DashboardNotification::class, 1);
+});
+
+test('rolling back account creation removes its dashboard notification', function () {
+    Notification::swap(new ChannelManager(app()));
+
+    DB::beginTransaction();
+    User::factory()->create();
+    expect($this->admin->notifications()->count())->toBe(1);
+    DB::rollBack();
+
+    expect(User::count())->toBe(0)
+        ->and($this->admin->notifications()->count())->toBe(0);
+});

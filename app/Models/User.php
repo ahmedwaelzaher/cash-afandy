@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Gender;
 use App\Enums\NotificationType;
+use App\Notifications\DashboardNotification;
 use App\Notifications\NewUserNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
@@ -128,6 +130,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         static::created(function (User $user) {
             $user->preferences()->create();
+
+            // Notify active administrators who can open the new account's details.
+            Notification::send(Admin::active()->get()->filter(fn (Admin $admin) => $admin->can('dashboard.users.show')), DashboardNotification::make(
+                title: __(':user registered a new account.', ['user' => $user->full_name]),
+                url: route('dashboard.users.show', $user),
+                data: ['user_id' => $user->id],
+            ));
         });
     }
 
