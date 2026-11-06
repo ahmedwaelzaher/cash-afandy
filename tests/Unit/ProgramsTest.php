@@ -12,7 +12,9 @@ use App\Models\ProgramReward;
 use App\Models\ProgramSubscription;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\DashboardNotification;
 use Illuminate\Foundation\Testing\TestCase;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -108,6 +110,57 @@ beforeEach(function () {
 
 afterEach(function () {
     DB::purge('program_test');
+});
+
+test('program events notify active authorized administrators once', function (bool $manual) {
+    // Limit dashboard notices to active administrators allowed to open their destination.
+    $admin = Admin::factory()->create(['active' => true]);
+    $inactive = Admin::factory()->create(['active' => false]);
+    $unauthorized = Admin::factory()->create(['active' => true]);
+    foreach (['dashboard.programs.show', 'dashboard.program-rewards.show'] as $permission) {
+        Permission::create(['name' => $permission, 'guard_name' => 'admins']);
+        $admin->givePermissionTo($permission);
+        $inactive->givePermissionTo($permission);
+    }
+
+    // Duplicate enrollment reuses the subscription without sending a second notice.
+    $program = ($this->createProgram)(['requires_approval' => $manual]);
+    $subscription = app(SubscribeToProgram::class)->handle($this->owner, $program);
+    app(SubscribeToProgram::class)->handle($this->owner, $program);
+    Notification::assertSentTo($admin, DashboardNotification::class, fn ($notification) => $notification->url === route('dashboard.programs.show', $program)
+        && $notification->data === ['program_subscription_id' => $subscription->id]);
+    Notification::assertSentToTimes($admin, DashboardNotification::class, 1);
+
+    // Manual rewards notify at review request, while automatic ones notify after payment.
+    $reward = ($this->createReward)($subscription);
+    Notification::assertSentToTimes($admin, DashboardNotification::class, $manual ? 2 : 1);
+    app(RecieveProgramReward::class)->handle($reward, true, $manual ? $admin : null);
+    app(RecieveProgramReward::class)->handle($reward, true, $manual ? $admin : null);
+    Notification::assertSentToTimes($admin, DashboardNotification::class, 2);
+    Notification::assertSentTo($admin, DashboardNotification::class, fn ($notification) => $notification->url === route('dashboard.program-rewards.show', $reward)
+        && $notification->data === ['program_reward_id' => $reward->id]
+        && $notification->level->value === ($manual ? 'warning' : 'success'));
+    Notification::assertNotSentTo([$inactive, $unauthorized], DashboardNotification::class);
+})->with([true, false]);
+
+test('rolled back program events leave no dashboard notifications', function () {
+    // Store real dashboard notices on the same connection as participation records.
+    Notification::swap(new ChannelManager(app()));
+    $admin = Admin::factory()->create(['active' => true]);
+    foreach (['dashboard.programs.show', 'dashboard.program-rewards.show'] as $permission) {
+        Permission::create(['name' => $permission, 'guard_name' => 'admins']);
+        $admin->givePermissionTo($permission);
+    }
+    $program = ($this->createProgram)(['requires_approval' => true]);
+
+    DB::beginTransaction();
+    $subscription = app(SubscribeToProgram::class)->handle($this->owner, $program);
+    ($this->createReward)($subscription);
+    expect($admin->notifications()->count())->toBe(2);
+    DB::rollBack();
+
+    expect($admin->notifications()->count())->toBe(0)
+        ->and($program->subscriptions()->count())->toBe(0);
 });
 
 test('administrators can open rewards filtered to a selected program', function () {

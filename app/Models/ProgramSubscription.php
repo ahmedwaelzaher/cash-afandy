@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\DashboardNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Notification;
 
 class ProgramSubscription extends Model
 {
@@ -29,6 +31,20 @@ class ProgramSubscription extends Model
         'reward_amount' => 'integer',
         'completed_at' => 'datetime',
     ];
+
+    /**
+     * Notify administrators when a new participation attempt is created.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (self $subscription) {
+            Notification::send(Admin::active()->get()->filter(fn (Admin $admin) => $admin->can('dashboard.programs.show')), DashboardNotification::make(
+                title: __(':user joined :program.', ['user' => $subscription->user->full_name, 'program' => $subscription->program->title]),
+                url: route('dashboard.programs.show', $subscription->program_id),
+                data: ['program_subscription_id' => $subscription->id],
+            ));
+        });
+    }
 
     /**
      * Get the subscribed program.

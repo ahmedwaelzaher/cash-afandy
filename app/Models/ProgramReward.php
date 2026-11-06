@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationLevel;
 use App\Enums\ProgramRewardStatus;
+use App\Notifications\DashboardNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Notification;
 
 class ProgramReward extends Model
 {
@@ -34,6 +37,47 @@ class ProgramReward extends Model
         'status' => ProgramRewardStatus::class,
         'reviewed_at' => 'datetime',
     ];
+
+    /**
+     * Notify administrators of pending reviews and successful automatic payments.
+     */
+    protected static function booted(): void
+    {
+        // Automatic rewards only produce a notification after payment succeeds.
+        static::created(function (self $reward) {
+            if ($reward->subscription->program->requires_approval && $reward->status === ProgramRewardStatus::Pending) {
+                $reward->notifyAdministrators();
+            }
+        });
+
+        // Manual reviews and repeated updates do not produce automatic-payment notices.
+        static::updated(function (self $reward) {
+            if ($reward->wasChanged('status') && $reward->status === ProgramRewardStatus::Paid
+                && ! $reward->subscription->program->requires_approval && $reward->admin_id === null) {
+                $reward->notifyAdministrators();
+            }
+        });
+    }
+
+    /**
+     * Send the reward's current outcome through ordinary dashboard notifications.
+     */
+    protected function notifyAdministrators(): void
+    {
+        $details = [
+            'user' => $this->subscription->user->full_name,
+            'program' => $this->subscription->program->title,
+        ];
+
+        Notification::send(Admin::active()->get()->filter(fn (Admin $admin) => $admin->can('dashboard.program-rewards.show')), DashboardNotification::make(
+            title: $this->status === ProgramRewardStatus::Pending
+                ? __(':user earned a reward in :program awaiting approval.', $details)
+                : __(':user received an automatic reward in :program.', $details),
+            url: route('dashboard.program-rewards.show', $this),
+            level: $this->status === ProgramRewardStatus::Pending ? NotificationLevel::Warning : NotificationLevel::Success,
+            data: ['program_reward_id' => $this->id],
+        ));
+    }
 
     /**
      * Get the subscription that earned this reward.
