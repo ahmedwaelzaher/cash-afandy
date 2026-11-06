@@ -15,6 +15,7 @@
     ":user joined :program.": "اشترك :user في :program.",
     ":user received an automatic reward in :program.": "تم صرف مكافأة :user تلقائيًا في :program.",
     ":user registered a new account.": "سجّل :user حسابًا جديدًا.",
+    ":user requested a wallet payout.": "طلب :user سحب رصيد من المحفظة.",
     ":word in hand": ":word في اليد",
     "A coupon in hand": "كوبون في اليد",
     "A coupon lowers the price immediately. Cashback is a reward for an eligible, recorded purchase after confirmation.": "الكوبون بيقلل السعر فورًا. الكاش باك مكافأة على شراء مؤهل ومسجل، بعد التأكيد.",

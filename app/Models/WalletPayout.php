@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\WalletPayoutMethod;
 use App\Enums\WalletPayoutStatus;
+use App\Notifications\DashboardNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Notification;
 
 class WalletPayout extends Model
 {
@@ -50,6 +52,20 @@ class WalletPayout extends Model
         'details' => 'encrypted:array',
         'reviewed_at' => 'datetime',
     ];
+
+    /**
+     * Notify authorized administrators when a payout request is created.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (self $payout) {
+            Notification::send(Admin::active()->get()->filter(fn (Admin $admin) => $admin->can('dashboard.wallet-payouts.show')), DashboardNotification::make(
+                title: __(':user requested a wallet payout.', ['user' => $payout->wallet->user->full_name]),
+                url: route('dashboard.wallet-payouts.show', $payout),
+                data: ['wallet_payout_id' => $payout->id],
+            ));
+        });
+    }
 
     /**
      * Get the wallet that owns the payout request.

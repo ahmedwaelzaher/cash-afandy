@@ -7,9 +7,11 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletPayout;
+use App\Notifications\DashboardNotification;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\Validation\ValidationException;
 use Redot\Http\Middleware\RoutePermission;
+use Spatie\Permission\Models\Permission;
 
 uses(TestCase::class);
 
@@ -50,6 +53,7 @@ beforeEach(function () {
     Schema::create('admins', function (Blueprint $table) {
         $table->id();
         $table->string('name');
+        $table->boolean('active')->default(true);
         $table->softDeletes();
     });
     Schema::create('user_preferences', function (Blueprint $table) {
@@ -67,6 +71,8 @@ beforeEach(function () {
         $table->string('currency');
     });
     foreach ([
+        '0001_01_01_000005_create_permission_tables.php',
+        '0001_01_01_000015_create_notifications_table.php',
         '2026_11_04_000001_create_wallets_and_wallet_transactions.php',
         '2026_11_05_000002_create_wallet_payouts_table.php',
     ] as $migration) {
@@ -83,10 +89,58 @@ beforeEach(function () {
     $this->user = User::findOrFail(1);
     $this->admin = Admin::findOrFail(1);
     $this->wallet = Wallet::create(['user_id' => 1, 'currency' => 'EGP', 'balance' => 10000]);
+
+    Permission::create(['name' => 'dashboard.wallet-payouts.show', 'guard_name' => 'admins']);
+    $this->admin->givePermissionTo('dashboard.wallet-payouts.show');
+
+    // Exercise payout events without inventing an enabled withdrawal method.
+    $this->createPayout = function (): WalletPayout {
+        $payout = new WalletPayout([
+            'wallet_id' => $this->wallet->id,
+            'reference' => (string) Str::uuid(),
+            'amount' => 2500,
+            'details' => ['destination' => 'private-destination'],
+            'status' => 'pending',
+            'idempotency_key' => (string) Str::uuid(),
+        ]);
+        $payout->setRawAttributes([...$payout->getAttributes(), 'method' => 'unconfigured']);
+        $payout->save();
+
+        return $payout;
+    };
 });
 
 afterEach(function () {
     DB::purge('wallet_payout_test');
+});
+
+test('new payout requests notify active authorized administrators once without exposing destinations', function () {
+    DB::table('admins')->insert([
+        ['id' => 2, 'name' => 'Inactive', 'active' => false],
+        ['id' => 3, 'name' => 'Unauthorized', 'active' => true],
+    ]);
+    $inactive = Admin::findOrFail(2);
+    $inactive->givePermissionTo('dashboard.wallet-payouts.show');
+    $payout = ($this->createPayout)();
+    $payout->update(['review_note' => 'Reviewing']);
+
+    Notification::assertSentToTimes($this->admin, DashboardNotification::class, 1);
+    Notification::assertSentTo($this->admin, DashboardNotification::class, fn ($notification) => $notification->url === route('dashboard.wallet-payouts.show', $payout)
+        && $notification->data === ['wallet_payout_id' => $payout->id]
+        && ! str_contains(json_encode($notification->toArray($this->admin)), 'private-destination'));
+    Notification::assertNotSentTo([$inactive, Admin::findOrFail(3)], DashboardNotification::class);
+});
+
+test('rolled back payout requests leave no dashboard notification', function () {
+    Notification::swap(new ChannelManager(app()));
+
+    DB::beginTransaction();
+    ($this->createPayout)();
+    expect($this->admin->notifications()->count())->toBe(1);
+    DB::rollBack();
+
+    expect(WalletPayout::count())->toBe(0)
+        ->and($this->admin->notifications()->count())->toBe(0);
 });
 
 test('payout requests reject methods until they are explicitly added to the enum', function (string $method) {
