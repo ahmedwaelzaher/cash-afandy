@@ -9,6 +9,7 @@ use App\Http\Controllers\Website\NotificationController;
 use App\Http\Controllers\Website\OfferController;
 use App\Http\Controllers\Website\PendingActionController;
 use App\Http\Controllers\Website\ProfileController;
+use App\Http\Controllers\Website\ProgramController;
 use App\Http\Controllers\Website\PushSubscriptionController;
 use App\Http\Controllers\Website\SearchController;
 use App\Http\Controllers\Website\ShortenedUrlController;
@@ -49,6 +50,9 @@ Route::middleware(EnsureProfileIsComplete::class)->group(function () {
     Route::get('stores', [StoreController::class, 'index'])->name('stores.index');
     Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.show');
 
+    Route::get('programs', [ProgramController::class, 'index'])->name('programs.index');
+    Route::get('programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
+
     Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
     Route::get('search', SearchController::class)->name('search');
@@ -69,6 +73,9 @@ Route::middleware('auth:users')->group(function () {
 });
 
 Route::middleware(['auth:users', EnsureProfileIsComplete::class])->group(function () {
+    Route::post('programs/{program}/subscribe', [ProgramController::class, 'subscribe'])->middleware('throttle:10,1')->name('programs.subscribe');
+    Route::post('programs/{program}/evaluate', [ProgramController::class, 'evaluate'])->middleware('throttle:10,1')->name('programs.evaluate');
+
     Route::get('wallet', [WalletController::class, 'show'])->name('wallet.show');
     Route::post('wallet/payouts', [WalletController::class, 'storePayout'])->middleware('throttle:10,1')->name('wallet.payouts.store');
 

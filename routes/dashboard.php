@@ -17,6 +17,8 @@ use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\OfferController;
 use App\Http\Controllers\Dashboard\PostController;
 use App\Http\Controllers\Dashboard\ProfileController;
+use App\Http\Controllers\Dashboard\ProgramController;
+use App\Http\Controllers\Dashboard\ProgramRewardController;
 use App\Http\Controllers\Dashboard\QrCodeController;
 use App\Http\Controllers\Dashboard\RepresentativeController;
 use App\Http\Controllers\Dashboard\RoleController;
@@ -60,6 +62,8 @@ Route::middleware('auth:admins')->group(function () {
     Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
 
     /* --------- Cash Afandy --------- */
+    Route::resource('programs', ProgramController::class)->except(['destroy']);
+    Route::resource('program-rewards', ProgramRewardController::class)->only(['index', 'show', 'update']);
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('stores', StoreController::class)->except(['show']);
     Route::resource('brokers', BrokerController::class)->except(['show']);

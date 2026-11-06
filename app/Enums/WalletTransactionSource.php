@@ -7,6 +7,7 @@ enum WalletTransactionSource: string
     case AdminAdjustment = 'admin_adjustment';
     case PayoutRequest = 'payout_request';
     case PayoutRefund = 'payout_refund';
+    case ProgramReward = 'program_reward';
 
     /**
      * Get the label for the wallet transaction source.
@@ -17,6 +18,7 @@ enum WalletTransactionSource: string
             self::AdminAdjustment => __('Administrative adjustment'),
             self::PayoutRequest => __('Payout request'),
             self::PayoutRefund => __('Payout refund'),
+            self::ProgramReward => __('Program rewards'),
         };
     }
 

@@ -155,6 +155,14 @@ class User extends Authenticatable implements MustVerifyEmail
             && $this->country_id && $this->wallet()->exists();
     }
 
+    /**
+     * Get the programs the user explicitly joined.
+     */
+    public function programSubscriptions(): HasMany
+    {
+        return $this->hasMany(ProgramSubscription::class);
+    }
+
     public function receivesWebsiteNotification(?NotificationType $type = null): bool
     {
         $preferences = $this->preferences;
